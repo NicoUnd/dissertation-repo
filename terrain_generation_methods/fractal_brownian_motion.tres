@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="TerrainGenerationMethod" load_steps=8 format=3 uid="uid://bunfkxpwyox5q"]
+
+[ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/default_shader_paremeter.gd" id="1_am8m6"]
+[ext_resource type="Script" uid="uid://c2hfrfoaosq6m" path="res://scripts/terrain_generation_method.gd" id="1_wh3qd"]
+[ext_resource type="Shader" uid="uid://bmtxdjjq3087p" path="res://shaders/fractal_brownian_motion.gdshader" id="2_7y8rf"]
+[ext_resource type="Shader" uid="uid://ct0u3mljs5wmj" path="res://shaders/fractal_brownian_motion_unshaded.gdshader" id="3_am8m6"]
+
+[sub_resource type="Resource" id="Resource_am8m6"]
+script = ExtResource("1_am8m6")
+name = "frequency"
+value = 16.0
+metadata/_custom_type_script = "uid://cllw715ufr57u"
+
+[sub_resource type="Resource" id="Resource_25fsa"]
+script = ExtResource("1_am8m6")
+name = "ampltiude"
+value = 16.0
+metadata/_custom_type_script = "uid://cllw715ufr57u"
+
+[sub_resource type="Resource" id="Resource_ur1vb"]
+script = ExtResource("1_am8m6")
+name = "octaves"
+value = 12
+metadata/_custom_type_script = "uid://cllw715ufr57u"
+
+[resource]
+script = ExtResource("1_wh3qd")
+shader = ExtResource("2_7y8rf")
+unshaded_shader = ExtResource("3_am8m6")
+default_shader_parameters = Array[ExtResource("1_am8m6")]([SubResource("Resource_am8m6"), SubResource("Resource_25fsa"), SubResource("Resource_ur1vb")])
+metadata/_custom_type_script = "uid://c2hfrfoaosq6m"
