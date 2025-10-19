@@ -1,4 +1,4 @@
-@tool
+#@tool
 extends Camera3D
 
 @onready var camera_pivot: Node3D = %CameraPivot

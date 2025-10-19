@@ -1,4 +1,4 @@
-@tool
+#@tool
 extends Control
 
 @onready var visualisation_viewport: SubViewport = %VisualisationViewport
