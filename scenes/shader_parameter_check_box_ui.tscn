@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bngc5tmbrhe76"]
+
+[ext_resource type="Script" uid="uid://bv8i54fk0tv38" path="res://scripts/shader_parameter_check_box_ui.gd" id="1_j5x35"]
+
+[node name="ShaderParameterCheckBoxUI" type="CheckButton"]
+offset_right = 44.0
+offset_bottom = 24.0
+script = ExtResource("1_j5x35")

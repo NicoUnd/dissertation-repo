@@ -12,7 +12,7 @@ uniform sampler2D dirt_texture;
 uniform sampler2D grass_texture;
 
 // terrain generation method specific parameters
-uniform float frequency: hint_range(1.0, 64.0);
+uniform float period: hint_range(1.0, 64.0);
 uniform float amplitude: hint_range(1.0, 64.0);
 
 uniform int octaves: hint_range(1, 16);
@@ -67,26 +67,26 @@ float perlin_2D(vec2 uv) {
 	return (value + 1.0) * 0.5;
 }
 
-float fract_brownian_motion(vec2 uv, int given_octaves, float base_freq, float base_amp) {
+float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float base_amp) {
 	float total = 0.0;
-	float freq = base_freq;
+	float peri = base_period;
 	float amp = base_amp;
 	while (given_octaves > 0) {
-		total += perlin_2D(uv / freq) * amp;
-		freq /= 2.0;
+		total += perlin_2D(uv / peri) * amp;
+		peri /= 2.0;
 		amp /= 2.0;
 		given_octaves -= 1;
 	}
 	return total;
 }
 
-vec3 get_normal(vec2 uv, int given_octaves, float base_freq, float base_amp) {
+vec3 get_normal(vec2 uv, int given_octaves, float base_period, float base_amp) {
 	const float delta = 0.01;
 
-    float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_freq, base_amp);
-    float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_freq, base_amp);
-    float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_freq, base_amp);
-    float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_freq, base_amp);
+    float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_period, base_amp);
+    float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_period, base_amp);
+    float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_period, base_amp);
+    float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_period, base_amp);
 
     float dx = hR - hL;
     float dy = hU - hD;
@@ -109,14 +109,14 @@ float get_fract_brownian_motion_max_height(int given_octaves, float base_amp) {
 
 void vertex() {
 	vec2 uv = VERTEX.xz;
-	VERTEX.y += fract_brownian_motion(uv, octaves, frequency, amplitude);
+	VERTEX.y += fract_brownian_motion(uv, octaves, period, amplitude);
 	VERTEX.y -= get_fract_brownian_motion_max_height(octaves, amplitude) * 0.5;
-	NORMAL = get_normal(uv, octaves, frequency, amplitude);
+	NORMAL = get_normal(uv, octaves, period, amplitude);
 }
 
 void fragment() {
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	vec3 world_normal = get_normal(world_pos.xz, octaves, frequency, amplitude);
+	vec3 world_normal = get_normal(world_pos.xz, octaves, period, amplitude);
 	float upness = dot(world_normal, vec3(0.0, 1.0, 0.0));
 
 	if (albedo_is_heightmap) {

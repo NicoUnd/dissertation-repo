@@ -38,14 +38,16 @@ func set_shader_parameter(shader_parameter_name: String, shader_parameter_value:
 	if shader_parameter_name == "auto_randomise_seed":
 		auto_randomise_seed = shader_parameter_value;
 		return;
+	elif shader_parameter_name == "resolution_of_plane":
+		var new_subdivide: int = int(shader_parameter_value - 1);
+		terrain_generation_method_visualiser.mesh.subdivide_width = new_subdivide;
+		terrain_generation_method_visualiser.mesh.subdivide_depth = new_subdivide;
+		return;
 	elif shader_parameter_name in ["albedo_is_heightmap", "unshaded"]:
 		terrain_generation_method_visualiser.set(shader_parameter_name, shader_parameter_value);
 		return;
 	if is_shader_specific:
-		print("SETTING: " + shader_parameter_name)
-		print(terrain_generation_method_visualiser.mesh.material.get_shader_parameter(shader_parameter_name))
 		terrain_generation_method_visualiser.mesh.material.set_shader_parameter(shader_parameter_name, shader_parameter_value);
-		print(terrain_generation_method_visualiser.mesh.material.get_shader_parameter(shader_parameter_name))
 		heightmap_terrain_generation_method_visualiser.mesh.material.set_shader_parameter(shader_parameter_name, shader_parameter_value);
 	else:
 		terrain_generation_method_visualiser.set(shader_parameter_name, shader_parameter_value);

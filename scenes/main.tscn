@@ -36,13 +36,13 @@ uniform bool albedo_is_heightmap;
 
 uniform bool circle;
 
-uniform float seed: hint_range(1.0, 128.0, 0.1);
+uniform float seed: hint_range(1.0, 64.0, 0.1);
 
 uniform sampler2D dirt_texture;
 uniform sampler2D grass_texture;
 
 // terrain generation method specific parameters
-uniform float frequency: hint_range(1.0, 64.0);
+uniform float period: hint_range(1.0, 64.0);
 uniform float amplitude: hint_range(1.0, 64.0);
 
 uniform int octaves: hint_range(1, 16);
@@ -56,6 +56,7 @@ uniform int octaves: hint_range(1, 16);
 //}
 
 vec2 random(vec2 uv){
+	uv += vec2(seed * 124.231, seed * 74.512);
     uv = vec2( dot(uv, vec2(127.1 ,311.7) ),
                dot(uv, vec2(269.5,183.3) ) );
 	return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * seed);
@@ -96,26 +97,26 @@ float perlin_2D(vec2 uv) {
 	return (value + 1.0) * 0.5;
 }
 
-float fract_brownian_motion(vec2 uv, int given_octaves, float base_freq, float base_amp) {
+float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float base_amp) {
 	float total = 0.0;
-	float freq = base_freq;
+	float peri = base_period;
 	float amp = base_amp;
 	while (given_octaves > 0) {
-		total += perlin_2D(uv / freq) * amp;
-		freq /= 2.0;
+		total += perlin_2D(uv / peri) * amp;
+		peri /= 2.0;
 		amp /= 2.0;
 		given_octaves -= 1;
 	}
 	return total;
 }
 
-vec3 get_normal(vec2 uv, int given_octaves, float base_freq, float base_amp) {
+vec3 get_normal(vec2 uv, int given_octaves, float base_period, float base_amp) {
 	const float delta = 0.01;
 
-    float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_freq, base_amp);
-    float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_freq, base_amp);
-    float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_freq, base_amp);
-    float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_freq, base_amp);
+    float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_period, base_amp);
+    float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_period, base_amp);
+    float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_period, base_amp);
+    float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_period, base_amp);
 
     float dx = hR - hL;
     float dy = hU - hD;
@@ -138,19 +139,19 @@ float get_fract_brownian_motion_max_height(int given_octaves, float base_amp) {
 
 void vertex() {
 	vec2 uv = VERTEX.xz;
-	VERTEX.y += fract_brownian_motion(uv, octaves, frequency, amplitude);
+	VERTEX.y += fract_brownian_motion(uv, octaves, period, amplitude);
 	VERTEX.y -= get_fract_brownian_motion_max_height(octaves, amplitude) * 0.5;
-	NORMAL = get_normal(uv, octaves, frequency, amplitude);
+	NORMAL = get_normal(uv, octaves, period, amplitude);
 }
 
 void fragment() {
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	vec3 world_normal = get_normal(world_pos.xz, octaves, frequency, amplitude);
+	vec3 world_normal = get_normal(world_pos.xz, octaves, period, amplitude);
 	float upness = dot(world_normal, vec3(0.0, 1.0, 0.0));
 
 	if (albedo_is_heightmap) {
 		float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
-		ALBEDO = vec3(((world_pos.y + 0.25 * amplitude) / max_height));
+		ALBEDO = vec3(((world_pos.y + 0.3 * amplitude) / max_height));
 	} else {
 		vec2 texture_uv = fract(world_pos.xz);
 		ALBEDO = (upness * texture(grass_texture, texture_uv) + (1.0 - upness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
@@ -182,7 +183,7 @@ shader_parameter/albedo_is_heightmap = false
 shader_parameter/circle = true
 shader_parameter/seed = 26.21024406171987
 shader_parameter/grass_texture = ExtResource("4_tefeu")
-shader_parameter/frequency = 16.0
+shader_parameter/period = 16.0
 shader_parameter/amplitude = 16.0
 shader_parameter/octaves = 0
 
@@ -205,13 +206,13 @@ uniform bool albedo_is_heightmap;
 
 uniform bool circle;
 
-uniform float seed: hint_range(1.0, 128.0, 0.1);
+uniform float seed: hint_range(1.0, 64.0, 0.1);
 
 uniform sampler2D dirt_texture;
 uniform sampler2D grass_texture;
 
 // terrain generation method specific parameters
-uniform float frequency: hint_range(1.0, 64.0);
+uniform float period: hint_range(1.0, 64.0);
 uniform float amplitude: hint_range(1.0, 64.0);
 
 uniform int octaves: hint_range(1, 16);
@@ -225,6 +226,7 @@ uniform int octaves: hint_range(1, 16);
 //}
 
 vec2 random(vec2 uv){
+	uv += vec2(seed * 124.231, seed * 74.512);
     uv = vec2( dot(uv, vec2(127.1 ,311.7) ),
                dot(uv, vec2(269.5,183.3) ) );
 	return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * seed);
@@ -265,26 +267,26 @@ float perlin_2D(vec2 uv) {
 	return (value + 1.0) * 0.5;
 }
 
-float fract_brownian_motion(vec2 uv, int given_octaves, float base_freq, float base_amp) {
+float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float base_amp) {
 	float total = 0.0;
-	float freq = base_freq;
+	float peri = base_period;
 	float amp = base_amp;
 	while (given_octaves > 0) {
-		total += perlin_2D(uv / freq) * amp;
-		freq /= 2.0;
+		total += perlin_2D(uv / peri) * amp;
+		peri /= 2.0;
 		amp /= 2.0;
 		given_octaves -= 1;
 	}
 	return total;
 }
 
-vec3 get_normal(vec2 uv, int given_octaves, float base_freq, float base_amp) {
+vec3 get_normal(vec2 uv, int given_octaves, float base_period, float base_amp) {
 	const float delta = 0.01;
 
-    float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_freq, base_amp);
-    float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_freq, base_amp);
-    float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_freq, base_amp);
-    float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_freq, base_amp);
+    float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_period, base_amp);
+    float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_period, base_amp);
+    float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_period, base_amp);
+    float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_period, base_amp);
 
     float dx = hR - hL;
     float dy = hU - hD;
@@ -307,19 +309,19 @@ float get_fract_brownian_motion_max_height(int given_octaves, float base_amp) {
 
 void vertex() {
 	vec2 uv = VERTEX.xz;
-	VERTEX.y += fract_brownian_motion(uv, octaves, frequency, amplitude);
+	VERTEX.y += fract_brownian_motion(uv, octaves, period, amplitude);
 	VERTEX.y -= get_fract_brownian_motion_max_height(octaves, amplitude) * 0.5;
-	NORMAL = get_normal(uv, octaves, frequency, amplitude);
+	NORMAL = get_normal(uv, octaves, period, amplitude);
 }
 
 void fragment() {
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	vec3 world_normal = get_normal(world_pos.xz, octaves, frequency, amplitude);
+	vec3 world_normal = get_normal(world_pos.xz, octaves, period, amplitude);
 	float upness = dot(world_normal, vec3(0.0, 1.0, 0.0));
 
 	if (albedo_is_heightmap) {
 		float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
-		ALBEDO = vec3(((world_pos.y + 0.25 * amplitude) / max_height));
+		ALBEDO = vec3(((world_pos.y + 0.3 * amplitude) / max_height));
 	} else {
 		vec2 texture_uv = fract(world_pos.xz);
 		ALBEDO = (upness * texture(grass_texture, texture_uv) + (1.0 - upness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
@@ -351,7 +353,7 @@ shader_parameter/albedo_is_heightmap = true
 shader_parameter/circle = true
 shader_parameter/seed = 1.0
 shader_parameter/grass_texture = ExtResource("4_tefeu")
-shader_parameter/frequency = 16.0
+shader_parameter/period = 16.0
 shader_parameter/amplitude = 16.0
 shader_parameter/octaves = 0
 
@@ -379,24 +381,23 @@ terrain_generation_method = ExtResource("2_jyhfs")
 unique_name_in_owner = true
 world_3d = SubResource("World3D_85g3d")
 transparent_bg = true
-size = Vector2i(3072, 2160)
+size = Vector2i(2635, 2160)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="VisualisationViewport"]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
 shadow_enabled = true
-directional_shadow_max_distance = 1000.0
+directional_shadow_max_distance = 20536.5
 
 [node name="TerrainGenerationMethodVisualiser" parent="VisualisationViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
 mesh = SubResource("PlaneMesh_tipki")
 skeleton = NodePath("../..")
-terrain_generation_method = ExtResource("2_jyhfs")
 circle = true
 seed = 26.21024406171987
 
 [node name="CameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(-0.84246933, 0, -0.53874433, 0, 1, 0, 0.53874433, 0, -0.84246933, 0, 0, 0)
+transform = Transform3D(0.7259937, 0, 0.6877014, 0, 1, 0, -0.6877014, 0, 0.7259937, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VisualisationViewport/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
@@ -423,7 +424,6 @@ size = 64.0
 unique_name_in_owner = true
 layers = 2
 mesh = SubResource("PlaneMesh_ya4ey")
-terrain_generation_method = ExtResource("2_jyhfs")
 unshaded = true
 albedo_is_heightmap = true
 circle = true
@@ -434,7 +434,6 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -3072.0
 grow_horizontal = 0
 grow_vertical = 2
 texture = SubResource("ViewportTexture_tbgi4")

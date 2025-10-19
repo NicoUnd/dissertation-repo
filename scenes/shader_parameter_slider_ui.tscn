@@ -1,18 +1,37 @@
-[gd_scene load_steps=2 format=3 uid="uid://u3fkap1o8cbi"]
+[gd_scene load_steps=4 format=3 uid="uid://u3fkap1o8cbi"]
 
 [ext_resource type="Script" uid="uid://umd3nyngns5u" path="res://scripts/shader_parameter_slider_ui.gd" id="1_fbbfm"]
 
-[node name="ShaderParameterSliderUI" type="HBoxContainer"]
-offset_right = 40.0
-offset_bottom = 40.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fbbfm"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.1, 0.1, 0.1, 0)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="Theme" id="Theme_ro6k6"]
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_fbbfm")
+
+[node name="ShaderParameterSliderUI" type="PanelContainer"]
+custom_minimum_size = Vector2(1450, 0)
+offset_right = 847.0
+offset_bottom = 75.0
+theme = SubResource("Theme_ro6k6")
 script = ExtResource("1_fbbfm")
 
 [node name="Label" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 0
 text = "Frequency"
 
 [node name="VSeparator" type="VSeparator" parent="."]
+visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 theme_override_constants/separation = 32
@@ -21,3 +40,7 @@ theme_override_constants/separation = 32
 unique_name_in_owner = true
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 1
+
+[connection signal="value_changed" from="HSlider" to="." method="update_text"]

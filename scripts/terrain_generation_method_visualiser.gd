@@ -3,12 +3,6 @@ extends MeshInstance3D;
 class_name TerrainGenerationMethodVisualiser;
 
 func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderParameter]) -> void:
-	mesh = PlaneMesh.new();
-	mesh.size = Vector2(64, 64);
-	mesh.subdivide_depth = 1027;
-	mesh.subdivide_width = 1027;
-	
-	mesh.material = ShaderMaterial.new();
 	mesh.material.shader = new_shader.duplicate();
 	for shader_specific_parameter: ShaderParameter in shader_specific_parameters:
 		mesh.material.set_shader_parameter(shader_specific_parameter.name, shader_specific_parameter.value);
@@ -26,7 +20,16 @@ func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderPara
 	set(new_unshaded):
 		unshaded = new_unshaded;
 		if terrain_generation_method:
-			set_shader(terrain_generation_method.unshaded_shader if unshaded else terrain_generation_method.shader, terrain_generation_method.shader_parameters);
+			var shader_specific_parameters = terrain_generation_method.shader_parameters;
+			var prev_shader_specific_parameter_names: Array[String] = [];
+			var prev_shader_specific_parameter_values: Array[Variant] = [];
+			for shader_specific_parameter: ShaderParameter in shader_specific_parameters:
+				var shader_specific_parameter_name: String = shader_specific_parameter.name;
+				prev_shader_specific_parameter_names.append(shader_specific_parameter_name);
+				prev_shader_specific_parameter_values.append(mesh.material.get_shader_parameter(shader_specific_parameter_name));
+			set_shader(terrain_generation_method.unshaded_shader if unshaded else terrain_generation_method.shader, shader_specific_parameters);
+			for shader_specific_parameter_index: int in shader_specific_parameters.size():
+				mesh.material.set_shader_parameter(prev_shader_specific_parameter_names[shader_specific_parameter_index], prev_shader_specific_parameter_values[shader_specific_parameter_index]);
 
 func apply_shader_options() -> void:
 	mesh.material.set_shader_parameter("seed", seed);
