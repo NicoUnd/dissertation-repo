@@ -2,7 +2,7 @@
 extends MeshInstance3D;
 class_name TerrainGenerationMethodVisualiser;
 
-func set_shader(new_shader: Shader, shader_specific_default_parameters: Array[DefaultShaderParameter]) -> void:
+func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderParameter]) -> void:
 	mesh = PlaneMesh.new();
 	mesh.size = Vector2(64, 64);
 	mesh.subdivide_depth = 1027;
@@ -10,8 +10,8 @@ func set_shader(new_shader: Shader, shader_specific_default_parameters: Array[De
 	
 	mesh.material = ShaderMaterial.new();
 	mesh.material.shader = new_shader.duplicate();
-	for shader_specific_default_parameter: DefaultShaderParameter in shader_specific_default_parameters:
-		mesh.material.set_shader_parameter(shader_specific_default_parameter.name, shader_specific_default_parameter.value);
+	for shader_specific_parameter: ShaderParameter in shader_specific_parameters:
+		mesh.material.set_shader_parameter(shader_specific_parameter.name, shader_specific_parameter.value);
 	apply_shader_options();
 
 @export var terrain_generation_method: TerrainGenerationMethod:
@@ -20,20 +20,17 @@ func set_shader(new_shader: Shader, shader_specific_default_parameters: Array[De
 		if not terrain_generation_method:
 			mesh.material = ShaderMaterial.new();
 		else:
-			set_shader(terrain_generation_method.unshaded_shader if unshaded else terrain_generation_method.shader, terrain_generation_method.default_shader_parameters);
+			set_shader(terrain_generation_method.unshaded_shader if unshaded else terrain_generation_method.shader, terrain_generation_method.shader_parameters);
 
 @export var unshaded: bool = false:
 	set(new_unshaded):
 		unshaded = new_unshaded;
 		if terrain_generation_method:
-			set_shader(terrain_generation_method.unshaded_shader if unshaded else terrain_generation_method.shader, terrain_generation_method.default_shader_parameters);
+			set_shader(terrain_generation_method.unshaded_shader if unshaded else terrain_generation_method.shader, terrain_generation_method.shader_parameters);
 
 func apply_shader_options() -> void:
 	mesh.material.set_shader_parameter("seed", seed);
-	print("APPLYING SHADER OPTIONS, albedo_is_heightmap is " + str(albedo_is_heightmap))
-	print("albedo_is_heightmap is before " + str(mesh.material.get_shader_parameter("albedo_is_heightmap")))
 	mesh.material.set_shader_parameter("albedo_is_heightmap", albedo_is_heightmap);
-	print("albedo_is_heightmap is after " + str(mesh.material.get_shader_parameter("albedo_is_heightmap")))
 	mesh.material.set_shader_parameter("circle", circle);
 	mesh.material.set_shader_parameter("grass_texture", grass_texture);
 

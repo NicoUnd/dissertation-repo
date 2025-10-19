@@ -6,14 +6,14 @@ uniform bool albedo_is_heightmap;
 
 uniform bool circle;
 
-uniform float seed: hint_range(1.0, 128.0, 0.1);
+uniform float seed: hint_range(1.0, 64.0, 0.1);
 
 uniform sampler2D dirt_texture;
 uniform sampler2D grass_texture;
 
 // terrain generation method specific parameters
 uniform float frequency: hint_range(1.0, 64.0);
-uniform float ampltiude: hint_range(1.0, 64.0);
+uniform float amplitude: hint_range(1.0, 64.0);
 
 uniform int octaves: hint_range(1, 16);
 
@@ -26,6 +26,7 @@ uniform int octaves: hint_range(1, 16);
 //}
 
 vec2 random(vec2 uv){
+	uv += vec2(seed * 124.231, seed * 74.512);
     uv = vec2( dot(uv, vec2(127.1 ,311.7) ),
                dot(uv, vec2(269.5,183.3) ) );
 	return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * seed);
@@ -108,19 +109,19 @@ float get_fract_brownian_motion_max_height(int given_octaves, float base_amp) {
 
 void vertex() {
 	vec2 uv = VERTEX.xz;
-	VERTEX.y += fract_brownian_motion(uv, octaves, frequency, ampltiude);
-	VERTEX.y -= get_fract_brownian_motion_max_height(octaves, ampltiude) * 0.5;
-	NORMAL = get_normal(uv, octaves, frequency, ampltiude);
+	VERTEX.y += fract_brownian_motion(uv, octaves, frequency, amplitude);
+	VERTEX.y -= get_fract_brownian_motion_max_height(octaves, amplitude) * 0.5;
+	NORMAL = get_normal(uv, octaves, frequency, amplitude);
 }
 
 void fragment() {
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	vec3 world_normal = get_normal(world_pos.xz, octaves, frequency, ampltiude);
+	vec3 world_normal = get_normal(world_pos.xz, octaves, frequency, amplitude);
 	float upness = dot(world_normal, vec3(0.0, 1.0, 0.0));
 
 	if (albedo_is_heightmap) {
-		float max_height = get_fract_brownian_motion_max_height(octaves, ampltiude);
-		ALBEDO = vec3(((world_pos.y + 0.25 * ampltiude) / max_height));
+		float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
+		ALBEDO = vec3(((world_pos.y + 0.3 * amplitude) / max_height));
 	} else {
 		vec2 texture_uv = fract(world_pos.xz);
 		ALBEDO = (upness * texture(grass_texture, texture_uv) + (1.0 - upness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;

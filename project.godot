@@ -28,7 +28,9 @@ folder_colors={
 "res://assets/": "orange",
 "res://scenes/": "red",
 "res://scripts/": "yellow",
-"res://terrain_generation_methods/": "green"
+"res://shaders/": "blue",
+"res://terrain_generation_methods/": "green",
+"res://themes/": "pink"
 }
 
 [rendering]

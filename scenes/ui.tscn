@@ -1,4 +1,7 @@
-[gd_scene format=3 uid="uid://vsifhaplg8ve"]
+[gd_scene load_steps=3 format=3 uid="uid://vsifhaplg8ve"]
+
+[ext_resource type="Theme" uid="uid://bbvfb43bck665" path="res://themes/theme.tres" id="1_nt7q6"]
+[ext_resource type="Script" uid="uid://b1dg41bshlwok" path="res://scripts/ui.gd" id="2_x4jx1"]
 
 [node name="UI" type="Control"]
 layout_mode = 3
@@ -7,3 +10,37 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_nt7q6")
+script = ExtResource("2_x4jx1")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 100
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 100
+
+[node name="Panel" type="PanelContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme = ExtResource("1_nt7q6")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 25
+theme_override_constants/margin_top = 25
+theme_override_constants/margin_right = 25
+theme_override_constants/margin_bottom = 25
+
+[node name="ShaderParametersVBoxContainer" type="VBoxContainer" parent="MarginContainer/Panel/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme = ExtResource("1_nt7q6")

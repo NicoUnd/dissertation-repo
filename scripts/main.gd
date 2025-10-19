@@ -1,31 +1,55 @@
 @tool
-extends Node3D
+extends Control
 
+@onready var visualisation_viewport: SubViewport = %VisualisationViewport
 @onready var heightmap_viewport: SubViewport = %HeightmapViewport;
 
 @onready var terrain_generation_method_visualiser: TerrainGenerationMethodVisualiser = %TerrainGenerationMethodVisualiser
 @onready var heightmap_terrain_generation_method_visualiser: TerrainGenerationMethodVisualiser = %HeightmapTerrainGenerationMethodVisualiser
 
+@onready var timer: Timer = $VisualisationViewport/Timer
+
+@onready var ui: Control = %UI
+
 @export var terrain_generation_method: TerrainGenerationMethod:
 	set(new_terrain_generation_method):
 		terrain_generation_method = new_terrain_generation_method;
+		print("A")
 		if terrain_generation_method_visualiser:
+			print("B")
 			terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
 		if heightmap_terrain_generation_method_visualiser:
 			heightmap_terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
+		if ui:
+			ui.set_shader_specific_parameters(terrain_generation_method.shader_parameters);
+
+var auto_randomise_seed: bool = false;
 
 func _ready() -> void:
-	terrain_generation_method = null;
-	
 	await get_tree().process_frame
 	
-	terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
-	heightmap_terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
+	print("OKAY")
 	heightmap_terrain_generation_method_visualiser.albedo_is_heightmap = true;
-	
 	terrain_generation_method = preload("uid://bunfkxpwyox5q")
-	terrain_generation_method_visualiser.circle = true;
-	heightmap_terrain_generation_method_visualiser.circle = true;
+	
+	timer.start();
+
+func set_shader_parameter(shader_parameter_name: String, shader_parameter_value: Variant, is_shader_specific: bool=true) -> void:
+	if shader_parameter_name == "auto_randomise_seed":
+		auto_randomise_seed = shader_parameter_value;
+		return;
+	elif shader_parameter_name in ["albedo_is_heightmap", "unshaded"]:
+		terrain_generation_method_visualiser.set(shader_parameter_name, shader_parameter_value);
+		return;
+	if is_shader_specific:
+		print("SETTING: " + shader_parameter_name)
+		print(terrain_generation_method_visualiser.mesh.material.get_shader_parameter(shader_parameter_name))
+		terrain_generation_method_visualiser.mesh.material.set_shader_parameter(shader_parameter_name, shader_parameter_value);
+		print(terrain_generation_method_visualiser.mesh.material.get_shader_parameter(shader_parameter_name))
+		heightmap_terrain_generation_method_visualiser.mesh.material.set_shader_parameter(shader_parameter_name, shader_parameter_value);
+	else:
+		terrain_generation_method_visualiser.set(shader_parameter_name, shader_parameter_value);
+		heightmap_terrain_generation_method_visualiser.set(shader_parameter_name, shader_parameter_value);
 
 func save_heightmap() -> void:
 	const heightmap_save_path = "res://heightmap.png";
@@ -34,6 +58,8 @@ func save_heightmap() -> void:
 	var error = heightmap.save_png(heightmap_save_path);
 	print(error)
 
-
 func _on_timer_timeout() -> void:
-	terrain_generation_method_visualiser.seed = randf_range(1, 64)
+	if auto_randomise_seed:
+		var new_seed = randf_range(1, 64);
+		terrain_generation_method_visualiser.seed = new_seed;
+		heightmap_terrain_generation_method_visualiser.seed = new_seed;
