@@ -1,6 +1,9 @@
-#@tool
+@tool
 extends MeshInstance3D;
 class_name TerrainGenerationMethodVisualiser;
+
+const TERRAIN_GENERATION_METHODS: Array[TerrainGenerationMethod] = [preload("uid://bunfkxpwyox5q")];
+const PLANE_RESOLUTIONS: Array[int] = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
 
 func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderParameter]) -> void:
 	mesh.material.shader = new_shader.duplicate();
@@ -11,6 +14,7 @@ func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderPara
 @export var terrain_generation_method: TerrainGenerationMethod:
 	set(new_terrain_generation_method):
 		terrain_generation_method = new_terrain_generation_method;
+		seed = randf_range(1, 64);
 		if not terrain_generation_method:
 			mesh.material = ShaderMaterial.new();
 		else:
@@ -33,14 +37,15 @@ func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderPara
 
 func apply_shader_options() -> void:
 	mesh.material.set_shader_parameter("seed", seed);
-	mesh.material.set_shader_parameter("albedo_is_heightmap", albedo_is_heightmap);
+	mesh.material.set_shader_parameter("albedo_type", albedo_type);
 	mesh.material.set_shader_parameter("circle", circle);
 	mesh.material.set_shader_parameter("grass_texture", grass_texture);
+	mesh.material.set_shader_parameter("dirt_texture", dirt_texture);
 
-@export var albedo_is_heightmap: bool = false:
-	set(new_albedo_is_heightmap):
-		albedo_is_heightmap = new_albedo_is_heightmap;
-		mesh.material.set_shader_parameter("albedo_is_heightmap", albedo_is_heightmap);
+@export var albedo_type: int = 0:
+	set(new_albedo_type):
+		albedo_type = new_albedo_type;
+		mesh.material.set_shader_parameter("albedo_type", albedo_type);
 
 @export var circle: bool = false:
 	set(new_circle):
@@ -52,10 +57,15 @@ func apply_shader_options() -> void:
 		seed = new_seed;
 		mesh.material.set_shader_parameter("seed", seed);
 
-@export var grass_texture: Texture2D = preload("uid://bwrwr1amdu6se"):
+@export var grass_texture: Texture2D = preload("uid://dql2oecs77v8i"):
 	set(new_grass_texture):
 		grass_texture = new_grass_texture;
 		mesh.material.set_shader_parameter("grass_texture", grass_texture);
+
+@export var dirt_texture: Texture2D = preload("uid://bwrwr1amdu6se"):
+	set(new_dirt_texture):
+		dirt_texture = new_dirt_texture;
+		mesh.material.set_shader_parameter("dirt_texture", dirt_texture);
 
 func _ready() -> void:
 	print("MAIN READY")

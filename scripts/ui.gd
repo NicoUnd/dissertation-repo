@@ -2,6 +2,7 @@ extends Control
 
 const SHADER_PARAMETER_CHECK_BOX_UI = preload("uid://bngc5tmbrhe76")
 const SHADER_PARAMETER_SLIDER_UI_SCENE = preload("uid://u3fkap1o8cbi")
+const SHADER_PARAMETER_OPTION_BUTTON_UI = preload("uid://wgyphejds23x")
 
 @onready var main: Control = $".."
 
@@ -22,6 +23,11 @@ func add_shader_parameter(shader_parameter: ShaderParameter, is_shader_specific:
 		shader_parameters_v_box_container.add_child(new_shader_parameter_UI);
 		new_shader_parameter_UI.setup(shader_parameter);
 		new_shader_parameter_UI.h_slider.connect("value_changed", on_change);
+	elif shader_parameter is ShaderParameterEnum:
+		new_shader_parameter_UI = SHADER_PARAMETER_OPTION_BUTTON_UI.instantiate();
+		shader_parameters_v_box_container.add_child(new_shader_parameter_UI);
+		new_shader_parameter_UI.setup(shader_parameter);
+		new_shader_parameter_UI.option_button.connect("item_selected", on_change);
 	
 	if is_shader_specific:
 		shader_specific_UIs.append(new_shader_parameter_UI)
@@ -36,9 +42,12 @@ func set_shader_specific_parameters(shader_specific_parameters: Array[ShaderPara
 func _ready() -> void:
 	add_shader_parameter(ShaderParameterNumber.new("seed", 1, 1, 64, false, false, false), false);
 	add_shader_parameter(ShaderParameterBool.new("auto_randomise_seed",false), false);
-	add_shader_parameter(ShaderParameterBool.new("circle", true), false);
-	add_shader_parameter(ShaderParameterBool.new("albedo_is_heightmap", false), false);
+	add_shader_parameter(ShaderParameterEnum.new("albedo_type", 0, ["texture", "heightmap", "normal"]), false);
 	add_shader_parameter(ShaderParameterBool.new("unshaded", false), false);
-	add_shader_parameter(ShaderParameterNumber.new("resolution_of_plane", 1024, 4, 4096, true, true, true), false);
-	
+	add_shader_parameter(ShaderParameterBool.new("circle", true), false);
+	var plane_resolution_strings: Array[String] = [];
+	for plane_resolution: int in TerrainGenerationMethodVisualiser.PLANE_RESOLUTIONS:
+		plane_resolution_strings.append(str(plane_resolution) + "x" + str(plane_resolution));
+	add_shader_parameter(ShaderParameterEnum.new("resolution_of_plane", 6, plane_resolution_strings), false);
 	shader_parameters_v_box_container.add_child(HSeparator.new());
+	add_shader_parameter(ShaderParameterEnum.new("terrain_generation_method", -1, ["fractal_brownian_motion"]), false);

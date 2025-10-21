@@ -2,7 +2,7 @@ shader_type spatial;
 render_mode depth_prepass_alpha;
 
 // every terrain generation method shader parameters
-uniform bool albedo_is_heightmap;
+uniform int albedo_type;
 
 uniform bool circle;
 
@@ -17,6 +17,8 @@ uniform float amplitude: hint_range(1.0, 64.0);
 
 uniform int octaves: hint_range(1, 16);
 
+uniform int value_type;
+
 
 // pseudo random number from a seed (uv)
 //vec2 random(vec2 uv) {
@@ -29,7 +31,7 @@ vec2 random(vec2 uv){
 	uv += vec2(seed * 124.231, seed * 74.512);
     uv = vec2( dot(uv, vec2(127.1 ,311.7) ),
                dot(uv, vec2(269.5,183.3) ) );
-	return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * seed);
+	return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123);
     //return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * (seed - TIME * 0.000001));
 }
 
@@ -64,7 +66,7 @@ float perlin_2D(vec2 uv) {
 	float value_T = mix(value_TL, value_TR, smooth_factor.x);
 
 	float value = mix(value_B, value_T, smooth_factor.y);
-	return (value + 1.0) * 0.5;
+	return value;
 }
 
 float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float base_amp) {
@@ -72,7 +74,12 @@ float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float
 	float peri = base_period;
 	float amp = base_amp;
 	while (given_octaves > 0) {
-		total += perlin_2D(uv / peri) * amp;
+		float val = perlin_2D(uv / peri) * amp;
+		if (value_type != 0) {
+			total += abs(val);
+		} else {
+			total += val;
+		}
 		peri /= 2.0;
 		amp /= 2.0;
 		given_octaves -= 1;
@@ -104,28 +111,45 @@ float get_fract_brownian_motion_max_height(int given_octaves, float base_amp) {
 		amp /= 2.0;
 		octave += 1;
 	}
+	//max_height *= 0.5;
+	if (value_type != 0) {
+		max_height *= 0.5;
+	}
 	return max_height;
 }
 
 void vertex() {
 	vec2 uv = VERTEX.xz;
-	VERTEX.y += fract_brownian_motion(uv, octaves, period, amplitude);
-	VERTEX.y -= get_fract_brownian_motion_max_height(octaves, amplitude) * 0.5;
+	if (value_type == 0 || value_type == 1) {
+		VERTEX.y += fract_brownian_motion(uv, octaves, period, amplitude);
+		if (value_type == 1) {
+			VERTEX.y -= get_fract_brownian_motion_max_height(octaves, amplitude) * 0.25;
+		}
+	} else { // value_type == 2
+		VERTEX.y -= fract_brownian_motion(uv, octaves, period, amplitude);
+		VERTEX.y += get_fract_brownian_motion_max_height(octaves, amplitude) * 0.25;
+	}
 	NORMAL = get_normal(uv, octaves, period, amplitude);
 }
 
 void fragment() {
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 world_normal = get_normal(world_pos.xz, octaves, period, amplitude);
-	float upness = dot(world_normal, vec3(0.0, 1.0, 0.0));
-
-	if (albedo_is_heightmap) {
-		float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
-		ALBEDO = vec3(((world_pos.y + 0.3 * amplitude) / max_height));
-	} else {
+	
+	if (albedo_type == 0) {
 		vec2 texture_uv = fract(world_pos.xz);
-		ALBEDO = (upness * texture(grass_texture, texture_uv) + (1.0 - upness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
+		float steepness = dot(world_normal, vec3(0.0, 1.0, 0.0));
+		ALBEDO = (steepness * vec4(0.2, 0.25, 0.2, 1.0) + (1.0 - steepness) * vec4(0.05, 0.05, 0.05, 1.0)).xyz;
+	} else {
+		if (albedo_type == 1) {
+			float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
+			ALBEDO = vec3(((world_pos.y + max_height) / (max_height * 2.0)));
+			ALBEDO = vec3(world_pos.y / max_height + 0.5);
+		} else { // albedo_type == 2
+			ALBEDO = world_normal;
+		}
 	}
+	
 	if (circle) {
 		ALPHA = 1.0 - smoothstep(512.0 + 256.0 + 128.0 + 64.0 + 32.0, 1024.0, world_pos.x * world_pos.x + world_pos.z * world_pos.z);
 	}

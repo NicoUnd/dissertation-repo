@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://wgyphejds23x"]
+
+[ext_resource type="Theme" uid="uid://bbvfb43bck665" path="res://themes/theme.tres" id="1_hnbu4"]
+[ext_resource type="Script" uid="uid://d0fv3uxdl3kul" path="res://scripts/shader_parameter_option_button_ui.gd" id="2_oodr5"]
+
+[node name="ShaderParameterOptionButtonUI" type="PanelContainer"]
+custom_minimum_size = Vector2(1450, 0)
+offset_right = 1105.0
+offset_bottom = 141.0
+theme = ExtResource("1_hnbu4")
+script = ExtResource("2_oodr5")
+
+[node name="Label" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Value type"
+
+[node name="OptionButton" type="OptionButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4

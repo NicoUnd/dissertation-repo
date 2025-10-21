@@ -1,11 +1,11 @@
-[gd_scene load_steps=21 format=3 uid="uid://djov3pag7t3c"]
+[gd_scene load_steps=19 format=3 uid="uid://djov3pag7t3c"]
 
 [ext_resource type="PackedScene" uid="uid://mknok0q1uv77" path="res://scenes/plane.tscn" id="1_o5qli"]
 [ext_resource type="Theme" uid="uid://bbvfb43bck665" path="res://themes/theme.tres" id="1_o6xl0"]
 [ext_resource type="Script" uid="uid://dduxtvik1ne71" path="res://scripts/main.gd" id="1_sugp2"]
 [ext_resource type="Script" uid="uid://cj868n7yysjnm" path="res://scripts/rotating_camera.gd" id="2_0wfyh"]
 [ext_resource type="Resource" uid="uid://bunfkxpwyox5q" path="res://terrain_generation_methods/fractal_brownian_motion.tres" id="2_jyhfs"]
-[ext_resource type="Texture2D" uid="uid://bwrwr1amdu6se" path="res://assets/dark-rock-wall-seamless-texture-free-105.png" id="4_tefeu"]
+[ext_resource type="Texture2D" uid="uid://de0eqtkic42jj" path="res://assets/7d756d56-3bfd-4319-abb0-e047759b88da.jpg" id="6_o6xl0"]
 [ext_resource type="PackedScene" uid="uid://vsifhaplg8ve" path="res://scenes/ui.tscn" id="6_tefeu"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tefeu"]
@@ -28,168 +28,10 @@ glow_enabled = true
 [sub_resource type="World3D" id="World3D_85g3d"]
 environment = SubResource("Environment_tipki")
 
-[sub_resource type="Shader" id="Shader_tefeu"]
-code = "shader_type spatial;
-render_mode depth_prepass_alpha;
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tefeu"]
 
-// every terrain generation method shader parameters
-uniform bool albedo_is_heightmap;
-
-uniform bool circle;
-
-uniform float seed: hint_range(1.0, 64.0, 0.1);
-
-uniform sampler2D dirt_texture;
-uniform sampler2D grass_texture;
-
-// terrain generation method specific parameters
-uniform float period: hint_range(1.0, 64.0);
-uniform float amplitude: hint_range(1.0, 64.0);
-
-uniform int octaves: hint_range(1, 16);
-
-
-// pseudo random number from a seed (uv)
-//vec2 random(vec2 uv) {
-	//uv = vec2(dot(uv, vec2(127.1, 311.7)),
-	          //dot(uv, vec2(269.5, 183.3)));
-	//return normalize(-1.0 + 2.0 * fract(sin(uv) * 43758.5453123));
-//}
-
-vec2 random(vec2 uv){
-	uv += vec2(seed * 124.231, seed * 74.512);
-    uv = vec2( dot(uv, vec2(127.1 ,311.7) ),
-               dot(uv, vec2(269.5,183.3) ) );
-	return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * seed);
-    //return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * (seed - TIME * 0.000001));
-}
-
-float perlin_2D(vec2 uv) {
-	vec2 grid_index = floor(uv);
-	vec2 grid_fract = fract(uv);
-
-	vec2 BL = grid_index + vec2(0.0, 0.0);
-	vec2 BR = grid_index + vec2(1.0, 0.0);
-	vec2 TL = grid_index + vec2(0.0, 1.0);
-	vec2 TR = grid_index + vec2(1.0, 1.0);
-
-	vec2 grad_BL = random(BL);
-	vec2 grad_BR = random(BR);
-	vec2 grad_TL = random(TL);
-	vec2 grad_TR = random(TR);
-
-	vec2 offset_vector_BL = grid_fract - vec2(0.0, 0.0);
-	vec2 offset_vector_BR = grid_fract - vec2(1.0, 0.0);
-	vec2 offset_vector_TL = grid_fract - vec2(0.0, 1.0);
-	vec2 offset_vector_TR = grid_fract - vec2(1.0, 1.0);
-
-	float value_BL = dot(offset_vector_BL, grad_BL);
-	float value_BR = dot(offset_vector_BR, grad_BR);
-	float value_TL = dot(offset_vector_TL, grad_TL);
-	float value_TR = dot(offset_vector_TR, grad_TR);
-
-	vec2 smooth_factor = grid_fract * grid_fract * grid_fract *
-            (grid_fract * (grid_fract * 6.0 - 15.0) + 10.0);
-
-	float value_B = mix(value_BL, value_BR, smooth_factor.x);
-	float value_T = mix(value_TL, value_TR, smooth_factor.x);
-
-	float value = mix(value_B, value_T, smooth_factor.y);
-	return (value + 1.0) * 0.5;
-}
-
-float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float base_amp) {
-	float total = 0.0;
-	float peri = base_period;
-	float amp = base_amp;
-	while (given_octaves > 0) {
-		total += perlin_2D(uv / peri) * amp;
-		peri /= 2.0;
-		amp /= 2.0;
-		given_octaves -= 1;
-	}
-	return total;
-}
-
-vec3 get_normal(vec2 uv, int given_octaves, float base_period, float base_amp) {
-	const float delta = 0.01;
-
-    float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_period, base_amp);
-    float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_period, base_amp);
-    float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_period, base_amp);
-    float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_period, base_amp);
-
-    float dx = hR - hL;
-    float dy = hU - hD;
-
-    vec3 normal = normalize(vec3(-dx, delta, -dy));
-    return normal;
-}
-
-float get_fract_brownian_motion_max_height(int given_octaves, float base_amp) {
-	float max_height = 0.0;
-	int octave = 0;
-	float amp = base_amp;
-	while (octave < given_octaves) {
-		max_height += amp;
-		amp /= 2.0;
-		octave += 1;
-	}
-	return max_height;
-}
-
-void vertex() {
-	vec2 uv = VERTEX.xz;
-	VERTEX.y += fract_brownian_motion(uv, octaves, period, amplitude);
-	VERTEX.y -= get_fract_brownian_motion_max_height(octaves, amplitude) * 0.5;
-	NORMAL = get_normal(uv, octaves, period, amplitude);
-}
-
-void fragment() {
-	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	vec3 world_normal = get_normal(world_pos.xz, octaves, period, amplitude);
-	float upness = dot(world_normal, vec3(0.0, 1.0, 0.0));
-
-	if (albedo_is_heightmap) {
-		float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
-		ALBEDO = vec3(((world_pos.y + 0.3 * amplitude) / max_height));
-	} else {
-		vec2 texture_uv = fract(world_pos.xz);
-		ALBEDO = (upness * texture(grass_texture, texture_uv) + (1.0 - upness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
-	}
-	if (circle) {
-		ALPHA = 1.0 - smoothstep(512.0 + 256.0 + 128.0 + 64.0 + 32.0, 1024.0, world_pos.x * world_pos.x + world_pos.z * world_pos.z);
-	}
-}
-
-//void light() {
-	////vec3 N_world = get_normal(world_xz / frequency);
-    ////vec3 N = normalize((VIEW_MATRIX * vec4(N_world, 0.0)).xyz);
-	//vec3 N = NORMAL;
-	//
-    //vec3 L = LIGHT;
-	//
-	//// Lambertian diffuse term
-    //float NdotL = max(dot(N, L), 0.0);
-	//
-	//// Combine with light color, attenuation, and material albedo
-    //DIFFUSE_LIGHT += NdotL * ATTENUATION * LIGHT_COLOR * ALBEDO;
-//}
-"
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_o6xl0"]
-render_priority = 0
-shader = SubResource("Shader_tefeu")
-shader_parameter/albedo_is_heightmap = false
-shader_parameter/circle = true
-shader_parameter/seed = 26.21024406171987
-shader_parameter/grass_texture = ExtResource("4_tefeu")
-shader_parameter/period = 16.0
-shader_parameter/amplitude = 16.0
-shader_parameter/octaves = 12
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_tipki"]
-material = SubResource("ShaderMaterial_o6xl0")
+[sub_resource type="PlaneMesh" id="PlaneMesh_o6xl0"]
+material = SubResource("ShaderMaterial_tefeu")
 size = Vector2(64, 64)
 subdivide_width = 1027
 subdivide_depth = 1027
@@ -198,168 +40,10 @@ subdivide_depth = 1027
 background_mode = 1
 background_color = Color(0, 0, 0, 0)
 
-[sub_resource type="Shader" id="Shader_85g3d"]
-code = "shader_type spatial;
-render_mode depth_prepass_alpha, unshaded;
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tipki"]
 
-// every terrain generation method shader parameters
-uniform bool albedo_is_heightmap;
-
-uniform bool circle;
-
-uniform float seed: hint_range(1.0, 64.0, 0.1);
-
-uniform sampler2D dirt_texture;
-uniform sampler2D grass_texture;
-
-// terrain generation method specific parameters
-uniform float period: hint_range(1.0, 64.0);
-uniform float amplitude: hint_range(1.0, 64.0);
-
-uniform int octaves: hint_range(1, 16);
-
-
-// pseudo random number from a seed (uv)
-//vec2 random(vec2 uv) {
-	//uv = vec2(dot(uv, vec2(127.1, 311.7)),
-	          //dot(uv, vec2(269.5, 183.3)));
-	//return normalize(-1.0 + 2.0 * fract(sin(uv) * 43758.5453123));
-//}
-
-vec2 random(vec2 uv){
-	uv += vec2(seed * 124.231, seed * 74.512);
-    uv = vec2( dot(uv, vec2(127.1 ,311.7) ),
-               dot(uv, vec2(269.5,183.3) ) );
-	return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * seed);
-    //return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * (seed - TIME * 0.000001));
-}
-
-float perlin_2D(vec2 uv) {
-	vec2 grid_index = floor(uv);
-	vec2 grid_fract = fract(uv);
-
-	vec2 BL = grid_index + vec2(0.0, 0.0);
-	vec2 BR = grid_index + vec2(1.0, 0.0);
-	vec2 TL = grid_index + vec2(0.0, 1.0);
-	vec2 TR = grid_index + vec2(1.0, 1.0);
-
-	vec2 grad_BL = random(BL);
-	vec2 grad_BR = random(BR);
-	vec2 grad_TL = random(TL);
-	vec2 grad_TR = random(TR);
-
-	vec2 offset_vector_BL = grid_fract - vec2(0.0, 0.0);
-	vec2 offset_vector_BR = grid_fract - vec2(1.0, 0.0);
-	vec2 offset_vector_TL = grid_fract - vec2(0.0, 1.0);
-	vec2 offset_vector_TR = grid_fract - vec2(1.0, 1.0);
-
-	float value_BL = dot(offset_vector_BL, grad_BL);
-	float value_BR = dot(offset_vector_BR, grad_BR);
-	float value_TL = dot(offset_vector_TL, grad_TL);
-	float value_TR = dot(offset_vector_TR, grad_TR);
-
-	vec2 smooth_factor = grid_fract * grid_fract * grid_fract *
-            (grid_fract * (grid_fract * 6.0 - 15.0) + 10.0);
-
-	float value_B = mix(value_BL, value_BR, smooth_factor.x);
-	float value_T = mix(value_TL, value_TR, smooth_factor.x);
-
-	float value = mix(value_B, value_T, smooth_factor.y);
-	return (value + 1.0) * 0.5;
-}
-
-float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float base_amp) {
-	float total = 0.0;
-	float peri = base_period;
-	float amp = base_amp;
-	while (given_octaves > 0) {
-		total += perlin_2D(uv / peri) * amp;
-		peri /= 2.0;
-		amp /= 2.0;
-		given_octaves -= 1;
-	}
-	return total;
-}
-
-vec3 get_normal(vec2 uv, int given_octaves, float base_period, float base_amp) {
-	const float delta = 0.01;
-
-    float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_period, base_amp);
-    float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_period, base_amp);
-    float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_period, base_amp);
-    float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_period, base_amp);
-
-    float dx = hR - hL;
-    float dy = hU - hD;
-
-    vec3 normal = normalize(vec3(-dx, delta, -dy));
-    return normal;
-}
-
-float get_fract_brownian_motion_max_height(int given_octaves, float base_amp) {
-	float max_height = 0.0;
-	int octave = 0;
-	float amp = base_amp;
-	while (octave < given_octaves) {
-		max_height += amp;
-		amp /= 2.0;
-		octave += 1;
-	}
-	return max_height;
-}
-
-void vertex() {
-	vec2 uv = VERTEX.xz;
-	VERTEX.y += fract_brownian_motion(uv, octaves, period, amplitude);
-	VERTEX.y -= get_fract_brownian_motion_max_height(octaves, amplitude) * 0.5;
-	NORMAL = get_normal(uv, octaves, period, amplitude);
-}
-
-void fragment() {
-	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	vec3 world_normal = get_normal(world_pos.xz, octaves, period, amplitude);
-	float upness = dot(world_normal, vec3(0.0, 1.0, 0.0));
-
-	if (albedo_is_heightmap) {
-		float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
-		ALBEDO = vec3(((world_pos.y + 0.3 * amplitude) / max_height));
-	} else {
-		vec2 texture_uv = fract(world_pos.xz);
-		ALBEDO = (upness * texture(grass_texture, texture_uv) + (1.0 - upness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
-	}
-	if (circle) {
-		ALPHA = 1.0 - smoothstep(512.0 + 256.0 + 128.0 + 64.0 + 32.0, 1024.0, world_pos.x * world_pos.x + world_pos.z * world_pos.z);
-	}
-}
-
-//void light() {
-	////vec3 N_world = get_normal(world_xz / frequency);
-    ////vec3 N = normalize((VIEW_MATRIX * vec4(N_world, 0.0)).xyz);
-	//vec3 N = NORMAL;
-	//
-    //vec3 L = LIGHT;
-	//
-	//// Lambertian diffuse term
-    //float NdotL = max(dot(N, L), 0.0);
-	//
-	//// Combine with light color, attenuation, and material albedo
-    //DIFFUSE_LIGHT += NdotL * ATTENUATION * LIGHT_COLOR * ALBEDO;
-//}
-"
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_choun"]
-render_priority = 0
-shader = SubResource("Shader_85g3d")
-shader_parameter/albedo_is_heightmap = true
-shader_parameter/circle = true
-shader_parameter/seed = 1.0
-shader_parameter/grass_texture = ExtResource("4_tefeu")
-shader_parameter/period = 16.0
-shader_parameter/amplitude = 16.0
-shader_parameter/octaves = 12
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_ya4ey"]
-material = SubResource("ShaderMaterial_choun")
+[sub_resource type="PlaneMesh" id="PlaneMesh_85g3d"]
+material = SubResource("ShaderMaterial_tipki")
 size = Vector2(64, 64)
 subdivide_width = 1027
 subdivide_depth = 1027
@@ -392,14 +76,14 @@ directional_shadow_max_distance = 20536.5
 
 [node name="TerrainGenerationMethodVisualiser" parent="VisualisationViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
-mesh = SubResource("PlaneMesh_tipki")
+mesh = SubResource("PlaneMesh_o6xl0")
 skeleton = NodePath("../..")
 circle = true
 seed = 26.21024406171987
 
 [node name="CameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(0.49743822, 0, 0.8674994, 0, 1, 0, -0.8674994, 0, 0.49743822, 0, 0, 0)
+transform = Transform3D(0.3891962, 0, -0.92115456, 0, 1, 0, 0.92115456, 0, 0.3891962, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VisualisationViewport/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
@@ -412,7 +96,7 @@ autostart = true
 
 [node name="HeightmapViewport" type="SubViewport" parent="."]
 unique_name_in_owner = true
-size = Vector2i(1024, 1024)
+render_target_update_mode = 4
 
 [node name="HeightmapCamera3D" type="Camera3D" parent="HeightmapViewport"]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 179.52252, 0)
@@ -425,13 +109,33 @@ size = 64.0
 [node name="HeightmapTerrainGenerationMethodVisualiser" parent="HeightmapViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
 layers = 2
-mesh = SubResource("PlaneMesh_ya4ey")
+mesh = SubResource("PlaneMesh_85g3d")
 unshaded = true
-albedo_is_heightmap = true
+albedo_type = 1
 circle = true
 
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2747024, 0.35795543, 0.4056682, 1)
+
+[node name="BlueprintTextureRect" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0.05882353)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 605.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_o6xl0")
+expand_mode = 1
+
 [node name="VisualisationTextureRect" type="TextureRect" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
@@ -441,6 +145,10 @@ grow_horizontal = 0
 grow_vertical = 2
 texture = SubResource("ViewportTexture_tbgi4")
 
+[node name="UI" parent="." instance=ExtResource("6_tefeu")]
+unique_name_in_owner = true
+layout_mode = 1
+
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -448,6 +156,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_constants/margin_left = 100
 theme_override_constants/margin_top = 100
 theme_override_constants/margin_right = 100
@@ -471,14 +180,38 @@ modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 theme_override_constants/separation = 64
 
-[node name="GenerateStatisticsButton" type="Button" parent="MarginContainer/HBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="SaveHeightmapButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Save Heightmap"
+alignment = 0
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+
+[node name="GenerateStatisticsButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 8
 text = "Generate Statistics"
 
-[node name="UI" parent="." instance=ExtResource("6_tefeu")]
+[node name="SaveHeightmapFileDialog" type="FileDialog" parent="."]
 unique_name_in_owner = true
-layout_mode = 1
+oversampling_override = 1.0
+title = ""
+initial_position = 1
+size = Vector2i(2018, 1416)
+ok_button_text = "Save Heightmap"
+access = 2
+option_count = 1
+option_0/name = "Heightmap Resolution"
+option_0/values = PackedStringArray("1024x1024", "2048x2048", "4096x4096")
 
 [connection signal="timeout" from="VisualisationViewport/Timer" to="." method="_on_timer_timeout"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/SaveHeightmapButton" to="." method="_on_save_heightmap_button_pressed"]
+[connection signal="confirmed" from="SaveHeightmapFileDialog" to="." method="_on_save_heightmap_file_dialog_confirmed"]

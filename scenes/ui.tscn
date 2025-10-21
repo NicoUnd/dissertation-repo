@@ -26,13 +26,13 @@ theme_override_constants/margin_right = 100
 theme_override_constants/margin_bottom = 100
 
 [node name="Panel" type="PanelContainer" parent="MarginContainer"]
+custom_minimum_size = Vector2(1500, 0)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 theme = ExtResource("1_nt7q6")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Panel"]
-custom_minimum_size = Vector2(1500, 0)
 layout_mode = 2
 theme_override_constants/margin_left = 25
 theme_override_constants/margin_top = 25
