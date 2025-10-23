@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://337ax8mji8ac"]
+
+[ext_resource type="Script" uid="uid://hwaa2pqluwyk" path="res://shader_parameter_image_UI.gd" id="1_ky82d"]
+
+[node name="ShaderParameterImageUI" type="Button"]
+offset_right = 8.0
+offset_bottom = 8.0
+script = ExtResource("1_ky82d")

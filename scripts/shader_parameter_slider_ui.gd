@@ -24,7 +24,7 @@ func setup(shader_parameter: ShaderParameterNumber) -> void:
 	if is_int:
 		h_slider.step = 1;
 	else:
-		h_slider.step = 0.1;
+		h_slider.step = 0.01;
 	h_slider.value = value;
 
 func update_text(new_value: float) -> void:

@@ -1,0 +1,75 @@
+[gd_resource type="Resource" script_class="TerrainGenerationMethod" load_steps=18 format=3 uid="uid://uir8vm75yx0o"]
+
+[ext_resource type="Script" uid="uid://c2hfrfoaosq6m" path="res://scripts/terrain_generation_method.gd" id="1_b7ql0"]
+[ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/shader_paremeter.gd" id="2_cnqi1"]
+[ext_resource type="Shader" uid="uid://dn1ae62elc7nb" path="res://shaders/heightmap_blending.gdshader" id="2_r2i4r"]
+[ext_resource type="Script" uid="uid://b2pyma2gu2m37" path="res://scripts/shader_parameter_image.gd" id="4_ygccv"]
+[ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/shader_parameter_number.gd" id="5_hq3wy"]
+
+[sub_resource type="Image" id="Image_ygccv"]
+
+[sub_resource type="Resource" id="Resource_hq3wy"]
+script = ExtResource("4_ygccv")
+name = "heightmap1"
+value = SubResource("Image_ygccv")
+metadata/_custom_type_script = "uid://b2pyma2gu2m37"
+
+[sub_resource type="Image" id="Image_33twg"]
+
+[sub_resource type="Resource" id="Resource_auc3n"]
+script = ExtResource("4_ygccv")
+name = "heightmap2"
+value = SubResource("Image_33twg")
+metadata/_custom_type_script = "uid://b2pyma2gu2m37"
+
+[sub_resource type="Image" id="Image_1rdl3"]
+
+[sub_resource type="Resource" id="Resource_5mavw"]
+script = ExtResource("4_ygccv")
+name = "heightmap3"
+value = SubResource("Image_1rdl3")
+metadata/_custom_type_script = "uid://b2pyma2gu2m37"
+
+[sub_resource type="Image" id="Image_ch6t7"]
+
+[sub_resource type="Resource" id="Resource_7w5ie"]
+script = ExtResource("4_ygccv")
+name = "heightmap4"
+value = SubResource("Image_ch6t7")
+metadata/_custom_type_script = "uid://b2pyma2gu2m37"
+
+[sub_resource type="Resource" id="Resource_i1px2"]
+script = ExtResource("5_hq3wy")
+max_value = 1.0
+name = "c1"
+value = 0.5
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_ct7ax"]
+script = ExtResource("5_hq3wy")
+max_value = 1.0
+name = "c2"
+value = 0.5
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_e7po1"]
+script = ExtResource("5_hq3wy")
+max_value = 1.0
+name = "c3"
+value = 0.0
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_leuid"]
+script = ExtResource("5_hq3wy")
+max_value = 1.0
+name = "c4"
+value = 0.0
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[resource]
+script = ExtResource("1_b7ql0")
+name = "heightmap_blending"
+shader = ExtResource("2_r2i4r")
+unshaded_shader = ExtResource("2_r2i4r")
+shader_parameters = Array[ExtResource("2_cnqi1")]([SubResource("Resource_hq3wy"), SubResource("Resource_auc3n"), SubResource("Resource_5mavw"), SubResource("Resource_7w5ie"), SubResource("Resource_i1px2"), SubResource("Resource_ct7ax"), SubResource("Resource_e7po1"), SubResource("Resource_leuid")])
+metadata/_custom_type_script = "uid://c2hfrfoaosq6m"

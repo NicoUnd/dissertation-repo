@@ -43,6 +43,7 @@ metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
 [resource]
 script = ExtResource("1_wh3qd")
+name = "fractal_brownian_motion"
 shader = ExtResource("2_7y8rf")
 unshaded_shader = ExtResource("3_am8m6")
 shader_parameters = Array[ExtResource("3_25fsa")]([SubResource("Resource_ur1vb"), SubResource("Resource_wried"), SubResource("Resource_25fsa"), SubResource("Resource_qj0ci")])

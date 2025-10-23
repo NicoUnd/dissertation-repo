@@ -2,7 +2,13 @@
 extends MeshInstance3D;
 class_name TerrainGenerationMethodVisualiser;
 
-const TERRAIN_GENERATION_METHODS: Array[TerrainGenerationMethod] = [preload("uid://bunfkxpwyox5q")];
+const TERRAIN_GENERATION_METHODS: Array[TerrainGenerationMethod] = [
+	preload("uid://bunfkxpwyox5q"), # FBM
+	preload("uid://dsrbtacjgyx26"), # Worley
+	
+	preload("uid://uir8vm75yx0o"), # Heightmap blending
+];
+
 const PLANE_RESOLUTIONS: Array[int] = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
 
 func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderParameter]) -> void:
@@ -39,6 +45,7 @@ func apply_shader_options() -> void:
 	mesh.material.set_shader_parameter("seed", seed);
 	mesh.material.set_shader_parameter("albedo_type", albedo_type);
 	mesh.material.set_shader_parameter("circle", circle);
+	mesh.material.set_shader_parameter("perturbate", perturbate);
 	mesh.material.set_shader_parameter("grass_texture", grass_texture);
 	mesh.material.set_shader_parameter("dirt_texture", dirt_texture);
 
@@ -51,6 +58,11 @@ func apply_shader_options() -> void:
 	set(new_circle):
 		circle = new_circle;
 		mesh.material.set_shader_parameter("circle", circle);
+
+@export var perturbate: bool = false:
+	set(new_perturbate):
+		perturbate = new_perturbate;
+		mesh.material.set_shader_parameter("perturbate", perturbate);
 
 @export var seed: float = 1:
 	set(new_seed):

@@ -28,10 +28,10 @@ glow_enabled = true
 [sub_resource type="World3D" id="World3D_85g3d"]
 environment = SubResource("Environment_tipki")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_tefeu"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o6xl0"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_o6xl0"]
-material = SubResource("ShaderMaterial_tefeu")
+[sub_resource type="PlaneMesh" id="PlaneMesh_tipki"]
+material = SubResource("ShaderMaterial_o6xl0")
 size = Vector2(64, 64)
 subdivide_width = 1027
 subdivide_depth = 1027
@@ -40,10 +40,10 @@ subdivide_depth = 1027
 background_mode = 1
 background_color = Color(0, 0, 0, 0)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_tipki"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_85g3d"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_85g3d"]
-material = SubResource("ShaderMaterial_tipki")
+[sub_resource type="PlaneMesh" id="PlaneMesh_choun"]
+material = SubResource("ShaderMaterial_85g3d")
 size = Vector2(64, 64)
 subdivide_width = 1027
 subdivide_depth = 1027
@@ -76,14 +76,14 @@ directional_shadow_max_distance = 20536.5
 
 [node name="TerrainGenerationMethodVisualiser" parent="VisualisationViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
-mesh = SubResource("PlaneMesh_o6xl0")
+mesh = SubResource("PlaneMesh_tipki")
 skeleton = NodePath("../..")
 circle = true
-seed = 26.21024406171987
+seed = 49.84911155932157
 
 [node name="CameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(0.3891962, 0, -0.92115456, 0, 1, 0, 0.92115456, 0, 0.3891962, 0, 0, 0)
+transform = Transform3D(0.93591076, 0, -0.35223636, 0, 1, 0, 0.35223636, 0, 0.93591076, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VisualisationViewport/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
@@ -109,10 +109,11 @@ size = 64.0
 [node name="HeightmapTerrainGenerationMethodVisualiser" parent="HeightmapViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
 layers = 2
-mesh = SubResource("PlaneMesh_85g3d")
+mesh = SubResource("PlaneMesh_choun")
 unshaded = true
 albedo_type = 1
 circle = true
+seed = 56.727918869881535
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -129,7 +130,7 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = 605.0
+offset_bottom = 639.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("6_o6xl0")

@@ -1,0 +1,57 @@
+[gd_resource type="Resource" script_class="TerrainGenerationMethod" load_steps=11 format=3 uid="uid://dsrbtacjgyx26"]
+
+[ext_resource type="Script" uid="uid://c2hfrfoaosq6m" path="res://scripts/terrain_generation_method.gd" id="1_xg2hl"]
+[ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/shader_paremeter.gd" id="2_417bw"]
+[ext_resource type="Shader" uid="uid://dw4uox3mjbeqn" path="res://shaders/worley.gdshader" id="2_gqvn1"]
+[ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/shader_parameter_number.gd" id="4_gqvn1"]
+[ext_resource type="Shader" uid="uid://c3ehsorlioocq" path="res://shaders/worley_unshaded.gdshader" id="5_waxsv"]
+
+[sub_resource type="Resource" id="Resource_waxsv"]
+script = ExtResource("4_gqvn1")
+min_value = 1.0
+max_value = 64.0
+is_exp = true
+name = "period"
+value = 8.0
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_315ex"]
+script = ExtResource("4_gqvn1")
+min_value = 1.0
+max_value = 8.0
+is_exp = true
+name = "amplitude"
+value = 2.0
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_1t84t"]
+script = ExtResource("4_gqvn1")
+min_value = -1.0
+max_value = 1.0
+name = "c1"
+value = 0.4
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_35kk1"]
+script = ExtResource("4_gqvn1")
+min_value = -1.0
+max_value = 1.0
+name = "c2"
+value = 0.6
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_4d0ll"]
+script = ExtResource("4_gqvn1")
+min_value = -1.0
+max_value = 1.0
+name = "c3"
+value = -0.6
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[resource]
+script = ExtResource("1_xg2hl")
+name = "worley"
+shader = ExtResource("2_gqvn1")
+unshaded_shader = ExtResource("5_waxsv")
+shader_parameters = Array[ExtResource("2_417bw")]([SubResource("Resource_waxsv"), SubResource("Resource_315ex"), SubResource("Resource_1t84t"), SubResource("Resource_35kk1"), SubResource("Resource_4d0ll")])
+metadata/_custom_type_script = "uid://c2hfrfoaosq6m"

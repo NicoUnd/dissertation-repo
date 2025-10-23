@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://mknok0q1uv77"]
 
-[ext_resource type="Texture2D" uid="uid://bwrwr1amdu6se" path="res://assets/dark-rock-wall-seamless-texture-free-105.png" id="1_md2q8"]
+[ext_resource type="Texture2D" uid="uid://bwrwr1amdu6se" path="res://assets/textures/dark-rock-wall-seamless-texture-free-105.png" id="1_md2q8"]
 [ext_resource type="Script" uid="uid://c38b2dst17kuq" path="res://scripts/terrain_generation_method_visualiser.gd" id="3_md2q8"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_206p1"]
@@ -14,5 +14,6 @@ subdivide_depth = 1027
 [node name="TerrainGenerationMethodVisualiser" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_md2q8")
 script = ExtResource("3_md2q8")
+seed = 11.528918053815884
 grass_texture = ExtResource("1_md2q8")
 dirt_texture = null

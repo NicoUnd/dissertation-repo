@@ -24,6 +24,8 @@ extends Control
 			heightmap_terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
 		if ui:
 			ui.set_shader_specific_parameters(terrain_generation_method.shader_parameters);
+		if heightmap_viewport:
+			heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 
 var auto_randomise_seed: bool = false;
 
