@@ -5,11 +5,13 @@ class_name TerrainGenerationMethodVisualiser;
 const TERRAIN_GENERATION_METHODS: Array[TerrainGenerationMethod] = [
 	preload("uid://bunfkxpwyox5q"), # FBM
 	preload("uid://dsrbtacjgyx26"), # Worley
+	preload("uid://ccwkefbr6ghxb"), # Diamond-square
+	
 	
 	preload("uid://uir8vm75yx0o"), # Heightmap blending
 ];
 
-const PLANE_RESOLUTIONS: Array[int] = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+const PLANE_RESOLUTIONS: Array[int] = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
 
 func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderParameter]) -> void:
 	mesh.material.shader = new_shader.duplicate();

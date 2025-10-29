@@ -7,6 +7,15 @@
 [ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/shader_parameter_number.gd" id="4_25fsa"]
 [ext_resource type="Script" uid="uid://dh4wgjnv8j0ir" path="res://scripts/shader_parameter_enum.gd" id="5_ur1vb"]
 
+[sub_resource type="Resource" id="Resource_wried"]
+script = ExtResource("4_25fsa")
+min_value = 1.0
+max_value = 32.0
+is_exp = true
+name = "amplitude"
+value = 16.0
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
 [sub_resource type="Resource" id="Resource_ur1vb"]
 script = ExtResource("4_25fsa")
 min_value = 1.0
@@ -14,15 +23,6 @@ max_value = 128.0
 is_exp = true
 name = "period"
 value = 32.0
-metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
-
-[sub_resource type="Resource" id="Resource_wried"]
-script = ExtResource("4_25fsa")
-min_value = 1.0
-max_value = 64.0
-is_exp = true
-name = "amplitude"
-value = 16.0
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
 [sub_resource type="Resource" id="Resource_25fsa"]
@@ -46,5 +46,6 @@ script = ExtResource("1_wh3qd")
 name = "fractal_brownian_motion"
 shader = ExtResource("2_7y8rf")
 unshaded_shader = ExtResource("3_am8m6")
-shader_parameters = Array[ExtResource("3_25fsa")]([SubResource("Resource_ur1vb"), SubResource("Resource_wried"), SubResource("Resource_25fsa"), SubResource("Resource_qj0ci")])
+shader_parameters = Array[ExtResource("3_25fsa")]([SubResource("Resource_wried"), SubResource("Resource_ur1vb"), SubResource("Resource_25fsa"), SubResource("Resource_qj0ci")])
+can_generate_in_chunks = true
 metadata/_custom_type_script = "uid://c2hfrfoaosq6m"

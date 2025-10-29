@@ -3,6 +3,8 @@ extends Control
 const SHADER_PARAMETER_CHECK_BOX_UI = preload("uid://bngc5tmbrhe76")
 const SHADER_PARAMETER_SLIDER_UI_SCENE = preload("uid://u3fkap1o8cbi")
 const SHADER_PARAMETER_OPTION_BUTTON_UI = preload("uid://wgyphejds23x")
+const SHADER_PARAMETER_IMAGE_UI = preload("uid://337ax8mji8ac")
+const SHADER_PARAMETER_BUTTON_UI = preload("uid://c4n6m7j3yipbk")
 
 @onready var main: Control = $".."
 
@@ -29,7 +31,15 @@ func add_shader_parameter(shader_parameter: ShaderParameter, is_shader_specific:
 		new_shader_parameter_UI.setup(shader_parameter);
 		new_shader_parameter_UI.option_button.connect("item_selected", on_change);
 	elif shader_parameter is ShaderParameterImage:
-		
+		new_shader_parameter_UI = SHADER_PARAMETER_IMAGE_UI.instantiate();
+		shader_parameters_v_box_container.add_child(new_shader_parameter_UI);
+		new_shader_parameter_UI.setup(shader_parameter);
+		new_shader_parameter_UI.connect("image_selected", on_change);
+	elif shader_parameter is ShaderParameterButton:
+		new_shader_parameter_UI = SHADER_PARAMETER_BUTTON_UI.instantiate();
+		shader_parameters_v_box_container.add_child(new_shader_parameter_UI);
+		new_shader_parameter_UI.setup(shader_parameter);
+		new_shader_parameter_UI.connect("pressed_down", on_change);
 	
 	if is_shader_specific:
 		shader_specific_UIs.append(new_shader_parameter_UI)
@@ -52,7 +62,7 @@ func _ready() -> void:
 	var plane_resolution_strings: Array[String] = [];
 	for plane_resolution: int in TerrainGenerationMethodVisualiser.PLANE_RESOLUTIONS:
 		plane_resolution_strings.append(str(plane_resolution) + "x" + str(plane_resolution));
-	add_shader_parameter(ShaderParameterEnum.new("resolution_of_plane", 6, plane_resolution_strings), false);
+	add_shader_parameter(ShaderParameterEnum.new("resolution_of_plane", 8, plane_resolution_strings), false);
 	
 	shader_parameters_v_box_container.add_child(HSeparator.new());
 	

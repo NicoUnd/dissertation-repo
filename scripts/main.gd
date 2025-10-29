@@ -1,6 +1,8 @@
 @tool
 extends Control
 
+const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
+
 @onready var visualisation_viewport: SubViewport = %VisualisationViewport
 @onready var heightmap_viewport: SubViewport = %HeightmapViewport;
 
@@ -13,6 +15,8 @@ extends Control
 
 @onready var save_heightmap_file_dialog: FileDialog = %SaveHeightmapFileDialog
 
+@onready var statistics_accept_dialog: AcceptDialog = %StatisticsAcceptDialog
+
 @export var terrain_generation_method: TerrainGenerationMethod:
 	set(new_terrain_generation_method):
 		terrain_generation_method = new_terrain_generation_method;
@@ -22,14 +26,18 @@ extends Control
 			terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
 		if heightmap_terrain_generation_method_visualiser:
 			heightmap_terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
-		if ui:
+		if ui and terrain_generation_method:
 			ui.set_shader_specific_parameters(terrain_generation_method.shader_parameters);
+			if terrain_generation_method.explicit_generation:
+				ui.add_shader_parameter(ShaderParameterButton.new("generate"), true);
 		if heightmap_viewport:
 			heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 
 var auto_randomise_seed: bool = false;
 
 func _ready() -> void:
+	terrain_generation_method = null;
+	
 	await get_tree().process_frame
 	
 	print("OKAY")
@@ -54,21 +62,29 @@ func set_shader_parameter(shader_parameter_name: String, shader_parameter_value:
 	elif shader_parameter_name == "terrain_generation_method":
 		terrain_generation_method = TerrainGenerationMethodVisualiser.TERRAIN_GENERATION_METHODS[shader_parameter_value];
 		return;
+	elif shader_parameter_name == "generate":
+		assert(terrain_generation_method.explicit_generation);
+		terrain_generation_method.generate(terrain_generation_method_visualiser.seed);
+		return;
+	
 	if is_shader_specific:
-		terrain_generation_method_visualiser.mesh.material.set_shader_parameter(shader_parameter_name, shader_parameter_value);
-		heightmap_terrain_generation_method_visualiser.mesh.material.set_shader_parameter(shader_parameter_name, shader_parameter_value);
+		if terrain_generation_method.explicit_generation and shader_parameter_name != "amplitude": # amplitude always in shader
+			terrain_generation_method.set(shader_parameter_name, shader_parameter_value);
+		else:
+			terrain_generation_method_visualiser.mesh.material.set_shader_parameter(shader_parameter_name, shader_parameter_value);
+			heightmap_terrain_generation_method_visualiser.mesh.material.set_shader_parameter(shader_parameter_name, shader_parameter_value);
 	else:
 		terrain_generation_method_visualiser.set(shader_parameter_name, shader_parameter_value);
 		heightmap_terrain_generation_method_visualiser.set(shader_parameter_name, shader_parameter_value);
 	
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 
-func save_heightmap() -> void:
-	const heightmap_save_path = "res://heightmap.png";
-	
-	var heightmap: Image = heightmap_viewport.get_texture().get_image();
-	var error = heightmap.save_png(heightmap_save_path);
-	print(error)
+#func save_heightmap() -> void:
+	#const heightmap_save_path = "res://heightmap.png";
+	#
+	#var heightmap: Image = heightmap_viewport.get_texture().get_image();
+	#var error = heightmap.save_png(heightmap_save_path);
+	#print(error)
 
 func _on_timer_timeout() -> void:
 	if auto_randomise_seed:
@@ -78,20 +94,48 @@ func _on_timer_timeout() -> void:
 		heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 
 func _on_save_heightmap_button_pressed() -> void:
-	save_heightmap_file_dialog.visible = true;
-	save_heightmap_file_dialog.get_line_edit().text = "Heightmap.jpg";
+	save_heightmap_file_dialog.show();
+	save_heightmap_file_dialog.get_line_edit().text = "Heightmap.exr";
 
-func _on_save_heightmap_file_dialog_confirmed() -> void:
-	var heightmap_viewport_size: int = [1024, 2048, 4096][save_heightmap_file_dialog.get_selected_options()["Heightmap Resolution"]];
-	heightmap_viewport.size = Vector2(heightmap_viewport_size, heightmap_viewport_size);
+func capture_heightmap(resolution: int) -> Image:
+	heightmap_viewport.size = Vector2(resolution, resolution);
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	RenderingServer.force_draw();
 	var heightmap: Image = heightmap_viewport.get_texture().get_image();
 	heightmap_viewport.size = Vector2(512, 512);
+	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
+	return heightmap;
+
+func _on_save_heightmap_file_dialog_confirmed() -> void:
+	var heightmap_resolution: int = HEIGHTMAP_RESOLUTIONS[save_heightmap_file_dialog.get_selected_options()["Heightmap Resolution"]];
+	var heightmap: Image = capture_heightmap(heightmap_resolution);
 	
 	var save_path = save_heightmap_file_dialog.current_dir.path_join(save_heightmap_file_dialog.get_line_edit().text);
-	if not save_path.ends_with(".jpg"):
-		save_path += ".jpg";
-	heightmap.save_jpg(save_path)
+	if heightmap.is_compressed():
+		heightmap.decompress();
+	heightmap.convert(Image.FORMAT_RF);
+	if not save_path.ends_with(".exr"):
+		save_path += ".exr";
+	heightmap.save_exr(save_path, true);
+
+func _on_generate_statistics_button_pressed() -> void:
+	const NUMBER_OF_SAMPLES_TO_AVERAGE: int = 5;
 	
-	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
+	if terrain_generation_method:
+		var heightmap_generation_times: Array[float] = [];
+		for heightmap_resolution: int in HEIGHTMAP_RESOLUTIONS:
+			var start_time = Time.get_ticks_msec();
+			for i: int in NUMBER_OF_SAMPLES_TO_AVERAGE:
+				capture_heightmap(heightmap_resolution);
+			heightmap_generation_times.append((Time.get_ticks_msec() - start_time) / float(NUMBER_OF_SAMPLES_TO_AVERAGE));
+		print(heightmap_generation_times);
+		
+		statistics_accept_dialog.dialog_text = \
+			terrain_generation_method.name.capitalize() + "
+			Time taken to generate heightmaps:
+			• 1024x1024: " + str(heightmap_generation_times[0]) + "ms
+			• 2048x2048: " + str(heightmap_generation_times[1]) + "ms
+			• 4096x4096: " + str(heightmap_generation_times[2]) + "ms
+			Can generate in chunks: " + ("✓" if terrain_generation_method.can_generate_in_chunks else "✗") + "
+			";
+		statistics_accept_dialog.show();

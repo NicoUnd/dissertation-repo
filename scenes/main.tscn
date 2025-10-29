@@ -1,10 +1,9 @@
-[gd_scene load_steps=19 format=3 uid="uid://djov3pag7t3c"]
+[gd_scene load_steps=18 format=3 uid="uid://djov3pag7t3c"]
 
 [ext_resource type="PackedScene" uid="uid://mknok0q1uv77" path="res://scenes/plane.tscn" id="1_o5qli"]
 [ext_resource type="Theme" uid="uid://bbvfb43bck665" path="res://themes/theme.tres" id="1_o6xl0"]
 [ext_resource type="Script" uid="uid://dduxtvik1ne71" path="res://scripts/main.gd" id="1_sugp2"]
 [ext_resource type="Script" uid="uid://cj868n7yysjnm" path="res://scripts/rotating_camera.gd" id="2_0wfyh"]
-[ext_resource type="Resource" uid="uid://bunfkxpwyox5q" path="res://terrain_generation_methods/fractal_brownian_motion.tres" id="2_jyhfs"]
 [ext_resource type="Texture2D" uid="uid://de0eqtkic42jj" path="res://assets/7d756d56-3bfd-4319-abb0-e047759b88da.jpg" id="6_o6xl0"]
 [ext_resource type="PackedScene" uid="uid://vsifhaplg8ve" path="res://scenes/ui.tscn" id="6_tefeu"]
 
@@ -28,10 +27,10 @@ glow_enabled = true
 [sub_resource type="World3D" id="World3D_85g3d"]
 environment = SubResource("Environment_tipki")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_o6xl0"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tefeu"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_tipki"]
-material = SubResource("ShaderMaterial_o6xl0")
+[sub_resource type="PlaneMesh" id="PlaneMesh_o6xl0"]
+material = SubResource("ShaderMaterial_tefeu")
 size = Vector2(64, 64)
 subdivide_width = 1027
 subdivide_depth = 1027
@@ -40,10 +39,10 @@ subdivide_depth = 1027
 background_mode = 1
 background_color = Color(0, 0, 0, 0)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_85g3d"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tipki"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_choun"]
-material = SubResource("ShaderMaterial_85g3d")
+[sub_resource type="PlaneMesh" id="PlaneMesh_85g3d"]
+material = SubResource("ShaderMaterial_tipki")
 size = Vector2(64, 64)
 subdivide_width = 1027
 subdivide_depth = 1027
@@ -61,7 +60,6 @@ offset_right = 4096.0
 offset_bottom = 2160.0
 theme = ExtResource("1_o6xl0")
 script = ExtResource("1_sugp2")
-terrain_generation_method = ExtResource("2_jyhfs")
 
 [node name="VisualisationViewport" type="SubViewport" parent="."]
 unique_name_in_owner = true
@@ -76,14 +74,15 @@ directional_shadow_max_distance = 20536.5
 
 [node name="TerrainGenerationMethodVisualiser" parent="VisualisationViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
-mesh = SubResource("PlaneMesh_tipki")
+mesh = SubResource("PlaneMesh_o6xl0")
 skeleton = NodePath("../..")
+terrain_generation_method = null
 circle = true
-seed = 49.84911155932157
+seed = 43.47016827375618
 
 [node name="CameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(0.93591076, 0, -0.35223636, 0, 1, 0, 0.35223636, 0, 0.93591076, 0, 0, 0)
+transform = Transform3D(-0.38249505, 0, -0.92395693, 0, 1, 0, 0.92395693, 0, -0.38249505, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VisualisationViewport/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
@@ -96,7 +95,8 @@ autostart = true
 
 [node name="HeightmapViewport" type="SubViewport" parent="."]
 unique_name_in_owner = true
-render_target_update_mode = 4
+use_hdr_2d = true
+render_target_update_mode = 1
 
 [node name="HeightmapCamera3D" type="Camera3D" parent="HeightmapViewport"]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 179.52252, 0)
@@ -109,11 +109,12 @@ size = 64.0
 [node name="HeightmapTerrainGenerationMethodVisualiser" parent="HeightmapViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
 layers = 2
-mesh = SubResource("PlaneMesh_choun")
+mesh = SubResource("PlaneMesh_85g3d")
+terrain_generation_method = null
 unshaded = true
 albedo_type = 1
 circle = true
-seed = 56.727918869881535
+seed = 3.5359146985738557
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -213,6 +214,16 @@ option_count = 1
 option_0/name = "Heightmap Resolution"
 option_0/values = PackedStringArray("1024x1024", "2048x2048", "4096x4096")
 
+[node name="StatisticsAcceptDialog" type="AcceptDialog" parent="."]
+unique_name_in_owner = true
+oversampling_override = 1.0
+title = ""
+initial_position = 1
+size = Vector2i(1212, 260)
+dialog_text = "Time taken to generate heightmaps:
+1024x1024: 81ms"
+
 [connection signal="timeout" from="VisualisationViewport/Timer" to="." method="_on_timer_timeout"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/SaveHeightmapButton" to="." method="_on_save_heightmap_button_pressed"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/GenerateStatisticsButton" to="." method="_on_generate_statistics_button_pressed"]
 [connection signal="confirmed" from="SaveHeightmapFileDialog" to="." method="_on_save_heightmap_file_dialog_confirmed"]

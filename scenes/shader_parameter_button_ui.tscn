@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://c4n6m7j3yipbk"]
+
+[ext_resource type="Script" uid="uid://c8ea5gak2e533" path="res://scripts/shader_parameter_button_ui.gd" id="1_m4rjt"]
+
+[node name="ShaderParameterButtonUI" type="Button"]
+offset_right = 8.0
+offset_bottom = 8.0
+script = ExtResource("1_m4rjt")
+
+[connection signal="pressed" from="." to="." method="_on_pressed"]

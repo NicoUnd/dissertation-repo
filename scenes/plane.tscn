@@ -14,6 +14,6 @@ subdivide_depth = 1027
 [node name="TerrainGenerationMethodVisualiser" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_md2q8")
 script = ExtResource("3_md2q8")
-seed = 11.528918053815884
+seed = 15.943491710796337
 grass_texture = ExtResource("1_md2q8")
 dirt_texture = null

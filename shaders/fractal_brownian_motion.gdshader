@@ -86,22 +86,21 @@ void fragment() {
 		uv += 2.0 * perlin_2D(uv * 0.25);
 	}
 	vec3 world_normal = get_normal(uv, octaves, period, amplitude);
-	float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
+	//float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
 
 	if (albedo_type == 0) {
 		//vec2 texture_uv = fract(world_pos.xz);
 		//texture_uv += 2.0 * perlin_2D(texture_uv * 0.25);
 		float steepness = dot(world_normal, vec3(0.0, 1.0, 0.0));
 		steepness *= steepness;
-		float highness = smoothstep(0.15, 0.7, world_pos.y * 2.0 / max_height);
+		float highness = smoothstep(0.15, 0.7, world_pos.y * 2.0 / amplitude);
 		ALBEDO = (steepness * (highness * vec4(1.0, 1.0, 1.0, 1.0) + (1.0 - highness) * vec4(0.15, 0.25, 0.18, 1.0)) +
 		(1.0 - steepness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
 		//ALBEDO = (steepness * vec4(0.2, 0.25, 0.2, 1.0) +
 		//(1.0 - steepness) * vec4(0.05, 0.05, 0.05, 1.0)).xyz;
 	} else {
 		if (albedo_type == 1) {
-			ALBEDO = vec3(((world_pos.y + max_height) / (max_height * 2.0)));
-			ALBEDO = vec3(world_pos.y / max_height + 0.5);
+			ALBEDO = vec3((world_pos.y / amplitude + 1.0) * 0.5);
 		} else { // albedo_type == 2
 			ALBEDO = world_normal;
 		}
