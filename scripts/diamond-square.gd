@@ -25,7 +25,8 @@ func generate(seed: float) -> Image:
 	pixels[resolution + 1][0] = random_number_generator.randf();
 	pixels[resolution + 1][resolution + 1] = random_number_generator.randf();
 	
-	for iteration: int in log2(resolution):
-		var indecies: Array[int] = 
+	var step_size: int = resolution;
+	while step_size > 1:
+		var s
 	
 	return;
