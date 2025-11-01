@@ -41,7 +41,7 @@ vec3 get_normal(vec2 uv, float amp, sampler2D h1, sampler2D h2, sampler2D h3, sa
     float dx = hR - hL;
     float dy = hU - hD;
 
-    vec3 normal = normalize(vec3(-dx, delta * 32.0, -dy));
+    vec3 normal = normalize(vec3(-dx, delta * 16.0, -dy));
     return normal;
 }
 

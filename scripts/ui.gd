@@ -10,6 +10,7 @@ const SHADER_PARAMETER_BUTTON_UI = preload("uid://c4n6m7j3yipbk")
 
 @onready var shader_parameters_v_box_container: VBoxContainer = %ShaderParametersVBoxContainer
 
+var seed_slider: ShaderParameterSliderUI;
 var shader_specific_UIs: Array[Control] = [];
 
 func add_shader_parameter(shader_parameter: ShaderParameter, is_shader_specific: bool) -> void:
@@ -40,6 +41,9 @@ func add_shader_parameter(shader_parameter: ShaderParameter, is_shader_specific:
 		shader_parameters_v_box_container.add_child(new_shader_parameter_UI);
 		new_shader_parameter_UI.setup(shader_parameter);
 		new_shader_parameter_UI.connect("pressed_down", on_change);
+	
+	if shader_parameter.name == "seed":
+		seed_slider = new_shader_parameter_UI;
 	
 	if is_shader_specific:
 		shader_specific_UIs.append(new_shader_parameter_UI)

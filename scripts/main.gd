@@ -17,6 +17,9 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 
 @onready var statistics_accept_dialog: AcceptDialog = %StatisticsAcceptDialog
 
+@onready var statistics_progress_center_container: CenterContainer = %StatisticsProgressCenterContainer
+@onready var statistics_progress_bar: ProgressBar = %StatisticsProgressBar
+
 @export var terrain_generation_method: TerrainGenerationMethod:
 	set(new_terrain_generation_method):
 		terrain_generation_method = new_terrain_generation_method;
@@ -64,11 +67,16 @@ func set_shader_parameter(shader_parameter_name: String, shader_parameter_value:
 		return;
 	elif shader_parameter_name == "generate":
 		assert(terrain_generation_method.explicit_generation);
-		terrain_generation_method.generate(terrain_generation_method_visualiser.seed);
-		return;
+		var heightmap: Image = terrain_generation_method.generate(terrain_generation_method_visualiser.seed);
+		var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
+		terrain_generation_method_visualiser.mesh.material.set_shader_parameter("heightmap", heightmap_texture);
+		heightmap_terrain_generation_method_visualiser.mesh.material.set_shader_parameter("heightmap", heightmap_texture);
 	
 	if is_shader_specific:
 		if terrain_generation_method.explicit_generation and shader_parameter_name != "amplitude": # amplitude always in shader
+			if shader_parameter_name == "resolution":
+				terrain_generation_method.set("resolution", terrain_generation_method.RESOLUTIONS[shader_parameter_value]);
+				return;
 			terrain_generation_method.set(shader_parameter_name, shader_parameter_value);
 		else:
 			terrain_generation_method_visualiser.mesh.material.set_shader_parameter(shader_parameter_name, shader_parameter_value);
@@ -92,6 +100,7 @@ func _on_timer_timeout() -> void:
 		terrain_generation_method_visualiser.seed = new_seed;
 		heightmap_terrain_generation_method_visualiser.seed = new_seed;
 		heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
+		ui.seed_slider.h_slider.value = new_seed;
 
 func _on_save_heightmap_button_pressed() -> void:
 	save_heightmap_file_dialog.show();
@@ -123,12 +132,27 @@ func _on_generate_statistics_button_pressed() -> void:
 	
 	if terrain_generation_method:
 		var heightmap_generation_times: Array[float] = [];
+		
+		statistics_progress_center_container.show();
+		statistics_progress_bar.value = 0;
+		statistics_progress_bar.max_value = NUMBER_OF_SAMPLES_TO_AVERAGE * HEIGHTMAP_RESOLUTIONS.size();
+		await get_tree().process_frame;
 		for heightmap_resolution: int in HEIGHTMAP_RESOLUTIONS:
-			var start_time = Time.get_ticks_msec();
+			var average_time: float = 0;
 			for i: int in NUMBER_OF_SAMPLES_TO_AVERAGE:
-				capture_heightmap(heightmap_resolution);
-			heightmap_generation_times.append((Time.get_ticks_msec() - start_time) / float(NUMBER_OF_SAMPLES_TO_AVERAGE));
+				var start_time = Time.get_ticks_msec();
+				if terrain_generation_method.explicit_generation:
+					terrain_generation_method.resolution = heightmap_resolution;
+					terrain_generation_method.generate(1.0);
+				else:
+					capture_heightmap(heightmap_resolution);
+				average_time += (Time.get_ticks_msec() - start_time) / float(NUMBER_OF_SAMPLES_TO_AVERAGE);
+				
+				statistics_progress_bar.value += 1;
+				await get_tree().process_frame;
+			heightmap_generation_times.append(average_time);
 		print(heightmap_generation_times);
+		statistics_progress_center_container.hide();
 		
 		statistics_accept_dialog.dialog_text = \
 			terrain_generation_method.name.capitalize() + "

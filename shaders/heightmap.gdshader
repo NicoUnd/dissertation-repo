@@ -10,7 +10,7 @@ uniform sampler2D heightmap;
 
 
 float sample_heightmap(vec2 uv, float amp, sampler2D h) {
-	return texture(h, uv).r * amp * 2.0 - 1.0;
+	return (texture(h, uv).r * 2.0 - 1.0) * amp;
 }
 
 vec3 get_normal(vec2 uv, float amp, sampler2D h) {
@@ -28,7 +28,7 @@ vec3 get_normal(vec2 uv, float amp, sampler2D h) {
     float dx = hR - hL;
     float dy = hU - hD;
 
-    vec3 normal = normalize(vec3(-dx, delta * 32.0, -dy));
+    vec3 normal = normalize(vec3(-dx, delta * 16.0, -dy));
     return normal;
 }
 
@@ -40,7 +40,7 @@ void vertex() {
 		uv /= 32.0;
 	}
 	VERTEX.y += sample_heightmap(uv, amplitude, heightmap);
-	VERTEX.y -= amplitude;
+	//VERTEX.y -= amplitude;
 	//NORMAL = get_normal(uv, amplitude, heightmap);
 }
 

@@ -78,11 +78,11 @@ mesh = SubResource("PlaneMesh_o6xl0")
 skeleton = NodePath("../..")
 terrain_generation_method = null
 circle = true
-seed = 43.47016827375618
+seed = 49.898671412206525
 
 [node name="CameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(-0.38249505, 0, -0.92395693, 0, 1, 0, 0.92395693, 0, -0.38249505, 0, 0, 0)
+transform = Transform3D(-0.32166162, 0, 0.9468541, 0, 1, 0, -0.9468541, 0, -0.32166162, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VisualisationViewport/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
@@ -95,6 +95,7 @@ autostart = true
 
 [node name="HeightmapViewport" type="SubViewport" parent="."]
 unique_name_in_owner = true
+transparent_bg = true
 use_hdr_2d = true
 render_target_update_mode = 1
 
@@ -114,7 +115,7 @@ terrain_generation_method = null
 unshaded = true
 albedo_type = 1
 circle = true
-seed = 3.5359146985738557
+seed = 46.036842174094495
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -222,6 +223,22 @@ initial_position = 1
 size = Vector2i(1212, 260)
 dialog_text = "Time taken to generate heightmaps:
 1024x1024: 81ms"
+
+[node name="StatisticsProgressCenterContainer" type="CenterContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StatisticsProgressBar" type="ProgressBar" parent="StatisticsProgressCenterContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1600, 100)
+layout_mode = 2
+show_percentage = false
 
 [connection signal="timeout" from="VisualisationViewport/Timer" to="." method="_on_timer_timeout"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/SaveHeightmapButton" to="." method="_on_save_heightmap_button_pressed"]
