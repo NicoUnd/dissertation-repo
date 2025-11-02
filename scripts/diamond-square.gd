@@ -58,7 +58,7 @@ func random_offset(random_number_generator: RandomNumberGenerator, random_scale:
 	else: # guassian
 		return random_number_generator.randfn(0, 0.5 * random_scale);
 
-func generate(seed: float) -> Image:
+func generate() -> Image:
 	var points: Array[PackedFloat32Array] = [];
 	points.resize(resolution + 1);
 	for row_index: int in resolution + 1:
@@ -103,13 +103,5 @@ func generate(seed: float) -> Image:
 	if normalise:
 		points = normalise_points(points);
 	
-	var bytes: PackedByteArray = PackedByteArray();
-	bytes.resize(resolution * resolution * 4);
-	var byte_index: int = 0;
-	for y: int in resolution:
-		for x: int in resolution:
-			bytes.encode_float(byte_index, points[y][x]);
-			byte_index += 4;
-	
-	var heightmap: Image = Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, bytes);
+	var heightmap: Image = points_to_heightmap(points);
 	return heightmap;
