@@ -15,6 +15,7 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 
 @onready var save_heightmap_file_dialog: FileDialog = %SaveHeightmapFileDialog
 
+@onready var generate_statistics_confirm_dialog: ConfirmationDialog = %GenerateStatisticsConfirmDialog
 @onready var statistics_accept_dialog: AcceptDialog = %StatisticsAcceptDialog
 
 @onready var statistics_progress_center_container: CenterContainer = %StatisticsProgressCenterContainer
@@ -140,6 +141,9 @@ func _on_save_heightmap_file_dialog_confirmed() -> void:
 	heightmap.save_exr(save_path, true);
 
 func _on_generate_statistics_button_pressed() -> void:
+	generate_statistics_confirm_dialog.show();
+
+func generate_statistics() -> void:
 	const NUMBER_OF_SAMPLES_TO_AVERAGE: int = 3;
 	
 	if terrain_generation_method:

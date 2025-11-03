@@ -6,6 +6,7 @@ const TERRAIN_GENERATION_METHODS: Array[TerrainGenerationMethod] = [
 	preload("uid://bunfkxpwyox5q"), # FBM
 	preload("uid://dsrbtacjgyx26"), # Worley
 	preload("uid://ccwkefbr6ghxb"), # Diamond-square
+	preload("uid://b0e0yu8xdqmo"), # Random walk
 	
 	
 	preload("uid://uir8vm75yx0o"), # Heightmap blending

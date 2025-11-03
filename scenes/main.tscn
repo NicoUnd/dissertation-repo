@@ -78,11 +78,11 @@ mesh = SubResource("PlaneMesh_o6xl0")
 skeleton = NodePath("../..")
 terrain_generation_method = null
 circle = true
-seed = 11.588643364505295
+seed = 10.12815681644518
 
 [node name="CameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(0.843152, 0, 0.53767425, 0, 1, 0, -0.53767425, 0, 0.843152, 0, 0, 0)
+transform = Transform3D(-0.71882236, 0, 0.6951928, 0, 1, 0, -0.6951928, 0, -0.71882236, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VisualisationViewport/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
@@ -112,7 +112,7 @@ terrain_generation_method = null
 unshaded = true
 albedo_type = 1
 circle = true
-seed = 54.09127012409766
+seed = 35.36010319133604
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -228,12 +228,21 @@ option_count = 1
 option_0/name = "Heightmap Resolution"
 option_0/values = PackedStringArray("1024x1024", "2048x2048", "4096x4096")
 
+[node name="GenerateStatisticsConfirmDialog" type="ConfirmationDialog" parent="."]
+unique_name_in_owner = true
+oversampling_override = 1.0
+title = ""
+initial_position = 1
+size = Vector2i(1322, 190)
+ok_button_text = "Confirm"
+dialog_text = "Warning, generating statistics can take multiple minutes"
+
 [node name="StatisticsAcceptDialog" type="AcceptDialog" parent="."]
 unique_name_in_owner = true
 oversampling_override = 1.0
 title = ""
 initial_position = 1
-size = Vector2i(1212, 260)
+size = Vector2i(1212, 330)
 dialog_text = "Time taken to generate heightmaps:
 1024x1024: 81ms"
 
@@ -243,4 +252,5 @@ autostart = true
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/SaveHeightmapButton" to="." method="_on_save_heightmap_button_pressed"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/GenerateStatisticsButton" to="." method="_on_generate_statistics_button_pressed"]
 [connection signal="confirmed" from="SaveHeightmapFileDialog" to="." method="_on_save_heightmap_file_dialog_confirmed"]
+[connection signal="confirmed" from="GenerateStatisticsConfirmDialog" to="." method="generate_statistics"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
