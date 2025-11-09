@@ -5,6 +5,9 @@ var resolution: int = 1024;
 
 var iterations: int = 1024*1024/2
 
+func setup() -> void:
+	pass;
+
 func generate() -> Image:
 	const MOVES: Array[Vector2i] = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT];
 	

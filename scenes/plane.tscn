@@ -1,31 +1,31 @@
 [gd_scene load_steps=8 format=3 uid="uid://mknok0q1uv77"]
 
-[ext_resource type="Shader" uid="uid://cq77nryhphey4" path="res://shaders/heightmap_unshaded.gdshader" id="1_ec1pi"]
+[ext_resource type="Texture2D" uid="uid://wwj0ixc5lkx3" path="res://Heightmap.exr" id="1_ec1pi"]
+[ext_resource type="Shader" uid="uid://deuuby3m21rbw" path="res://shaders/heightmap.gdshader" id="1_gvt5p"]
 [ext_resource type="Texture2D" uid="uid://bwrwr1amdu6se" path="res://assets/textures/dark-rock-wall-seamless-texture-free-105.png" id="1_md2q8"]
-[ext_resource type="Texture2D" uid="uid://wwj0ixc5lkx3" path="res://Heightmap.exr" id="2_gvt5p"]
-[ext_resource type="Resource" uid="uid://ccwkefbr6ghxb" path="res://terrain_generation_methods/diamond-square.tres" id="2_md2q8"]
 [ext_resource type="Script" uid="uid://c38b2dst17kuq" path="res://scripts/terrain_generation_method_visualiser.gd" id="3_md2q8"]
+[ext_resource type="Resource" uid="uid://uir8vm75yx0o" path="res://terrain_generation_methods/heightmap_blending.tres" id="4_lf188"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_gvt5p"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nqcjx"]
 render_priority = 0
-shader = ExtResource("1_ec1pi")
-shader_parameter/seed = 43.79463549464967
-shader_parameter/albedo_type = 1
+shader = ExtResource("1_gvt5p")
+shader_parameter/seed = 44.27952408656701
+shader_parameter/albedo_type = 0
 shader_parameter/circle = false
 shader_parameter/perturbate = false
-shader_parameter/amplitude = 16.0
-shader_parameter/heightmap = ExtResource("2_gvt5p")
+shader_parameter/amplitude = 22.8550010381125
+shader_parameter/heightmap = ExtResource("1_ec1pi")
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_lf188"]
-material = SubResource("ShaderMaterial_gvt5p")
+[sub_resource type="PlaneMesh" id="PlaneMesh_31wwe"]
+material = SubResource("ShaderMaterial_nqcjx")
 size = Vector2(64, 64)
 subdivide_width = 1027
 subdivide_depth = 1027
 
 [node name="TerrainGenerationMethodVisualiser" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_lf188")
+mesh = SubResource("PlaneMesh_31wwe")
 script = ExtResource("3_md2q8")
-terrain_generation_method = ExtResource("2_md2q8")
-seed = 43.79463549464967
+terrain_generation_method = ExtResource("4_lf188")
+seed = 44.27952408656701
 grass_texture = ExtResource("1_md2q8")
 dirt_texture = null

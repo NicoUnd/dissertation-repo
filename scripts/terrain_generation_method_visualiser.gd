@@ -23,7 +23,6 @@ func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderPara
 @export var terrain_generation_method: TerrainGenerationMethod:
 	set(new_terrain_generation_method):
 		terrain_generation_method = new_terrain_generation_method;
-		seed = randf_range(1, 64);
 		if not terrain_generation_method:
 			mesh.material = ShaderMaterial.new();
 		else:

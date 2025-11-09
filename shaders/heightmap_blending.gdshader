@@ -41,7 +41,7 @@ vec3 get_normal(vec2 uv, float amp, sampler2D h1, sampler2D h2, sampler2D h3, sa
     float dx = hR - hL;
     float dy = hU - hD;
 
-    vec3 normal = normalize(vec3(-dx, delta * 16.0, -dy));
+    vec3 normal = normalize(vec3(-dx, delta * 64.0, -dy));
     return normal;
 }
 
@@ -80,6 +80,7 @@ void fragment() {
 		//vec2 texture_uv = fract(world_pos.xz);
 		//texture_uv += 2.0 * perlin_2D(texture_uv * 0.25);
 		float steepness = dot(world_normal, vec3(0.0, 1.0, 0.0));
+		steepness *= steepness;
 		float highness = smoothstep(0.15, 0.7, world_pos.y / amplitude);
 		ALBEDO = (steepness * (highness * vec4(1.0, 1.0, 1.0, 1.0) + (1.0 - highness) * vec4(0.15, 0.25, 0.18, 1.0)) +
 		(1.0 - steepness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;

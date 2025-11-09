@@ -25,15 +25,17 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 	set(new_terrain_generation_method):
 		terrain_generation_method = new_terrain_generation_method;
 		print("A")
-		if terrain_generation_method_visualiser:
+		if terrain_generation_method_visualiser and heightmap_terrain_generation_method_visualiser:
 			print("B")
 			terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
-		if heightmap_terrain_generation_method_visualiser:
 			heightmap_terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
+			if terrain_generation_method:
+				randomise_seed();
 		if ui and terrain_generation_method:
 			ui.set_shader_specific_parameters(terrain_generation_method.shader_parameters);
 			if terrain_generation_method.explicit_generation:
 				ui.add_shader_parameter(ShaderParameterButton.new("generate"), true);
+				terrain_generation_method.setup();
 		if heightmap_viewport:
 			heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 

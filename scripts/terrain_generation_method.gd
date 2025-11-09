@@ -19,6 +19,10 @@ var seed: float;
 func log2(x: float) -> float:
 	return log(x) / log(2);
 
+func setup() -> void:
+	assert(false);
+	return;
+
 func generate() -> Image:
 	assert(false);
 	return;

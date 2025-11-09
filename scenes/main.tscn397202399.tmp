@@ -84,12 +84,12 @@ unique_name_in_owner = true
 mesh = SubResource("PlaneMesh_o6xl0")
 skeleton = NodePath("../..")
 terrain_generation_method = null
+seed = 10.12815681644518
 circle = true
-seed = 44.801236265629406
 
 [node name="CameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(-0.83553225, 0, 0.5494394, 0, 1, 0, -0.5494394, 0, -0.83553225, 0, 0, 0)
+transform = Transform3D(-0.4011735, 0, -0.9160013, 0, 1, 0, 0.9160013, 0, -0.4011735, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VisualisationViewport/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
@@ -117,10 +117,10 @@ unique_name_in_owner = true
 layers = 2
 mesh = SubResource("PlaneMesh_85g3d")
 terrain_generation_method = null
+seed = 35.36010319133604
 unshaded = true
 albedo_type = 1
 circle = true
-seed = 15.226760436685916
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
