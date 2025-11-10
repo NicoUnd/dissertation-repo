@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://djov3pag7t3c"]
+[gd_scene load_steps=20 format=3 uid="uid://djov3pag7t3c"]
 
 [ext_resource type="PackedScene" uid="uid://mknok0q1uv77" path="res://scenes/plane.tscn" id="1_o5qli"]
 [ext_resource type="Theme" uid="uid://bbvfb43bck665" path="res://themes/theme.tres" id="1_o6xl0"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://cj868n7yysjnm" path="res://scripts/rotating_camera.gd" id="2_0wfyh"]
 [ext_resource type="Texture2D" uid="uid://de0eqtkic42jj" path="res://assets/7d756d56-3bfd-4319-abb0-e047759b88da.jpg" id="6_o6xl0"]
 [ext_resource type="PackedScene" uid="uid://vsifhaplg8ve" path="res://scenes/ui.tscn" id="6_tefeu"]
+[ext_resource type="Theme" uid="uid://cs2nnup0f3ppn" path="res://themes/panel_container_clear.tres" id="7_o6xl0"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tefeu"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -83,13 +84,12 @@ directional_shadow_max_distance = 20536.5
 unique_name_in_owner = true
 mesh = SubResource("PlaneMesh_o6xl0")
 skeleton = NodePath("../..")
-terrain_generation_method = null
 circle = true
 seed = 44.801236265629406
 
 [node name="CameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(-0.83553225, 0, 0.5494394, 0, 1, 0, -0.5494394, 0, -0.83553225, 0, 0, 0)
+transform = Transform3D(0.16997081, 0, -0.9854479, 0, 1, 0, 0.9854479, 0, 0.16997081, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VisualisationViewport/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
@@ -116,7 +116,6 @@ size = 64.0
 unique_name_in_owner = true
 layers = 2
 mesh = SubResource("PlaneMesh_85g3d")
-terrain_generation_method = null
 unshaded = true
 albedo_type = 1
 circle = true
@@ -199,7 +198,6 @@ text = "Save Heightmap"
 alignment = 0
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/HBoxContainer/VBoxContainer"]
-modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 
 [node name="GenerateStatisticsButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer"]
@@ -207,6 +205,30 @@ layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 8
 text = "Generate Statistics"
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(1100, 0)
+layout_mode = 2
+theme = ExtResource("7_o6xl0")
+
+[node name="StatisticsSamplesLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Samples to Average Over (3)"
+
+[node name="StatisticsSamplesHSlider" type="HSlider" parent="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+min_value = 1.0
+max_value = 5.0
+value = 3.0
 
 [node name="StatisticsProgressCenterContainer" type="CenterContainer" parent="."]
 unique_name_in_owner = true
@@ -241,9 +263,9 @@ unique_name_in_owner = true
 oversampling_override = 1.0
 title = ""
 initial_position = 1
-size = Vector2i(1322, 190)
+size = Vector2i(2645, 190)
 ok_button_text = "Confirm"
-dialog_text = "Warning, generating statistics can take multiple minutes"
+dialog_text = "Warning, generating statistics can take multiple minutes, please keep this window maximised for the best results."
 
 [node name="StatisticsAcceptDialog" type="AcceptDialog" parent="."]
 unique_name_in_owner = true
@@ -259,6 +281,7 @@ autostart = true
 
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/SaveHeightmapButton" to="." method="_on_save_heightmap_button_pressed"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/GenerateStatisticsButton" to="." method="_on_generate_statistics_button_pressed"]
+[connection signal="value_changed" from="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer/StatisticsSamplesHSlider" to="." method="_on_statistics_samples_h_slider_value_changed"]
 [connection signal="confirmed" from="SaveHeightmapFileDialog" to="." method="_on_save_heightmap_file_dialog_confirmed"]
 [connection signal="confirmed" from="GenerateStatisticsConfirmDialog" to="." method="generate_statistics"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

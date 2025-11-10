@@ -62,14 +62,6 @@ func random_offset(random_number_generator: RandomNumberGenerator, random_scale:
 		return random_number_generator.randfn(0, 0.5 * random_scale);
 
 func setup() -> void:
-	#var random_number_generator: RandomNumberGenerator = RandomNumberGenerator.new();
-	#random_number_generator.seed = hash(seed);
-	#
-	#points[0] = random_number_generator.randf();
-	#points[resolution] = random_number_generator.randf();
-	#points[(resolution + 1) * resolution] = random_number_generator.randf();
-	#points[(resolution + 1) * (resolution + 1) - 1] = random_number_generator.randf();
-	
 	rendering_device = RenderingServer.create_local_rendering_device();
 	
 	var shader_file := load("res://shaders/diamond-square.glsl");
@@ -77,54 +69,58 @@ func setup() -> void:
 	
 	print("SETTING UP RENDERING DEVICE")
 
-func generate() -> Image:
-	#var points: Array[PackedFloat32Array] = [];
-	#points.resize(resolution + 1);
-	#for row_index: int in resolution + 1:
-		#var row: PackedFloat32Array = PackedFloat32Array(); # use 32 bits as is standard in exp file format
-		#row.resize(resolution + 1);
-		#points[row_index] = row;
-	#
-	#var random_number_generator: RandomNumberGenerator = RandomNumberGenerator.new();
-	#random_number_generator.seed = hash(seed);
-	#
-	#points[0][0] = random_number_generator.randf();
-	#points[0][resolution] = random_number_generator.randf();
-	#points[resolution][0] = random_number_generator.randf();
-	#points[resolution][resolution] = random_number_generator.randf();
-	#
-	#var step_size: int = resolution;
-	#var random_scale: float = 1;
-	#while step_size > 1:
-		#assert(posmod(step_size, 2) == 0) # step_size is even
-		#var half_step_size: int = step_size / 2;
-		#
-		## diamond step
-		#var diamond_indecies: Array = range(half_step_size, resolution + 1, step_size);
-		#for y: int in diamond_indecies:
-			#for x: int in diamond_indecies:
-				#points[y][x] = clamp(get_square_average(points, x, y, half_step_size) + random_offset(random_number_generator, random_scale), 0, 1);
-				##print("square_avg: " + str(points[y][x]))
-		#
-		## square step
-		#for y: int in range(0, resolution + 1, half_step_size):
-			#for x: int in range(posmod(y + half_step_size, step_size), resolution + 1, step_size):
-				#points[y][x] = clamp(get_diamond_average(points, x, y, half_step_size) + random_offset(random_number_generator, random_scale), 0, 1);
-				##print("diamond_avg: " + str(points[y][x]))
-		#
-		#step_size /= 2;
-		#random_scale *= pow(2, -smoothness);
-	#
-	#points.resize(resolution);
-	#for row: PackedFloat32Array in points:
-		#row.resize(resolution);
-	#
-	#if normalise:
-		#points = normalise_points(points);
-	#
-	#var heightmap: Image = points_to_heightmap(points);
-	#return heightmap;
+func setdown() -> void:
+	rendering_device.free_rid(rendering_device);
+	rendering_device.free_rid(compute_shader);
+
+func generate_CPU() -> Image:
+	var points: Array[PackedFloat32Array] = [];
+	points.resize(resolution + 1);
+	for row_index: int in resolution + 1:
+		var row: PackedFloat32Array = PackedFloat32Array(); # use 32 bits as is standard in exp file format
+		row.resize(resolution + 1);
+		points[row_index] = row;
 	
+	var random_number_generator: RandomNumberGenerator = RandomNumberGenerator.new();
+	random_number_generator.seed = hash(seed);
+	
+	points[0][0] = random_number_generator.randf();
+	points[0][resolution] = random_number_generator.randf();
+	points[resolution][0] = random_number_generator.randf();
+	points[resolution][resolution] = random_number_generator.randf();
+	
+	var step_size: int = resolution;
+	var random_scale: float = 1;
+	while step_size > 1:
+		assert(posmod(step_size, 2) == 0) # step_size is even
+		var half_step_size: int = step_size / 2;
+		
+		# diamond step
+		var diamond_indecies: Array = range(half_step_size, resolution + 1, step_size);
+		for y: int in diamond_indecies:
+			for x: int in diamond_indecies:
+				points[y][x] = clamp(get_square_average(points, x, y, half_step_size) + random_offset(random_number_generator, random_scale), 0, 1);
+				#print("square_avg: " + str(points[y][x]))
+		
+		# square step
+		for y: int in range(0, resolution + 1, half_step_size):
+			for x: int in range(posmod(y + half_step_size, step_size), resolution + 1, step_size):
+				points[y][x] = clamp(get_diamond_average(points, x, y, half_step_size) + random_offset(random_number_generator, random_scale), 0, 1);
+				#print("diamond_avg: " + str(points[y][x]))
+		
+		step_size /= 2;
+		random_scale *= pow(2, -smoothness);
+	
+	points.resize(resolution);
+	for row: PackedFloat32Array in points:
+		row.resize(resolution);
+	
+	var heightmap: Image = points_to_heightmap(points);
+	if normalise:
+		heightmap = normalise_heightmap(heightmap);
+	return heightmap;
+
+func generate_GPU() -> Image:
 	var points: PackedFloat32Array = PackedFloat32Array();
 	points.resize((resolution + 1) * (resolution + 1));
 	
@@ -150,6 +146,7 @@ func generate() -> Image:
 	var step_size: int = resolution;
 	var random_scale: float = 1;
 	while step_size > 1:
+		assert(posmod(step_size, 2) == 0) # step_size is even
 		# diamond step
 		var parameters: PackedFloat32Array = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(wrap_around), float(distribution), float(true)]);
 		
@@ -194,12 +191,17 @@ func generate() -> Image:
 		rendering_device.submit();
 		rendering_device.sync();
 		
+		rendering_device.free_rid(buffer_data);
+		#rendering_device.free_rid(uniform_set);
+		rendering_device.free_rid(pipeline);
+		
 		step_size /= 2;
 		random_scale *= pow(2, -smoothness);
-	print("HI");
 	
 	var output_bytes := rendering_device.buffer_get_data(points_data);
 	var output := output_bytes.to_float32_array();
+	
+	rendering_device.free_rid(points_data);
 	
 	var linear_index: int = 0;
 	var output_points: Array[PackedFloat32Array] = [];
@@ -209,7 +211,6 @@ func generate() -> Image:
 		output_points[row_index] = row;
 		linear_index += resolution + 1;
 	
-	print(output[20])
 	#for row_ind: int in (resolution + 1) * (resolution + 1):
 		#if output[row_ind] != 0:
 			#print("NOT ZERO VALUE: " + str(output[row_ind]) + " ind: " + str(row_ind))
@@ -221,8 +222,7 @@ func generate() -> Image:
 	for row: PackedFloat32Array in output_points:
 		row.resize(resolution);
 	
-	if normalise:
-		output_points = normalise_points(output_points);
-	
 	var heightmap: Image = points_to_heightmap(output_points);
+	if normalise:
+		heightmap = normalise_heightmap(heightmap);
 	return heightmap;

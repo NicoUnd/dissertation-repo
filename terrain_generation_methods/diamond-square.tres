@@ -57,6 +57,7 @@ name = "diamond-square"
 shader = ExtResource("2_dvls0")
 unshaded_shader = ExtResource("4_dvls0")
 explicit_generation = true
+GPU_accelerated = true
 shader_parameters = Array[ExtResource("2_1rd5d")]([SubResource("Resource_q4gjg"), SubResource("Resource_2on8b"), SubResource("Resource_mgpmt"), SubResource("Resource_krgyn"), SubResource("Resource_ikv75"), SubResource("Resource_22u67")])
 can_generate_in_chunks = true
 metadata/_custom_type_script = "uid://ddkes5jhoum04"
