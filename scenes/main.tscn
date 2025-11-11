@@ -28,10 +28,10 @@ glow_enabled = true
 [sub_resource type="World3D" id="World3D_85g3d"]
 environment = SubResource("Environment_tipki")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_tefeu"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o6xl0"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_o6xl0"]
-material = SubResource("ShaderMaterial_tefeu")
+[sub_resource type="PlaneMesh" id="PlaneMesh_tipki"]
+material = SubResource("ShaderMaterial_o6xl0")
 size = Vector2(64, 64)
 subdivide_width = 1027
 subdivide_depth = 1027
@@ -47,10 +47,10 @@ fog_depth_end = 150.0
 background_mode = 1
 background_color = Color(0, 0, 0, 0)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_tipki"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_85g3d"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_85g3d"]
-material = SubResource("ShaderMaterial_tipki")
+[sub_resource type="PlaneMesh" id="PlaneMesh_choun"]
+material = SubResource("ShaderMaterial_85g3d")
 size = Vector2(64, 64)
 subdivide_width = 1027
 subdivide_depth = 1027
@@ -82,14 +82,14 @@ directional_shadow_max_distance = 20536.5
 
 [node name="TerrainGenerationMethodVisualiser" parent="VisualisationViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
-mesh = SubResource("PlaneMesh_o6xl0")
+mesh = SubResource("PlaneMesh_tipki")
 skeleton = NodePath("../..")
 circle = true
 seed = 44.801236265629406
 
 [node name="CameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(0.16997081, 0, -0.9854479, 0, 1, 0, 0.9854479, 0, 0.16997081, 0, 0, 0)
+transform = Transform3D(0.93239444, 0, -0.3614388, 0, 1, 0, 0.3614388, 0, 0.93239444, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VisualisationViewport/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
@@ -115,10 +115,9 @@ size = 64.0
 [node name="HeightmapTerrainGenerationMethodVisualiser" parent="HeightmapViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
 layers = 2
-mesh = SubResource("PlaneMesh_85g3d")
+mesh = SubResource("PlaneMesh_choun")
 unshaded = true
 albedo_type = 1
-circle = true
 seed = 15.226760436685916
 
 [node name="ColorRect" type="ColorRect" parent="."]
@@ -219,7 +218,7 @@ theme = ExtResource("7_o6xl0")
 [node name="StatisticsSamplesLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Samples to Average Over (3)"
+text = "Samples to Average Over (5)"
 
 [node name="StatisticsSamplesHSlider" type="HSlider" parent="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer"]
 unique_name_in_owner = true
@@ -227,8 +226,8 @@ custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 min_value = 1.0
-max_value = 5.0
-value = 3.0
+max_value = 50.0
+value = 5.0
 
 [node name="StatisticsProgressCenterContainer" type="CenterContainer" parent="."]
 unique_name_in_owner = true

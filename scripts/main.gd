@@ -16,7 +16,7 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 @onready var save_heightmap_file_dialog: FileDialog = %SaveHeightmapFileDialog
 
 @onready var generate_statistics_confirm_dialog: ConfirmationDialog = %GenerateStatisticsConfirmDialog
-@onready var statistics_accept_dialog: AcceptDialog = %StatisticsAcceptDialog
+#@onready var statistics_accept_dialog: AcceptDialog = %StatisticsAcceptDialog
 
 @onready var statistics_samples_label: Label = %StatisticsSamplesLabel
 @onready var statistics_samples_h_slider: HSlider = %StatisticsSamplesHSlider
@@ -103,7 +103,8 @@ func set_shader_parameter(shader_parameter_name: String, shader_parameter_value:
 			set_seed(shader_parameter_value);
 			return;
 		terrain_generation_method_visualiser.set(shader_parameter_name, shader_parameter_value);
-		heightmap_terrain_generation_method_visualiser.set(shader_parameter_name, shader_parameter_value);
+		if shader_parameter_name != "circle":
+			heightmap_terrain_generation_method_visualiser.set(shader_parameter_name, shader_parameter_value);
 	
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 
@@ -197,6 +198,12 @@ func generate_statistics() -> void:
 		print(heightmap_generation_times);
 		statistics_progress_center_container.hide();
 		
+		var statistics_accept_dialog: AcceptDialog = AcceptDialog.new();
+		add_child(statistics_accept_dialog);
+		statistics_accept_dialog.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_PRIMARY_SCREEN;
+		statistics_accept_dialog.title = "";
+		statistics_accept_dialog.transient = false;
+		#statistics_accept_dialog.mouse_passthrough_polygon = PackedVector2Array([Vector2(0, 0), Vector2(0, 0.1), Vector2(0.1, 0.1), Vector2(0.1, 0)]);
 		statistics_accept_dialog.dialog_text = \
 			terrain_generation_method.name.capitalize() + "
 			Averages taken over " + str(NUMBER_OF_SAMPLES_TO_AVERAGE) + " samples.

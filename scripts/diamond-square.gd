@@ -70,8 +70,8 @@ func setup() -> void:
 	print("SETTING UP RENDERING DEVICE")
 
 func setdown() -> void:
-	rendering_device.free_rid(rendering_device);
 	rendering_device.free_rid(compute_shader);
+	rendering_device.free();
 
 func generate_CPU() -> Image:
 	var points: Array[PackedFloat32Array] = [];
@@ -169,6 +169,10 @@ func generate_GPU() -> Image:
 		rendering_device.submit();
 		rendering_device.sync();
 		
+		rendering_device.free_rid(uniform_set);
+		rendering_device.free_rid(buffer_data);
+		rendering_device.free_rid(pipeline);
+		
 		# square step
 		parameters = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(wrap_around), float(distribution), float(false)]);
 		
@@ -191,8 +195,8 @@ func generate_GPU() -> Image:
 		rendering_device.submit();
 		rendering_device.sync();
 		
+		rendering_device.free_rid(uniform_set);
 		rendering_device.free_rid(buffer_data);
-		#rendering_device.free_rid(uniform_set);
 		rendering_device.free_rid(pipeline);
 		
 		step_size /= 2;
