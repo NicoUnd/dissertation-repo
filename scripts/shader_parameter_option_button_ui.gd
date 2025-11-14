@@ -10,3 +10,6 @@ func setup(shader_parameter: ShaderParameterEnum) -> void:
 	for shader_parameter_option: String in shader_parameter.options:
 		option_button.add_item(shader_parameter_option.capitalize());
 	option_button.selected = shader_parameter.value;
+
+func _to_string() -> String:
+	return label.text + ": " + option_button.get_item_text(option_button.selected);

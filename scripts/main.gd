@@ -24,10 +24,12 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 @onready var statistics_progress_center_container: CenterContainer = %StatisticsProgressCenterContainer
 @onready var statistics_progress_bar: ProgressBar = %StatisticsProgressBar
 
+var rendering_device: RenderingDevice;
+
 @export var terrain_generation_method: TerrainGenerationMethod:
 	set(new_terrain_generation_method):
 		if terrain_generation_method and terrain_generation_method.explicit_generation:
-			terrain_generation_method.setdown();
+			terrain_generation_method.setdown(rendering_device);
 		terrain_generation_method = new_terrain_generation_method;
 		print("A")
 		if terrain_generation_method_visualiser and heightmap_terrain_generation_method_visualiser:
@@ -40,11 +42,13 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 			if ui:
 				ui.set_shader_specific_parameters(terrain_generation_method.shader_parameters);
 				if terrain_generation_method.explicit_generation:
-					ui.add_shader_parameter(ShaderParameterButton.new("generate_CPU"), true);
 					if terrain_generation_method.GPU_accelerated:
+						ui.add_shader_parameter(ShaderParameterButton.new("generate_CPU"), true);
 						ui.add_shader_parameter(ShaderParameterButton.new("generate_GPU"), true);
+					else:
+						ui.add_shader_parameter(ShaderParameterButton.new("generate"), true);
 			if terrain_generation_method.explicit_generation:
-				terrain_generation_method.setup();
+				terrain_generation_method.setup(rendering_device);
 		if heightmap_viewport:
 			heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 
@@ -58,6 +62,8 @@ func _ready() -> void:
 	print("OKAY")
 	heightmap_terrain_generation_method_visualiser.albedo_type = 1;
 	#terrain_generation_method = preload("uid://bunfkxpwyox5q")
+	
+	rendering_device = RenderingServer.create_local_rendering_device();
 	
 	timer.start();
 
@@ -80,11 +86,11 @@ func set_shader_parameter(shader_parameter_name: String, shader_parameter_value:
 	elif shader_parameter_name.substr(0, "generate".length()) == "generate":
 		assert(terrain_generation_method.explicit_generation);
 		var heightmap: Image;
-		if shader_parameter_name == "generate_CPU":
-			heightmap = terrain_generation_method.generate_CPU();
-		else: # generate_GPU
+		if shader_parameter_name == "generate_GPU":
 			assert(terrain_generation_method.GPU_accelerated);
-			heightmap = terrain_generation_method.generate_GPU();
+			heightmap = terrain_generation_method.generate_GPU(rendering_device);
+		else: # could be "generate" or "generate_CPU"
+			heightmap = terrain_generation_method.generate_CPU(rendering_device);
 		var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
 		terrain_generation_method_visualiser.mesh.material.set_shader_parameter("heightmap", heightmap_texture);
 		heightmap_terrain_generation_method_visualiser.mesh.material.set_shader_parameter("heightmap", heightmap_texture);
@@ -171,6 +177,9 @@ func generate_statistics() -> void:
 		statistics_progress_bar.max_value = NUMBER_OF_SAMPLES_TO_AVERAGE * HEIGHTMAP_RESOLUTIONS.size();
 		await get_tree().process_frame;
 		
+		var original_resolution: int;
+		if terrain_generation_method.explicit_generation:
+			original_resolution = terrain_generation_method.resolution;
 		var average_erosion_score: float = 0;
 		for heightmap_resolution: int in HEIGHTMAP_RESOLUTIONS:
 			var average_time: float = 0;
@@ -182,14 +191,14 @@ func generate_statistics() -> void:
 				if terrain_generation_method.explicit_generation:
 					terrain_generation_method.resolution = heightmap_resolution;
 					if terrain_generation_method.GPU_accelerated:
-						heightmap = terrain_generation_method.generate_GPU();
+						heightmap = terrain_generation_method.generate_GPU(rendering_device);
 					else:
-						heightmap = terrain_generation_method.generate_CPU();
+						heightmap = terrain_generation_method.generate_CPU(rendering_device);
 				else:
 					heightmap = capture_heightmap(heightmap_resolution);
 				average_time += (Time.get_ticks_msec() - start_time) / float(NUMBER_OF_SAMPLES_TO_AVERAGE);
 				
-				average_erosion_score += TerrainGenerationMethod.get_erosion_score(heightmap) / float(NUMBER_OF_SAMPLES_TO_AVERAGE * HEIGHTMAP_RESOLUTIONS.size());
+				average_erosion_score += TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device) / float(NUMBER_OF_SAMPLES_TO_AVERAGE * HEIGHTMAP_RESOLUTIONS.size());
 				#print("escore: " + str(TerrainGenerationMethod.get_erosion_score(heightmap)))
 				
 				statistics_progress_bar.value += 1;
@@ -197,15 +206,25 @@ func generate_statistics() -> void:
 			heightmap_generation_times.append(int(average_time));
 		print(heightmap_generation_times);
 		statistics_progress_center_container.hide();
+		if terrain_generation_method.explicit_generation:
+			terrain_generation_method.resolution = original_resolution;
+		
+		var parameters_string: String = "";
+		for shader_UI: Control in ui.shader_specific_UIs:
+			if shader_UI is ShaderParameterCheckBoxUI or shader_UI is ShaderParameterOptionButtonUI or shader_UI is ShaderParameterSliderUI:
+				var parameter_string: String = str(shader_UI);
+				if parameter_string.substr(0, "Amplitude".length()) != "Amplitude" and parameter_string.substr(0, "Resolution".length()) != "Resolution":
+					parameters_string += "• " + str(shader_UI) + "
+					";
 		
 		var statistics_accept_dialog: AcceptDialog = AcceptDialog.new();
 		add_child(statistics_accept_dialog);
-		statistics_accept_dialog.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_PRIMARY_SCREEN;
 		statistics_accept_dialog.title = "";
 		statistics_accept_dialog.transient = false;
 		#statistics_accept_dialog.mouse_passthrough_polygon = PackedVector2Array([Vector2(0, 0), Vector2(0, 0.1), Vector2(0.1, 0.1), Vector2(0.1, 0)]);
 		statistics_accept_dialog.dialog_text = \
-			terrain_generation_method.name.capitalize() + "
+			terrain_generation_method.name.capitalize() + " with parameters:
+			" + parameters_string + "
 			Averages taken over " + str(NUMBER_OF_SAMPLES_TO_AVERAGE) + " samples.
 			Time taken to generate heightmaps:
 			• 1024x1024: " + str(heightmap_generation_times[0]) + "ms
@@ -214,6 +233,7 @@ func generate_statistics() -> void:
 			Can generate in chunks: " + ("✓" if terrain_generation_method.can_generate_in_chunks else "✗") + "
 			Erosion score: " + str(average_erosion_score) + "
 			";
+		statistics_accept_dialog.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_PRIMARY_SCREEN;
 		statistics_accept_dialog.show();
 
 func _on_statistics_samples_h_slider_value_changed(value: float) -> void:

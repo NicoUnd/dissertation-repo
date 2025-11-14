@@ -11,7 +11,6 @@ var wrap_around: bool = true;
 
 var normalise: bool = false;
 
-var rendering_device: RenderingDevice;
 var compute_shader;
 
 func get_square_average(points: Array[PackedFloat32Array], x: int, y: int, half_step_size: int) -> float:
@@ -61,19 +60,19 @@ func random_offset(random_number_generator: RandomNumberGenerator, random_scale:
 	else: # guassian
 		return random_number_generator.randfn(0, 0.5 * random_scale);
 
-func setup() -> void:
-	rendering_device = RenderingServer.create_local_rendering_device();
+func setup(rendering_device: RenderingDevice) -> void:
+	#rendering_device = RenderingServer.create_local_rendering_device();
 	
 	var shader_file := load("res://shaders/diamond-square.glsl");
 	compute_shader = rendering_device.shader_create_from_spirv(shader_file.get_spirv());
 	
 	print("SETTING UP RENDERING DEVICE")
 
-func setdown() -> void:
+func setdown(rendering_device: RenderingDevice) -> void:
 	rendering_device.free_rid(compute_shader);
-	rendering_device.free();
+	#rendering_device.free();
 
-func generate_CPU() -> Image:
+func generate_CPU(rendering_device: RenderingDevice) -> Image:
 	var points: Array[PackedFloat32Array] = [];
 	points.resize(resolution + 1);
 	for row_index: int in resolution + 1:
@@ -117,10 +116,10 @@ func generate_CPU() -> Image:
 	
 	var heightmap: Image = points_to_heightmap(points);
 	if normalise:
-		heightmap = normalise_heightmap(heightmap);
+		heightmap = normalise_heightmap(heightmap, rendering_device);
 	return heightmap;
 
-func generate_GPU() -> Image:
+func generate_GPU(rendering_device: RenderingDevice) -> Image:
 	var points: PackedFloat32Array = PackedFloat32Array();
 	points.resize((resolution + 1) * (resolution + 1));
 	
@@ -207,13 +206,7 @@ func generate_GPU() -> Image:
 	
 	rendering_device.free_rid(points_data);
 	
-	var linear_index: int = 0;
-	var output_points: Array[PackedFloat32Array] = [];
-	output_points.resize(resolution + 1);
-	for row_index: int in resolution + 1:
-		var row: PackedFloat32Array = output.slice(linear_index, linear_index + resolution + 1); # use 32 bits as is standard in exp file format
-		output_points[row_index] = row;
-		linear_index += resolution + 1;
+	var output_points: Array[PackedFloat32Array] = points_linear_to_nested(output);
 	
 	#for row_ind: int in (resolution + 1) * (resolution + 1):
 		#if output[row_ind] != 0:
@@ -228,5 +221,5 @@ func generate_GPU() -> Image:
 	
 	var heightmap: Image = points_to_heightmap(output_points);
 	if normalise:
-		heightmap = normalise_heightmap(heightmap);
+		heightmap = normalise_heightmap(heightmap, rendering_device);
 	return heightmap;

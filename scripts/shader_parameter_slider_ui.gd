@@ -30,3 +30,8 @@ func setup(shader_parameter: ShaderParameterNumber) -> void:
 func update_text(new_value: float) -> void:
 	var new_value_string = str(int(new_value) if is_int else new_value);
 	label.text = shader_parameter_name_capitalized + " (" + new_value_string + (("x" + new_value_string) if is_square_in_display else "")+ ")"
+
+func _to_string() -> String:
+	var value: float = h_slider.value;
+	var value_string = str(int(value) if is_int else value);
+	return shader_parameter_name_capitalized + ": " + value_string + (("x" + value_string) if is_square_in_display else "");

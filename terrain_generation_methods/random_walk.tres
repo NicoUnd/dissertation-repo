@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="RandomWalk" load_steps=10 format=3 uid="uid://b0e0yu8xdqmo"]
+[gd_resource type="Resource" script_class="RandomWalk" load_steps=13 format=3 uid="uid://b0e0yu8xdqmo"]
 
 [ext_resource type="Script" uid="uid://b3m1lspbw6sua" path="res://scripts/random_walk.gd" id="1_twbos"]
 [ext_resource type="Shader" uid="uid://deuuby3m21rbw" path="res://shaders/heightmap.gdshader" id="2_gustg"]
@@ -14,22 +14,45 @@ name = "resolution"
 value = 2
 metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
-[sub_resource type="Resource" id="Resource_vw2q8"]
-script = ExtResource("5_878xy")
-max_value = 16777216.0
-is_int = true
-is_exp = true
-name = "iterations"
-value = 524288
-metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
-
 [sub_resource type="Resource" id="Resource_878xy"]
 script = ExtResource("5_878xy")
 min_value = 1.0
 max_value = 32.0
 is_exp = true
 name = "amplitude"
-value = 16.0
+value = 8.0
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_moksy"]
+script = ExtResource("5_878xy")
+max_value = 1.0
+name = "walk_percent_of_resolution"
+value = 0.4
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_vw2q8"]
+script = ExtResource("5_878xy")
+min_value = 1.0
+max_value = 32.0
+is_int = true
+name = "walks"
+value = 16
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_mp1bc"]
+script = ExtResource("4_878xy")
+options = Array[String](["centre", "near_centre", "corner", "random_corner", "random"])
+name = "start_from"
+value = 0
+metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
+
+[sub_resource type="Resource" id="Resource_2xyn7"]
+script = ExtResource("5_878xy")
+min_value = 1.0
+max_value = 32.0
+is_int = true
+name = "blur_radius"
+value = 5
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
 [resource]
@@ -38,5 +61,5 @@ name = "random_walk"
 shader = ExtResource("2_gustg")
 unshaded_shader = ExtResource("4_hw3dn")
 explicit_generation = true
-shader_parameters = Array[ExtResource("2_vd25m")]([SubResource("Resource_ra3kq"), SubResource("Resource_vw2q8"), SubResource("Resource_878xy")])
+shader_parameters = Array[ExtResource("2_vd25m")]([SubResource("Resource_ra3kq"), SubResource("Resource_878xy"), SubResource("Resource_moksy"), SubResource("Resource_vw2q8"), SubResource("Resource_mp1bc"), SubResource("Resource_2xyn7")])
 metadata/_custom_type_script = "uid://b3m1lspbw6sua"

@@ -20,19 +20,23 @@ var seed: float;
 func log2(x: float) -> float:
 	return log(x) / log(2);
 
-func setup() -> void:
+@warning_ignore("unused_parameter")
+func setup(rendering_device: RenderingDevice) -> void:
 	assert(false);
 	return;
 
-func setdown() -> void:
+@warning_ignore("unused_parameter")
+func setdown(rendering_device: RenderingDevice) -> void:
 	assert(false);
 	return;
 
-func generate_CPU() -> Image:
+@warning_ignore("unused_parameter")
+func generate_CPU(rendering_device: RenderingDevice) -> Image:
 	assert(false);
 	return;
 
-func generate_GPU() -> Image:
+@warning_ignore("unused_parameter")
+func generate_GPU(rendering_device: RenderingDevice) -> Image:
 	assert(false);
 	return;
 
@@ -64,26 +68,46 @@ static func heightmap_to_points(heightmap: Image) -> Array[PackedFloat32Array]:
 		points[point_index / resolution][posmod(point_index, resolution)] = bytes.decode_float(byte_index);
 	return points;
 
-static func points_to_slopemap_points(points: Array[PackedFloat32Array]) -> Array[PackedFloat32Array]:
-	var resolution: int = points.size();
-	var slopemap_points: Array[PackedFloat32Array] = [];
-	slopemap_points.resize(resolution);
-	for row_index: int in resolution:
-		var row: PackedFloat32Array = PackedFloat32Array();
-		row.resize(resolution);
-		slopemap_points[row_index] = row;
-	
-	for y: int in resolution:
-		for x: int in resolution:
-			var point: float = points[y][x];
-			slopemap_points[y][x] = max(
-				abs(point - points[posmod(y + 1, resolution)][x]),
-				abs(point - points[posmod(y - 1, resolution)][x]),
-				abs(point - points[y][posmod(x + 1, resolution)]),
-				abs(point - points[y][posmod(x - 1, resolution)]),
-			);
-	
-	return slopemap_points;
+static func points_linear_to_nested(linear_points: PackedFloat32Array) -> Array[PackedFloat32Array]:
+	var width_float: float = sqrt(linear_points.size())
+	assert(fposmod(width_float, 1) == 0);
+	@warning_ignore("narrowing_conversion")
+	var width: int = width_float;
+	var linear_index: int = 0;
+	var nested_points: Array[PackedFloat32Array] = [];
+	nested_points.resize(width);
+	for row_index: int in width:
+		var row: PackedFloat32Array = linear_points.slice(linear_index, linear_index + width);
+		nested_points[row_index] = row;
+		linear_index += width;
+	return nested_points;
+
+static func points_nested_to_linear(nested_points: Array[PackedFloat32Array]) -> PackedFloat32Array:
+	var linear_points: PackedFloat32Array = PackedFloat32Array();
+	for row: PackedFloat32Array in nested_points:
+		linear_points.append_array(row);
+	return linear_points;
+
+#static func points_to_slopemap_points(points: Array[PackedFloat32Array]) -> Array[PackedFloat32Array]:
+	#var resolution: int = points.size();
+	#var slopemap_points: Array[PackedFloat32Array] = [];
+	#slopemap_points.resize(resolution);
+	#for row_index: int in resolution:
+		#var row: PackedFloat32Array = PackedFloat32Array();
+		#row.resize(resolution);
+		#slopemap_points[row_index] = row;
+	#
+	#for y: int in resolution:
+		#for x: int in resolution:
+			#var point: float = points[y][x];
+			#slopemap_points[y][x] = max(
+				#abs(point - points[posmod(y + 1, resolution)][x]),
+				#abs(point - points[posmod(y - 1, resolution)][x]),
+				#abs(point - points[y][posmod(x + 1, resolution)]),
+				#abs(point - points[y][posmod(x - 1, resolution)]),
+			#);
+	#
+	#return slopemap_points;
 
 static func get_slopemap_data_GPU(heightmap: Image, rendering_device: RenderingDevice) -> PackedByteArray:
 	var shader_file := load("res://shaders/slopemap.glsl");
@@ -151,6 +175,7 @@ static func get_slopemap_data_GPU(heightmap: Image, rendering_device: RenderingD
 	rendering_device.free_rid(compute_shader);
 	rendering_device.free_rid(resolution_buffer_data);
 	rendering_device.free_rid(gpu_texture);
+	rendering_device.free_rid(sampler);
 	rendering_device.free_rid(slopemap_gpu_texture);
 	
 	return output_bytes;
@@ -225,7 +250,7 @@ static func std_dev_GPU(resolution: int, rendering_device: RenderingDevice, text
 	
 	return std_dev;
 
-static func get_erosion_score(heightmap: Image) -> float:
+static func get_erosion_score(heightmap: Image, rendering_device: RenderingDevice) -> float:
 	#var points: Array[PackedFloat32Array] = heightmap_to_points(heightmap);
 	#var slopemap_points: Array[PackedFloat32Array] = points_to_slopemap_points(points);
 	#print(slopemap_points[0].slice(0, 10));
@@ -247,8 +272,6 @@ static func get_erosion_score(heightmap: Image) -> float:
 	#
 	#assert(mean != 0);
 	#return std_dev / mean;
-	
-	var rendering_device: RenderingDevice = RenderingServer.create_local_rendering_device();
 	
 	var slopemap_bytes: PackedByteArray = get_slopemap_data_GPU(heightmap, rendering_device);
 	
@@ -299,9 +322,8 @@ static func get_erosion_score(heightmap: Image) -> float:
 	print("mean" + str(mean));
 	print("std_dev" + str(std_dev));
 	
-	rendering_device.free_rid(gpu_texture);
 	rendering_device.free_rid(sampler);
-	rendering_device.free();
+	rendering_device.free_rid(gpu_texture);
 	
 	return std_dev / mean;
 
@@ -360,6 +382,7 @@ static func max_min_GPU(heightmap: Image, rendering_device: RenderingDevice) -> 
 
 static func normalise_GPU(heightmap: Image, max_min_buffer_data: RID, rendering_device: RenderingDevice) -> Image:
 	var shader_file := load("res://shaders/normalise.glsl");
+	print(type_string(typeof(shader_file)))
 	var compute_shader := rendering_device.shader_create_from_spirv(shader_file.get_spirv());
 	
 	var resolution: int = heightmap.get_width();
@@ -406,8 +429,82 @@ static func normalise_GPU(heightmap: Image, max_min_buffer_data: RID, rendering_
 	
 	return Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, bytes);
 
-static func normalise_heightmap(heightmap: Image) -> Image:
-	var rendering_device: RenderingDevice = RenderingServer.create_local_rendering_device();
+static func normalise_heightmap(heightmap: Image, rendering_device: RenderingDevice) -> Image:
 	var normalised_heightmap: Image = normalise_GPU(heightmap, max_min_GPU(heightmap, rendering_device), rendering_device);
-	rendering_device.free();
 	return normalised_heightmap;
+
+static func gaussian_blur(heightmap: Image, blur_size: int, rendering_device: RenderingDevice) -> Image:
+	var shader_file := load("res://shaders/gaussian_blur_pass.glsl");
+	print(type_string(typeof(shader_file)))
+	if shader_file.get_spirv():
+		print("BOOO")
+	var compute_shader := rendering_device.shader_create_from_spirv(shader_file.get_spirv());
+	if compute_shader.is_valid():
+		print("YOOOO")
+	
+	var resolution: int = heightmap.get_width();
+	
+	var heightmap_bytes: PackedByteArray = heightmap.get_data();
+	var texture_data := RDTextureFormat.new();
+	texture_data.width = resolution;
+	texture_data.height = resolution;
+	texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT;
+	texture_data.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var gpu_texture = rendering_device.texture_create(texture_data, RDTextureView.new(), [heightmap_bytes]);
+	
+	var texture_uniform := RDUniform.new();
+	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
+	texture_uniform.binding = 1;
+	texture_uniform.add_id(gpu_texture);
+	
+	var blurred_heightmap_bytes: PackedByteArray = PackedByteArray();
+	blurred_heightmap_bytes.resize(resolution * resolution * 4);
+	var blurred_texture_data := RDTextureFormat.new();
+	blurred_texture_data.width = resolution;
+	blurred_texture_data.height = resolution;
+	blurred_texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT;
+	blurred_texture_data.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var blurred_gpu_texture = rendering_device.texture_create(blurred_texture_data, RDTextureView.new(), [blurred_heightmap_bytes]);
+	
+	var blurred_texture_uniform := RDUniform.new();
+	blurred_texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
+	blurred_texture_uniform.binding = 2;
+	blurred_texture_uniform.add_id(blurred_gpu_texture);
+	
+	print(compute_shader)
+	for horizontal: bool in [true, false]:
+		var parameters: PackedFloat32Array = PackedFloat32Array([float(horizontal), float(blur_size), float(blur_size) / 3, float(resolution)]); # 99.7% of a Gaussian distriution falls in 3 standard deviations
+		
+		var bytes: PackedByteArray = parameters.to_byte_array();
+		var buffer_data := rendering_device.storage_buffer_create(bytes.size(), bytes);
+		var buffer_uniform := RDUniform.new();
+		buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+		buffer_uniform.binding = 0 # this needs to match the "binding" in our shader file
+		buffer_uniform.add_id(buffer_data);
+		
+		print(compute_shader.is_valid())
+		var uniform_set := rendering_device.uniform_set_create([buffer_uniform, texture_uniform, blurred_texture_uniform], compute_shader, 0);
+		
+		var pipeline := rendering_device.compute_pipeline_create(compute_shader);
+		var compute_list := rendering_device.compute_list_begin();
+		rendering_device.compute_list_bind_compute_pipeline(compute_list, pipeline);
+		rendering_device.compute_list_bind_uniform_set(compute_list, uniform_set, 0);
+		@warning_ignore("integer_division")
+		var workgroups: int = resolution / 32;
+		rendering_device.compute_list_dispatch(compute_list, workgroups, workgroups, 1);
+		rendering_device.compute_list_end();
+		
+		rendering_device.submit();
+		rendering_device.sync();
+		
+		rendering_device.free_rid(uniform_set);
+		rendering_device.free_rid(pipeline);
+		rendering_device.free_rid(buffer_data);
+	
+	var output_bytes: PackedByteArray = rendering_device.texture_get_data(gpu_texture, 0); # use original GPU texture not blurred_GPU_texture as pass 1 will use image1 as input and image2 as output, then pass 2 will use image1 as output
+	
+	rendering_device.free_rid(gpu_texture);
+	rendering_device.free_rid(blurred_gpu_texture);
+	rendering_device.free_rid(compute_shader);
+	
+	return Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, output_bytes);
