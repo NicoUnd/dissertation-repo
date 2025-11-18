@@ -107,7 +107,5 @@ void fragment() {
 		//ALBEDO = vec3((perlin_2D(world_pos.xz) + 1.0) * 0.5);
 	}
 
-	if (circle) {
-		ALPHA = 1.0 - smoothstep(512.0 + 256.0 + 128.0 + 64.0 + 32.0, 1024.0, world_pos.x * world_pos.x + world_pos.z * world_pos.z);
-	}
+	ALPHA = get_alpha(world_pos);
 }

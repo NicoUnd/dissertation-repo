@@ -47,6 +47,8 @@ func add_shader_parameter(shader_parameter: ShaderParameter, is_shader_specific:
 	
 	if is_shader_specific:
 		shader_specific_UIs.append(new_shader_parameter_UI)
+		if not shader_parameter is ShaderParameterButton:
+			main.set_shader_parameter(shader_parameter.name, shader_parameter.value, is_shader_specific);
 
 func set_shader_specific_parameters(shader_specific_parameters: Array[ShaderParameter]) -> void:
 	for shader_specific_UI: Control in shader_specific_UIs:

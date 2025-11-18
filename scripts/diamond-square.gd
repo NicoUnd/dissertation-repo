@@ -7,9 +7,9 @@ var smoothness: float = 1;
 
 var distribution: int = 0;
 
-var wrap_around: bool = true;
+var wrap_around: bool = false;
 
-var normalise: bool = false;
+var normalise: bool = true;
 
 var compute_shader;
 

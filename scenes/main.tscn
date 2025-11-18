@@ -89,7 +89,7 @@ seed = 44.801236265629406
 
 [node name="CameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(-0.23643829, 0, -0.9716451, 0, 1, 0, 0.9716451, 0, -0.23643829, 0, 0, 0)
+transform = Transform3D(0.80393887, 0, 0.59470963, 0, 1, 0, -0.59470963, 0, 0.80393887, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VisualisationViewport/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
@@ -199,17 +199,6 @@ alignment = 0
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="GenerateStatisticsButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 8
-text = "Generate Statistics"
-
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/HBoxContainer/VBoxContainer"]
-modulate = Color(1, 1, 1, 0)
-layout_mode = 2
-theme_override_constants/separation = 16
-
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/HBoxContainer/VBoxContainer"]
 custom_minimum_size = Vector2(1100, 0)
 layout_mode = 2
@@ -228,6 +217,17 @@ size_flags_horizontal = 8
 min_value = 1.0
 max_value = 50.0
 value = 5.0
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="GenerateStatisticsButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+text = "Generate Statistics"
 
 [node name="StatisticsProgressCenterContainer" type="CenterContainer" parent="."]
 unique_name_in_owner = true
@@ -279,8 +279,8 @@ dialog_text = "Time taken to generate heightmaps:
 autostart = true
 
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/SaveHeightmapButton" to="." method="_on_save_heightmap_button_pressed"]
-[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/GenerateStatisticsButton" to="." method="_on_generate_statistics_button_pressed"]
 [connection signal="value_changed" from="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer/StatisticsSamplesHSlider" to="." method="_on_statistics_samples_h_slider_value_changed"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/GenerateStatisticsButton" to="." method="_on_generate_statistics_button_pressed"]
 [connection signal="confirmed" from="SaveHeightmapFileDialog" to="." method="_on_save_heightmap_file_dialog_confirmed"]
 [connection signal="confirmed" from="GenerateStatisticsConfirmDialog" to="." method="generate_statistics"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

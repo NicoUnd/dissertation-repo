@@ -31,9 +31,7 @@ var rendering_device: RenderingDevice;
 		if terrain_generation_method and terrain_generation_method.explicit_generation:
 			terrain_generation_method.setdown(rendering_device);
 		terrain_generation_method = new_terrain_generation_method;
-		print("A")
 		if terrain_generation_method_visualiser and heightmap_terrain_generation_method_visualiser:
-			print("B")
 			terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
 			heightmap_terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
 			if terrain_generation_method:

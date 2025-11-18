@@ -382,7 +382,6 @@ static func max_min_GPU(heightmap: Image, rendering_device: RenderingDevice) -> 
 
 static func normalise_GPU(heightmap: Image, max_min_buffer_data: RID, rendering_device: RenderingDevice) -> Image:
 	var shader_file := load("res://shaders/normalise.glsl");
-	print(type_string(typeof(shader_file)))
 	var compute_shader := rendering_device.shader_create_from_spirv(shader_file.get_spirv());
 	
 	var resolution: int = heightmap.get_width();
@@ -435,12 +434,7 @@ static func normalise_heightmap(heightmap: Image, rendering_device: RenderingDev
 
 static func gaussian_blur(heightmap: Image, blur_size: int, rendering_device: RenderingDevice) -> Image:
 	var shader_file := load("res://shaders/gaussian_blur_pass.glsl");
-	print(type_string(typeof(shader_file)))
-	if shader_file.get_spirv():
-		print("BOOO")
 	var compute_shader := rendering_device.shader_create_from_spirv(shader_file.get_spirv());
-	if compute_shader.is_valid():
-		print("YOOOO")
 	
 	var resolution: int = heightmap.get_width();
 	
@@ -471,7 +465,6 @@ static func gaussian_blur(heightmap: Image, blur_size: int, rendering_device: Re
 	blurred_texture_uniform.binding = 2;
 	blurred_texture_uniform.add_id(blurred_gpu_texture);
 	
-	print(compute_shader)
 	for horizontal: bool in [true, false]:
 		var parameters: PackedFloat32Array = PackedFloat32Array([float(horizontal), float(blur_size), float(blur_size) / 3, float(resolution)]); # 99.7% of a Gaussian distriution falls in 3 standard deviations
 		
@@ -482,7 +475,6 @@ static func gaussian_blur(heightmap: Image, blur_size: int, rendering_device: Re
 		buffer_uniform.binding = 0 # this needs to match the "binding" in our shader file
 		buffer_uniform.add_id(buffer_data);
 		
-		print(compute_shader.is_valid())
 		var uniform_set := rendering_device.uniform_set_create([buffer_uniform, texture_uniform, blurred_texture_uniform], compute_shader, 0);
 		
 		var pipeline := rendering_device.compute_pipeline_create(compute_shader);

@@ -16,6 +16,17 @@ vec2 random(vec2 uv){
     //return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * (seed - TIME * 0.000001));
 }
 
+float get_alpha(vec3 world_pos) {
+	if (circle) {
+		return 1.0 - smoothstep(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5, 32.0, sqrt(world_pos.x * world_pos.x + world_pos.z * world_pos.z));
+	} else {
+		return 1.0 -
+			max(smoothstep(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5, 32.0, world_pos.x),
+			max(smoothstep(-(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5), -32.0, world_pos.x),
+			max(smoothstep(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5, 32.0, world_pos.z),
+			smoothstep(-(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5), -32.0, world_pos.z))));
+	}
+}
 
 float perlin_2D(vec2 uv) {
 	vec2 grid_index = floor(uv);

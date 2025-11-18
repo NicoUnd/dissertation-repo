@@ -10,6 +10,7 @@ layout(set = 0, binding = 0, std430) restrict buffer PointBuffer1{
 points_buffer_1;
 
 layout(set = 0, binding = 1, std430) restrict buffer PointBuffer2{
+	float multiplier;
 	float data[];
 }
 points_buffer_2;
@@ -19,5 +20,5 @@ void main() {
 	// gl_GlobalInvocationID.x uniquely identifies this invocation across all work groups
 	uint index = gl_GlobalInvocationID.x;
 
-	points_buffer_1.data[index] += points_buffer_2.data[index];
+	points_buffer_1.data[index] += points_buffer_2.data[index] * points_buffer_2.multiplier;
 }
