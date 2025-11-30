@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://u3fkap1o8cbi"]
+
+[ext_resource type="Theme" uid="uid://cs2nnup0f3ppn" path="res://themes/panel_container_clear.tres" id="1_bpjap"]
+[ext_resource type="Script" uid="uid://umd3nyngns5u" path="res://scripts/parameter_UIs/parameter_slider_ui.gd" id="2_emijj"]
+
+[node name="ParameterSliderUI" type="PanelContainer"]
+custom_minimum_size = Vector2(1450, 0)
+offset_right = 1346.0
+offset_bottom = 128.0
+theme = ExtResource("1_bpjap")
+script = ExtResource("2_emijj")
+
+[node name="Label" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Frequency"
+
+[node name="VSeparator" type="VSeparator" parent="."]
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="HSlider" type="HSlider" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 1
+
+[connection signal="value_changed" from="HSlider" to="." method="update_text"]

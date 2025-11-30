@@ -3,21 +3,22 @@ extends MeshInstance3D;
 class_name TerrainGenerationMethodVisualiser;
 
 const TERRAIN_GENERATION_METHODS: Array[TerrainGenerationMethod] = [
-	preload("uid://bunfkxpwyox5q"), # FBM
-	preload("uid://dsrbtacjgyx26"), # Worley
-	preload("uid://ccwkefbr6ghxb"), # Diamond-square
-	preload("uid://b0e0yu8xdqmo"), # Random walk
-	
-	
-	preload("uid://uir8vm75yx0o"), # Heightmap blending
+	preload("res://terrain_generation_methods/fractal_brownian_motion.tres"),
+	preload("res://terrain_generation_methods/worley.tres"),
+	preload("res://terrain_generation_methods/diamond-square.tres"),
+	preload("res://terrain_generation_methods/random_walk.tres"),
+	preload("res://terrain_generation_methods/diffusion_limited_aggregation.tres"),
+	preload("res://terrain_generation_methods/heightmap_blending.tres"),
 ];
 
 const PLANE_RESOLUTIONS: Array[int] = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
 
-func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderParameter]) -> void:
-	mesh.material.shader = new_shader.duplicate();
-	for shader_specific_parameter: ShaderParameter in shader_specific_parameters:
-		mesh.material.set_shader_parameter(shader_specific_parameter.name, shader_specific_parameter.value);
+@onready var water_mesh_instance_3d: MeshInstance3D = %WaterMeshInstance3D
+
+func set_shader(new_shader: Shader, terrain_generation_method_specific_parameters: Array[Parameter]) -> void:
+	mesh.material.shader = new_shader; #.duplicate();
+	for terrain_generation_method_specific_parameter: Parameter in terrain_generation_method_specific_parameters:
+		mesh.material.set_shader_parameter(terrain_generation_method_specific_parameter.name, terrain_generation_method_specific_parameter.value);
 	apply_shader_options();
 
 @export var terrain_generation_method: TerrainGenerationMethod:
@@ -26,22 +27,22 @@ func set_shader(new_shader: Shader, shader_specific_parameters: Array[ShaderPara
 		if not terrain_generation_method:
 			mesh.material = ShaderMaterial.new();
 		else:
-			set_shader(terrain_generation_method.unshaded_shader if unshaded else terrain_generation_method.shader, terrain_generation_method.shader_parameters);
+			set_shader(terrain_generation_method.get_shader(unshaded), terrain_generation_method.parameters);
 
 @export var unshaded: bool = false:
 	set(new_unshaded):
 		unshaded = new_unshaded;
 		if terrain_generation_method:
-			var shader_specific_parameters = terrain_generation_method.shader_parameters;
-			var prev_shader_specific_parameter_names: Array[String] = [];
-			var prev_shader_specific_parameter_values: Array[Variant] = [];
-			for shader_specific_parameter: ShaderParameter in shader_specific_parameters:
-				var shader_specific_parameter_name: String = shader_specific_parameter.name;
-				prev_shader_specific_parameter_names.append(shader_specific_parameter_name);
-				prev_shader_specific_parameter_values.append(mesh.material.get_shader_parameter(shader_specific_parameter_name));
-			set_shader(terrain_generation_method.unshaded_shader if unshaded else terrain_generation_method.shader, shader_specific_parameters);
-			for shader_specific_parameter_index: int in shader_specific_parameters.size():
-				mesh.material.set_shader_parameter(prev_shader_specific_parameter_names[shader_specific_parameter_index], prev_shader_specific_parameter_values[shader_specific_parameter_index]);
+			var terrain_generation_method_specific_parameters = terrain_generation_method.parameters;
+			var prev_terrain_generation_method_specific_parameter_names: Array[String] = [];
+			var prev_terrain_generation_method_specific_parameter_values: Array[Variant] = [];
+			for terrain_generation_method_specific_parameter: Parameter in terrain_generation_method_specific_parameters:
+				var terrain_generation_method_specific_parameter_name: String = terrain_generation_method_specific_parameter.name;
+				prev_terrain_generation_method_specific_parameter_names.append(terrain_generation_method_specific_parameter_name);
+				prev_terrain_generation_method_specific_parameter_values.append(mesh.material.get_shader_parameter(terrain_generation_method_specific_parameter_name));
+			set_shader(terrain_generation_method.get_shader(unshaded), terrain_generation_method_specific_parameters);
+			for terrain_generation_method_specific_parameter_index: int in terrain_generation_method_specific_parameters.size():
+				mesh.material.set_shader_parameter(prev_terrain_generation_method_specific_parameter_names[terrain_generation_method_specific_parameter_index], prev_terrain_generation_method_specific_parameter_values[terrain_generation_method_specific_parameter_index]);
 
 func apply_shader_options() -> void:
 	mesh.material.set_shader_parameter("seed", seed);
@@ -60,6 +61,8 @@ func apply_shader_options() -> void:
 	set(new_circle):
 		circle = new_circle;
 		mesh.material.set_shader_parameter("circle", circle);
+		if water_mesh_instance_3d:
+			water_mesh_instance_3d.mesh.material.set_shader_parameter("circle", circle);
 
 @export var perturbate: bool = false:
 	set(new_perturbate):
@@ -80,6 +83,13 @@ func apply_shader_options() -> void:
 	set(new_dirt_texture):
 		dirt_texture = new_dirt_texture;
 		mesh.material.set_shader_parameter("dirt_texture", dirt_texture);
+
+var max_amplitude: float = 0;
+@export var water_level: float = 0:
+	set(new_water_level):
+		water_level = new_water_level;
+		water_mesh_instance_3d.visible = water_level != 0;
+		water_mesh_instance_3d.position.y = max_amplitude * 0.5 * (water_level * 2 - 1);
 
 func _ready() -> void:
 	print("MAIN READY")

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="DiffusionLimitedAggregation" load_steps=3 format=3 uid="uid://c2vmmpdikh121"]
+
+[ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="1_77tkw"]
+[ext_resource type="Script" uid="uid://b4xxvbdak0nxt" path="res://scripts/terrain_generation_methods/diffusion_limited_aggregation.gd" id="2_otslh"]
+
+[resource]
+script = ExtResource("2_otslh")
+name = "diffusion_limited_aggregation"
+min_amplitude = 1.0
+max_amplitude = 64.0
+default_amplitude = 32.0
+metadata/_custom_type_script = "uid://b4xxvbdak0nxt"

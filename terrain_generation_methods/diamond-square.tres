@@ -1,63 +1,44 @@
-[gd_resource type="Resource" script_class="DiamondSquare" load_steps=14 format=3 uid="uid://ccwkefbr6ghxb"]
+[gd_resource type="Resource" script_class="DiamondSquare" load_steps=10 format=3 uid="uid://ba8lnm4iollr1"]
 
-[ext_resource type="Script" uid="uid://ddkes5jhoum04" path="res://scripts/diamond-square.gd" id="1_q4gjg"]
-[ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/shader_paremeter.gd" id="2_1rd5d"]
-[ext_resource type="Shader" uid="uid://deuuby3m21rbw" path="res://shaders/heightmap.gdshader" id="2_dvls0"]
-[ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/shader_parameter_number.gd" id="4_2on8b"]
-[ext_resource type="Shader" uid="uid://cq77nryhphey4" path="res://shaders/heightmap_unshaded.gdshader" id="4_dvls0"]
-[ext_resource type="Script" uid="uid://dh4wgjnv8j0ir" path="res://scripts/shader_parameter_enum.gd" id="4_gxwsg"]
-[ext_resource type="Script" uid="uid://ppfcadcfq54h" path="res://scripts/shader_parameter_bool.gd" id="6_q4gjg"]
+[ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="1_1rd5d"]
+[ext_resource type="Script" uid="uid://ddkes5jhoum04" path="res://scripts/terrain_generation_methods/diamond-square.gd" id="1_i3x2c"]
+[ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/parameters/parameter_number.gd" id="2_dvls0"]
+[ext_resource type="Script" uid="uid://dh4wgjnv8j0ir" path="res://scripts/parameters/parameter_enum.gd" id="3_dvls0"]
+[ext_resource type="Script" uid="uid://ppfcadcfq54h" path="res://scripts/parameters/parameter_bool.gd" id="4_gxwsg"]
 
-[sub_resource type="Resource" id="Resource_q4gjg"]
-script = ExtResource("4_2on8b")
-min_value = 1.0
-max_value = 32.0
-is_exp = true
-name = "amplitude"
-value = 16.0
-metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
-
-[sub_resource type="Resource" id="Resource_2on8b"]
-script = ExtResource("4_gxwsg")
-options = Array[String](["256x256", "512x512", "1024x1024", "2048x2048", "4096x4096"])
-name = "resolution"
-value = 2
-metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
-
-[sub_resource type="Resource" id="Resource_mgpmt"]
-script = ExtResource("4_2on8b")
-min_value = 0.5
-max_value = 1.5
+[sub_resource type="Resource" id="Resource_gxwsg"]
+script = ExtResource("2_dvls0")
+max_value = 2.0
 name = "smoothness"
 value = 1.0
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
-[sub_resource type="Resource" id="Resource_krgyn"]
-script = ExtResource("4_gxwsg")
-options = Array[String](["uniform", "gaussian"])
+[sub_resource type="Resource" id="Resource_2on8b"]
+script = ExtResource("3_dvls0")
+options = Array[String](["uniform", "guassian"])
 name = "distribution"
-value = 0.0
+value = 0
 metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
-[sub_resource type="Resource" id="Resource_ikv75"]
-script = ExtResource("6_q4gjg")
+[sub_resource type="Resource" id="Resource_q4gjg"]
+script = ExtResource("4_gxwsg")
 name = "wrap_around"
 value = false
 metadata/_custom_type_script = "uid://ppfcadcfq54h"
 
-[sub_resource type="Resource" id="Resource_22u67"]
-script = ExtResource("6_q4gjg")
+[sub_resource type="Resource" id="Resource_krgyn"]
+script = ExtResource("4_gxwsg")
 name = "normalise"
 value = true
 metadata/_custom_type_script = "uid://ppfcadcfq54h"
 
 [resource]
-script = ExtResource("1_q4gjg")
-name = "diamond-square"
-shader = ExtResource("2_dvls0")
-unshaded_shader = ExtResource("4_dvls0")
-explicit_generation = true
+script = ExtResource("1_i3x2c")
 GPU_accelerated = true
-shader_parameters = Array[ExtResource("2_1rd5d")]([SubResource("Resource_q4gjg"), SubResource("Resource_2on8b"), SubResource("Resource_mgpmt"), SubResource("Resource_krgyn"), SubResource("Resource_ikv75"), SubResource("Resource_22u67")])
+name = "diamond-square"
+min_amplitude = 1.0
+max_amplitude = 32.0
+default_amplitude = 16.0
+parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_gxwsg"), SubResource("Resource_2on8b"), SubResource("Resource_q4gjg"), SubResource("Resource_krgyn")])
 can_generate_in_chunks = true
 metadata/_custom_type_script = "uid://ddkes5jhoum04"

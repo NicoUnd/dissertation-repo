@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://r6u776hu33np"
+path="res://.godot/imported/diamond-square.glsl-a5c99642668bd3c5f74a432ad92b0801.res"
+
+[deps]
+
+source_file="res://shaders/compute_shaders/diamond-square.glsl"
+dest_files=["res://.godot/imported/diamond-square.glsl-a5c99642668bd3c5f74a432ad92b0801.res"]
+
+[params]
+
