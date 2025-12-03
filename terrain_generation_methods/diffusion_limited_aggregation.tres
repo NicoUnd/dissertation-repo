@@ -7,6 +7,6 @@
 script = ExtResource("2_otslh")
 name = "diffusion_limited_aggregation"
 min_amplitude = 1.0
-max_amplitude = 64.0
-default_amplitude = 32.0
+max_amplitude = 32.0
+default_amplitude = 16.0
 metadata/_custom_type_script = "uid://b4xxvbdak0nxt"

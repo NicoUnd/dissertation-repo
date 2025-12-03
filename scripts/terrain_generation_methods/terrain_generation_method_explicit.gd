@@ -21,3 +21,6 @@ func get_shader(unshaded: bool) -> Shader:
 @abstract func generate_CPU(rendering_device: RenderingDevice) -> Image;
 
 @abstract func generate_GPU(rendering_device: RenderingDevice) -> Image;
+
+func log2(x: float) -> float:
+	return log(x) / log(2);

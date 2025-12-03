@@ -11,9 +11,6 @@ var normalise: bool;
 
 var compute_shader;
 
-func log2(x: float) -> float:
-	return log(x) / log(2);
-
 func get_square_average(points: Array[PackedFloat32Array], x: int, y: int, half_step_size: int) -> float:
 	var square_average: float = 0;
 	for square_corner_y: int in [y - half_step_size, y + half_step_size]:
@@ -66,8 +63,6 @@ func setup(rendering_device: RenderingDevice) -> void:
 	
 	var shader_file := load("res://shaders/compute_shaders/diamond-square.glsl");
 	compute_shader = rendering_device.shader_create_from_spirv(shader_file.get_spirv());
-	
-	print("SETTING UP RENDERING DEVICE")
 
 func setdown(rendering_device: RenderingDevice) -> void:
 	rendering_device.free_rid(compute_shader);

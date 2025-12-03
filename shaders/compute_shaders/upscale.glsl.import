@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://qb634iowfo3b"
+path="res://.godot/imported/upscale.glsl-af2ed247f806c2d5015755ac0a13f4e8.res"
+
+[deps]
+
+source_file="res://shaders/compute_shaders/upscale.glsl"
+dest_files=["res://.godot/imported/upscale.glsl-af2ed247f806c2d5015755ac0a13f4e8.res"]
+
+[params]
+
