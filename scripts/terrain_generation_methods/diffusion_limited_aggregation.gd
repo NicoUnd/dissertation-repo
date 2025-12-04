@@ -122,31 +122,64 @@ func generate_CPU(rendering_device: RenderingDevice) -> Image:
 	heightmap = normalise_heightmap(heightmap, rendering_device);
 	return heightmap;
 
-func fill_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, parameter_uniform: RDUniform, attach_directions_uniform: RDUniform) -> void:
+func fill_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, attach_directions_uniform: RDUniform, add) -> void:
 	@warning_ignore("integer_division")
 	var workgroups = layer_resolution / INITIAL_RESOLUTION;
 	
-	var uniform_set := rendering_device.uniform_set_create([parameter_uniform, attach_directions_uniform], compute_shader, 0);
+	var output_bytes := rendering_device.buffer_get_data(add);
+	print(output_bytes.to_int32_array()[layer_resolution * layer_resolution / 2 + layer_resolution / 2]);
+	if layer_resolution == INITIAL_RESOLUTION:
+		var total: int = 0;
+		for x in output_bytes.to_int32_array():
+			total += x;
+		print("TOTAL: " + str(total));
 	
-	var pipeline := rendering_device.compute_pipeline_create(compute_shader);
-	var compute_list := rendering_device.compute_list_begin();
-	rendering_device.compute_list_bind_compute_pipeline(compute_list, pipeline);
-	rendering_device.compute_list_bind_uniform_set(compute_list, uniform_set, 0);
-	rendering_device.compute_list_dispatch(compute_list, workgroups, workgroups, 1);
-	rendering_device.compute_list_end();
-	
-	@warning_ignore("integer_division")
-	for __ in float(INITIAL_RESOLUTION * INITIAL_RESOLUTION) * 0.1 / 4: # this will be the same for every layer, just larget batches
+	for i: int in float(INITIAL_RESOLUTION * INITIAL_RESOLUTION) * 0.1: # this will be the same for every layer, just larget batches
+		# need to update the seed so that each calling will get different random numbers
+		var shader_parameters: PackedFloat32Array = PackedFloat32Array([float(seed + i), float(layer_resolution)]);
+		var parameters_bytes: PackedByteArray = shader_parameters.to_byte_array();
+		var parameters_data := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
+		var parameter_uniform := RDUniform.new();
+		parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+		parameter_uniform.binding = 0 # this needs to match the "binding" in our shader file
+		parameter_uniform.add_id(parameters_data);
+		
+		var uniform_set := rendering_device.uniform_set_create([parameter_uniform, attach_directions_uniform], compute_shader, 0);
+		
+		var pipeline := rendering_device.compute_pipeline_create(compute_shader);
+		var compute_list := rendering_device.compute_list_begin();
+		rendering_device.compute_list_bind_compute_pipeline(compute_list, pipeline);
+		rendering_device.compute_list_bind_uniform_set(compute_list, uniform_set, 0);
+		rendering_device.compute_list_dispatch(compute_list, workgroups, workgroups, 1);
+		rendering_device.compute_list_end();
+		
 		rendering_device.submit();
-	rendering_device.sync();
+		rendering_device.sync();
+		
+		rendering_device.free_rid(uniform_set);
+		rendering_device.free_rid(parameters_data);
+		rendering_device.free_rid(pipeline);
 	
-	rendering_device.free_rid(uniform_set);
-	rendering_device.free_rid(pipeline);
+	output_bytes = rendering_device.buffer_get_data(add);
+	print(output_bytes.to_int32_array()[layer_resolution * layer_resolution / 2 + layer_resolution / 2]);
+	if layer_resolution == INITIAL_RESOLUTION:
+		var total: int = 0;
+		for x in output_bytes.to_int32_array():
+			total += x;
+		print("TOTAL: " + str(total));
 
-func upscale_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, parameter_uniform: RDUniform, attach_directions_uniform: RDUniform) -> Array: # array of RDUniform and RID
+func upscale_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, attach_directions_uniform: RDUniform) -> Array: # array of RDUniform and RID
 	var upscaled_attach_directions: PackedInt32Array = PackedInt32Array();
 	var upscale_resolution: int = layer_resolution * 2;
 	upscaled_attach_directions.resize(upscale_resolution * upscale_resolution);
+	
+	var shader_parameters: PackedFloat32Array = PackedFloat32Array([seed, float(layer_resolution)]);
+	var parameters_bytes: PackedByteArray = shader_parameters.to_byte_array();
+	var parameters_data := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
+	var parameter_uniform := RDUniform.new();
+	parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+	parameter_uniform.binding = 0 # this needs to match the "binding" in our shader file
+	parameter_uniform.add_id(parameters_data);
 	
 	var upscaled_attach_directions_bytes: PackedByteArray = upscaled_attach_directions.to_byte_array();
 	var upscaled_attach_directions_buffer_data := rendering_device.storage_buffer_create(upscaled_attach_directions_bytes.size(), upscaled_attach_directions_bytes);
@@ -171,13 +204,22 @@ func upscale_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice,
 	rendering_device.sync();
 	
 	rendering_device.free_rid(uniform_set);
+	rendering_device.free_rid(parameters_data);
 	rendering_device.free_rid(pipeline);
 	
 	return [upscaled_attach_directions_buffer_uniform, upscaled_attach_directions_buffer_data];
 
-func smooth_falloff_height_GPU(rendering_device: RenderingDevice, parameter_uniform: RDUniform, attach_directions_uniform: RDUniform) -> PackedFloat32Array:
+func smooth_falloff_height_GPU(rendering_device: RenderingDevice, attach_directions_uniform: RDUniform) -> PackedFloat32Array:
 	var points: PackedFloat32Array = PackedFloat32Array();
-	points.resize(resolution * resolution);
+	points.resize(INITIAL_RESOLUTION * INITIAL_RESOLUTION); # TEMP CHANGE
+	
+	var shader_parameters: PackedFloat32Array = PackedFloat32Array([float(INITIAL_RESOLUTION)]); # TEMP CHANGE
+	var parameters_bytes: PackedByteArray = shader_parameters.to_byte_array();
+	var parameters_data := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
+	var parameter_uniform := RDUniform.new();
+	parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+	parameter_uniform.binding = 0 # this needs to match the "binding" in our shader file
+	parameter_uniform.add_id(parameters_data);
 	
 	var points_bytes: PackedByteArray = points.to_byte_array();
 	#var points_data := rendering_device.texture_buffer_create(points_bytes.size(), RenderingDevice.DATA_FORMAT_R32_SFLOAT, points_bytes);
@@ -187,7 +229,7 @@ func smooth_falloff_height_GPU(rendering_device: RenderingDevice, parameter_unif
 	points_uniform.binding = 2 # this needs to match the "binding" in our shader file
 	points_uniform.add_id(points_data);
 	
-	var workgroups = resolution / 32;
+	var workgroups = INITIAL_RESOLUTION / 32; # TEMP CHANGE
 	
 	var uniform_set := rendering_device.uniform_set_create([parameter_uniform, attach_directions_uniform, points_uniform], smooth_falloff_height_compute_shader, 0);
 	
@@ -206,6 +248,7 @@ func smooth_falloff_height_GPU(rendering_device: RenderingDevice, parameter_unif
 	
 	rendering_device.free_rid(uniform_set);
 	rendering_device.free_rid(points_data);
+	rendering_device.free_rid(parameters_data);
 	rendering_device.free_rid(pipeline);
 	
 	return output;
@@ -225,47 +268,26 @@ func generate_GPU(rendering_device: RenderingDevice) -> Image:
 	attach_directions_uniform.binding = 1 # this needs to match the "binding" in our shader file
 	attach_directions_uniform.add_id(attach_directions_data);
 	
-	var parameters: PackedFloat32Array = PackedFloat32Array([seed, float(resolution)]);
+	#var layer_resolution: int = INITIAL_RESOLUTION;
+	#while layer_resolution < resolution:
+		#fill_layer_GPU(layer_resolution, rendering_device, attach_directions_uniform, attach_directions_data);
+		#
+		#var upscaled_data: Array = upscale_layer_GPU(layer_resolution, rendering_device, attach_directions_uniform);
+		#attach_directions_uniform = upscaled_data[0];
+		#attach_directions_uniform.binding = 1; # from 2
+		#rendering_device.free_rid(attach_directions_data);
+		#attach_directions_data = upscaled_data[1];
+		#
+		#layer_resolution *= 2;
+		#print(layer_resolution);
+	#assert(layer_resolution == resolution);
 	
-	var bytes: PackedByteArray = parameters.to_byte_array();
-	var buffer_data := rendering_device.storage_buffer_create(bytes.size(), bytes);
-	var buffer_uniform := RDUniform.new();
-	buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
-	buffer_uniform.binding = 0 # this needs to match the "binding" in our shader file
-	buffer_uniform.add_id(buffer_data);
+	fill_layer_GPU(INITIAL_RESOLUTION, rendering_device, attach_directions_uniform, attach_directions_data); # TEMP CHANGE
+	var points_linear: PackedFloat32Array = smooth_falloff_height_GPU(rendering_device, attach_directions_uniform);
 	
-	var layer_resolution: int = INITIAL_RESOLUTION;
-	while layer_resolution < resolution:
-		fill_layer_GPU(layer_resolution, rendering_device, buffer_uniform, attach_directions_uniform);
-		
-		var upscaled_data: Array = upscale_layer_GPU(layer_resolution, rendering_device, buffer_uniform, attach_directions_uniform);
-		attach_directions_uniform = upscaled_data[0];
-		attach_directions_uniform.binding = 1; # from 2
-		rendering_device.free_rid(attach_directions_data);
-		attach_directions_data = upscaled_data[1];
-		
-		layer_resolution *= 2;
-		print(layer_resolution);
-	assert(layer_resolution == resolution);
-	fill_layer_GPU(resolution, rendering_device, buffer_uniform, attach_directions_uniform);
-	
-	var points: PackedFloat32Array = smooth_falloff_height_GPU(rendering_device, buffer_uniform, attach_directions_uniform);
-	
-	rendering_device.free_rid(buffer_data);
 	rendering_device.free_rid(attach_directions_data);
 	
+	var points: Array[PackedFloat32Array] = points_linear_to_nested(points_linear);
 	var heightmap: Image = points_to_heightmap(points);
-	heightmap = normalise_heightmap(heightmap, rendering_device);
+	#heightmap = normalise_heightmap(heightmap, rendering_device);
 	return heightmap;
-	
-	var points_bytes: PackedByteArray = points.to_byte_array();
-	print(points_bytes.size());
-	#var points_data := rendering_device.texture_buffer_create(points_bytes.size(), RenderingDevice.DATA_FORMAT_R32_SFLOAT, points_bytes);
-	var points_data := rendering_device.storage_buffer_create(points_bytes.size(), points_bytes);
-	var points_uniform := RDUniform.new();
-	points_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
-	points_uniform.binding = 1 # this needs to match the "binding" in our shader file
-	points_uniform.add_id(points_data);
-	
-	var workgroups: int = ceil(float(resolution + 1) / 32); # + 1 for the fact that resolution + 1 x resolution + 1
-	return;

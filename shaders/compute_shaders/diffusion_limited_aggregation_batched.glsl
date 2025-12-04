@@ -22,7 +22,7 @@ float next_rand(ivec2 uv, float seed){ // random 0-1 changes every call
 }
 
 int uv_to_linear(ivec2 uv) {
-	return (uv.y * (int(parameter_buffer.resolution) + 1) + uv.x);
+	return (uv.y * int(parameter_buffer.resolution) + uv.x);
 }
 
 ivec2 next_rand_move(ivec2 uv, float seed){
@@ -35,16 +35,20 @@ ivec2 next_rand_move(ivec2 uv, float seed){
 
 // The code we want to execute in each invocation
 void main() {
-	ivec2 uu = ivec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.x);
+	ivec2 uv = ivec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y);
 	float seed = parameter_buffer.seed;
 	float resolution_float = parameter_buffer.resolution;
 	int resolution = int(resolution_float);
 	
-	ivec2 pos = ivec2(int(next_rand(uu, seed) * (resolution_float)), int(next_rand(uu, seed) * (resolution_float)));
+	ivec2 pos = ivec2(int(next_rand(uv, seed) * (resolution_float)), int(next_rand(uv, seed) * (resolution_float)));
 	int pos_linear = uv_to_linear(pos);
-	if (attach_directions_buffer.data[pos_linear ] != 0) return;
+	if (attach_directions_buffer.data[pos_linear] != 0) return;
 	
-	while (true) {
+	//attach_directions_buffer.data[pos_linear] = int(next_rand(uv, seed) * 4.0);
+	//return;
+	
+	int i = 0;
+	while (i < 1000) {
 		if (attach_directions_buffer.data[uv_to_linear(ivec2(pos.x, max(0, pos.y - 1)))] != 0) {
 			attach_directions_buffer.data[pos_linear] = 1;
 			return;
@@ -57,11 +61,13 @@ void main() {
 			attach_directions_buffer.data[pos_linear] = 3;
 			return;
 		}
-		if (attach_directions_buffer.data[uv_to_linear(ivec2(max(0, pos.x + 1), pos.y))] != 0) {
+		if (attach_directions_buffer.data[uv_to_linear(ivec2(max(0, pos.x - 1), pos.y))] != 0) {
 			attach_directions_buffer.data[pos_linear] = 4;
 			return;
 		}
 		
-		pos = clamp(pos + next_rand_move(uu, seed), 0, resolution - 1);
+		pos = clamp(pos + next_rand_move(uv, seed), 0, resolution - 1);
+		pos_linear = uv_to_linear(pos);
+		i += 1;
 	}
 }

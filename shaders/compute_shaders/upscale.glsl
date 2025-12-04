@@ -21,7 +21,7 @@ layout(set = 0, binding = 2, std430) restrict buffer UpscaledAttachDirectionsBuf
 upscaled_attach_directions_buffer;
 
 int uv_to_linear(ivec2 uv) {
-	return (uv.y * (int(parameter_buffer.resolution) + 1) + uv.x);
+	return (uv.y * int(parameter_buffer.resolution) + uv.x);
 }
 
 ivec2 attach_direction_to_move(int attach_direction){

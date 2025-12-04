@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("2_otslh")
+GPU_accelerated = true
 name = "diffusion_limited_aggregation"
 min_amplitude = 1.0
 max_amplitude = 32.0
