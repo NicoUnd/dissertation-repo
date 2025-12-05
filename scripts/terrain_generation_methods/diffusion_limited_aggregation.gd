@@ -252,7 +252,6 @@ func smooth_falloff_height_GPU(rendering_device: RenderingDevice, attach_directi
 	var output := output_bytes.to_float32_array();
 	
 	rendering_device.free_rid(uniform_set);
-	rendering_device.free_rid(parameters_data);
 	rendering_device.free_rid(pipeline);
 	
 	var points: PackedInt32Array = PackedInt32Array();
