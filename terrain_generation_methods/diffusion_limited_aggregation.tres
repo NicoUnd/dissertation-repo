@@ -22,5 +22,4 @@ min_amplitude = 1.0
 max_amplitude = 32.0
 default_amplitude = 16.0
 parameters = Array[ExtResource("1_77tkw")]([SubResource("Resource_y5v37")])
-can_generate_in_chunks = null
 metadata/_custom_type_script = "uid://b4xxvbdak0nxt"

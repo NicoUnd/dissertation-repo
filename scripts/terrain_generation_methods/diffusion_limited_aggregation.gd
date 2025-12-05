@@ -6,6 +6,7 @@ const INITIAL_RESOLUTION: int = 32;
 var compute_shader;
 var upscale_compute_shader;
 var dla_height_compute_shader;
+var smooth_falloff_compute_shader;
 
 var walk_hops_to_live: int;
 
@@ -16,6 +17,8 @@ func setup(rendering_device: RenderingDevice) -> void:
 	upscale_compute_shader = rendering_device.shader_create_from_spirv(upscale_shader_file.get_spirv());
 	var dla_height_shader_file := load("res://shaders/compute_shaders/DLA_height.glsl");
 	dla_height_compute_shader = rendering_device.shader_create_from_spirv(dla_height_shader_file.get_spirv());
+	var smooth_falloff_shader_file := load("res://shaders/compute_shaders/smooth_falloff.glsl")
+	smooth_falloff_compute_shader = rendering_device.shader_create_from_spirv(smooth_falloff_shader_file.get_spirv());
 
 func setdown(rendering_device: RenderingDevice) -> void:
 	return;
@@ -212,7 +215,47 @@ func upscale_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice,
 	return [upscaled_attach_directions_buffer_uniform, upscaled_attach_directions_buffer_data];
 
 func smooth_falloff_height_GPU(rendering_device: RenderingDevice, attach_directions_uniform: RDUniform) -> PackedFloat32Array:
-	var points: PackedFloat32Array = PackedFloat32Array();
+	var int_points: PackedInt32Array = PackedInt32Array();
+	int_points.resize(resolution * resolution);
+	
+	var shader_parameters: PackedFloat32Array = PackedFloat32Array([float(resolution)]);
+	var parameters_bytes: PackedByteArray = shader_parameters.to_byte_array();
+	var parameters_data := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
+	var parameter_uniform := RDUniform.new();
+	parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+	parameter_uniform.binding = 0 # this needs to match the "binding" in our shader file
+	parameter_uniform.add_id(parameters_data);
+	
+	var int_points_bytes: PackedByteArray = int_points.to_byte_array();
+	#var points_data := rendering_device.texture_buffer_create(points_bytes.size(), RenderingDevice.DATA_FORMAT_R32_SFLOAT, points_bytes);
+	var int_points_data := rendering_device.storage_buffer_create(int_points_bytes.size(), int_points_bytes);
+	var int_points_uniform := RDUniform.new();
+	int_points_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+	int_points_uniform.binding = 2 # this needs to match the "binding" in our shader file
+	int_points_uniform.add_id(int_points_data);
+	
+	var workgroups = resolution / 32;
+	
+	var uniform_set := rendering_device.uniform_set_create([parameter_uniform, attach_directions_uniform, int_points_uniform], dla_height_compute_shader, 0);
+	
+	var pipeline := rendering_device.compute_pipeline_create(dla_height_compute_shader);
+	var compute_list := rendering_device.compute_list_begin();
+	rendering_device.compute_list_bind_compute_pipeline(compute_list, pipeline);
+	rendering_device.compute_list_bind_uniform_set(compute_list, uniform_set, 0);
+	rendering_device.compute_list_dispatch(compute_list, workgroups, workgroups, 1);
+	rendering_device.compute_list_end();
+	
+	rendering_device.submit();
+	rendering_device.sync();
+	
+	var output_bytes := rendering_device.buffer_get_data(points_data);
+	var output := output_bytes.to_float32_array();
+	
+	rendering_device.free_rid(uniform_set);
+	rendering_device.free_rid(parameters_data);
+	rendering_device.free_rid(pipeline);
+	
+	var points: PackedInt32Array = PackedInt32Array();
 	points.resize(resolution * resolution);
 	
 	var shader_parameters: PackedFloat32Array = PackedFloat32Array([float(resolution)]);
@@ -244,9 +287,6 @@ func smooth_falloff_height_GPU(rendering_device: RenderingDevice, attach_directi
 	
 	rendering_device.submit();
 	rendering_device.sync();
-	
-	var output_bytes := rendering_device.buffer_get_data(points_data);
-	var output := output_bytes.to_float32_array();
 	
 	rendering_device.free_rid(uniform_set);
 	rendering_device.free_rid(points_data);
