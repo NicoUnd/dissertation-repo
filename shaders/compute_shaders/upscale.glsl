@@ -24,6 +24,10 @@ int uv_to_linear(ivec2 uv) {
 	return (uv.y * int(parameter_buffer.resolution) + uv.x);
 }
 
+int upscaled_uv_to_linear(ivec2 uv) {
+	return (uv.y * int(parameter_buffer.resolution) * 2 + uv.x);
+}
+
 ivec2 attach_direction_to_move(int attach_direction){
 	if (attach_direction == 1) return ivec2(0, -1);
 	if (attach_direction == 2) return ivec2(1, 0);
@@ -44,6 +48,6 @@ void main() {
 	int resolution = int(resolution_float);
 	ivec2 upscaled_uv = uv * 2;
 	
-	upscaled_attach_directions_buffer.data[uv_to_linear(upscaled_uv)] = attach_direction;
-	upscaled_attach_directions_buffer.data[uv_to_linear(upscaled_uv + attach_direction_to_move(attach_direction))] = attach_direction;
+	upscaled_attach_directions_buffer.data[upscaled_uv_to_linear(upscaled_uv)] = attach_direction;
+	upscaled_attach_directions_buffer.data[upscaled_uv_to_linear(upscaled_uv + attach_direction_to_move(attach_direction))] = attach_direction;
 }

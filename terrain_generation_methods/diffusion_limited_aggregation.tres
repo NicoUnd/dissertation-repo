@@ -1,7 +1,18 @@
-[gd_resource type="Resource" script_class="DiffusionLimitedAggregation" load_steps=3 format=3 uid="uid://c2vmmpdikh121"]
+[gd_resource type="Resource" script_class="DiffusionLimitedAggregation" load_steps=5 format=3 uid="uid://c2vmmpdikh121"]
 
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="1_77tkw"]
+[ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/parameters/parameter_number.gd" id="2_d0pff"]
 [ext_resource type="Script" uid="uid://b4xxvbdak0nxt" path="res://scripts/terrain_generation_methods/diffusion_limited_aggregation.gd" id="2_otslh"]
+
+[sub_resource type="Resource" id="Resource_y5v37"]
+script = ExtResource("2_d0pff")
+min_value = 1024.0
+max_value = 65536.0
+is_int = true
+is_exp = true
+name = "walk_hops_to_live"
+value = 8192
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
 [resource]
 script = ExtResource("2_otslh")
@@ -10,4 +21,6 @@ name = "diffusion_limited_aggregation"
 min_amplitude = 1.0
 max_amplitude = 32.0
 default_amplitude = 16.0
+parameters = Array[ExtResource("1_77tkw")]([SubResource("Resource_y5v37")])
+can_generate_in_chunks = null
 metadata/_custom_type_script = "uid://b4xxvbdak0nxt"

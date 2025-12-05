@@ -7,6 +7,7 @@ layout(local_size_x = 2, local_size_y = 2, local_size_z = 1) in;
 layout(set = 0, binding = 0, std430) restrict buffer Parameters {
 	float seed;
 	float resolution;
+	float hops_to_live;
 }
 parameter_buffer;
 
@@ -15,9 +16,9 @@ layout(set = 0, binding = 1, std430) restrict buffer AttachDirectionsBuffer {
 }
 attach_directions_buffer;
 
-float rand_state = 0.0;
+float rand_state = 1.0;
 float next_rand(ivec2 uv, float seed){ // random 0-1 changes every call
-	rand_state += 1.0;
+	rand_state += 0.2;
 	return fract(sin(dot(vec2(uv), vec2(12.9898 + rand_state * 2.31, 78.233 + rand_state * 0.813))) * 437.5453 * seed * rand_state);
 }
 
@@ -47,8 +48,8 @@ void main() {
 	//attach_directions_buffer.data[pos_linear] = int(next_rand(uv, seed) * 4.0);
 	//return;
 	
-	int i = 0;
-	while (i < 1000) {
+	int hops_to_live = int(parameter_buffer.hops_to_live);
+	while (hops_to_live > 0) {
 		if (attach_directions_buffer.data[uv_to_linear(ivec2(pos.x, max(0, pos.y - 1)))] != 0) {
 			attach_directions_buffer.data[pos_linear] = 1;
 			return;
@@ -68,6 +69,6 @@ void main() {
 		
 		pos = clamp(pos + next_rand_move(uv, seed), 0, resolution - 1);
 		pos_linear = uv_to_linear(pos);
-		i += 1;
+		hops_to_live -= 1;
 	}
 }

@@ -10,10 +10,10 @@ layout(set = 0, binding = 0, std430) restrict buffer Parameters {
 }
 parameter_buffer;
 
-layout(set = 0, binding = 1, std430) restrict buffer AttachDirectionsBuffer {
+layout(set = 0, binding = 1, std430) restrict buffer IntPointsBuffer {
 	int data[];
 }
-attach_directions_buffer;
+int_points_buffer;
 
 layout(set = 0, binding = 2, std430) restrict buffer PointsBuffer {
 	int data[];

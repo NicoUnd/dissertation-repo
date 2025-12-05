@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://bnrpg3iqp3dkr"
+path="res://.godot/imported/smooth_falloff.glsl-074a26c8327e12370f27785e692c31fe.res"
+
+[deps]
+
+source_file="res://shaders/compute_shaders/smooth_falloff.glsl"
+dest_files=["res://.godot/imported/smooth_falloff.glsl-074a26c8327e12370f27785e692c31fe.res"]
+
+[params]
+

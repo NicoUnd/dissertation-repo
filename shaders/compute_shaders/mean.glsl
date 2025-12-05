@@ -1,6 +1,6 @@
 #[compute]
 #version 450
-#extension GL_EXT_shader_atomic_float : enable
+#extension GL_EXT_shader_atomic_float : require
 
 // Invocations in the (x, y, z) dimension
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
