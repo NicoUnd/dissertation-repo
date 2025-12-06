@@ -38,20 +38,18 @@ void main() {
 	int attach_direction = attach_directions_buffer.data[pos_linear];
 	if (attach_direction != 0) {
 		atomicMax(points_buffer.data[pos_linear], 1);
-		return;
 		
 		int resolution = int(parameter_buffer.resolution);
 		
 		int step = 1;
 		ivec2 centre = ivec2(resolution / 2, resolution / 2);
-		return;
 		while (pos != centre && step < 10) {
 			// move
 			pos += attach_direction_to_move(attach_directions_buffer.data[pos_linear]);
 			pos_linear = uv_to_linear(pos);
 			step += 1;
 			
-			// set_smooth_falloff
+			// set dla height
 			atomicMax(points_buffer.data[pos_linear], step);
 		}
 	}

@@ -215,6 +215,8 @@ func upscale_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice,
 	return [upscaled_attach_directions_buffer_uniform, upscaled_attach_directions_buffer_data];
 
 func smooth_falloff_height_GPU(rendering_device: RenderingDevice, attach_directions_uniform: RDUniform) -> PackedFloat32Array:
+	var workgroups = resolution / 32;
+	
 	var int_points: PackedInt32Array = PackedInt32Array();
 	int_points.resize(resolution * resolution);
 	
@@ -234,8 +236,6 @@ func smooth_falloff_height_GPU(rendering_device: RenderingDevice, attach_directi
 	int_points_uniform.binding = 2 # this needs to match the "binding" in our shader file
 	int_points_uniform.add_id(int_points_data);
 	
-	var workgroups = resolution / 32;
-	
 	var uniform_set := rendering_device.uniform_set_create([parameter_uniform, attach_directions_uniform, int_points_uniform], dla_height_compute_shader, 0);
 	
 	var pipeline := rendering_device.compute_pipeline_create(dla_height_compute_shader);
@@ -248,37 +248,26 @@ func smooth_falloff_height_GPU(rendering_device: RenderingDevice, attach_directi
 	rendering_device.submit();
 	rendering_device.sync();
 	
-	var output_bytes := rendering_device.buffer_get_data(points_data);
-	var output := output_bytes.to_float32_array();
-	
 	rendering_device.free_rid(uniform_set);
 	rendering_device.free_rid(pipeline);
 	
-	var points: PackedInt32Array = PackedInt32Array();
-	points.resize(resolution * resolution);
 	
-	var shader_parameters: PackedFloat32Array = PackedFloat32Array([float(resolution)]);
-	var parameters_bytes: PackedByteArray = shader_parameters.to_byte_array();
-	var parameters_data := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
-	var parameter_uniform := RDUniform.new();
-	parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
-	parameter_uniform.binding = 0 # this needs to match the "binding" in our shader file
-	parameter_uniform.add_id(parameters_data);
+	# smooth_falloff
+	var points: PackedFloat32Array = PackedFloat32Array();
+	points.resize(resolution * resolution);
 	
 	var points_bytes: PackedByteArray = points.to_byte_array();
 	#var points_data := rendering_device.texture_buffer_create(points_bytes.size(), RenderingDevice.DATA_FORMAT_R32_SFLOAT, points_bytes);
 	var points_data := rendering_device.storage_buffer_create(points_bytes.size(), points_bytes);
 	var points_uniform := RDUniform.new();
 	points_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
-	points_uniform.binding = 2 # this needs to match the "binding" in our shader file
+	points_uniform.binding = 1 # this needs to match the "binding" in our shader file
 	points_uniform.add_id(points_data);
 	
-	var workgroups = resolution / 32;
+	uniform_set = rendering_device.uniform_set_create([parameter_uniform, points_uniform, int_points_uniform], smooth_falloff_compute_shader, 0);
 	
-	var uniform_set := rendering_device.uniform_set_create([parameter_uniform, attach_directions_uniform, points_uniform], dla_height_compute_shader, 0);
-	
-	var pipeline := rendering_device.compute_pipeline_create(dla_height_compute_shader);
-	var compute_list := rendering_device.compute_list_begin();
+	pipeline = rendering_device.compute_pipeline_create(smooth_falloff_compute_shader);
+	compute_list = rendering_device.compute_list_begin();
 	rendering_device.compute_list_bind_compute_pipeline(compute_list, pipeline);
 	rendering_device.compute_list_bind_uniform_set(compute_list, uniform_set, 0);
 	rendering_device.compute_list_dispatch(compute_list, workgroups, workgroups, 1);
@@ -287,8 +276,12 @@ func smooth_falloff_height_GPU(rendering_device: RenderingDevice, attach_directi
 	rendering_device.submit();
 	rendering_device.sync();
 	
+	var output_bytes := rendering_device.buffer_get_data(points_data);
+	var output := output_bytes.to_float32_array();
+	
 	rendering_device.free_rid(uniform_set);
 	rendering_device.free_rid(points_data);
+	rendering_device.free_rid(int_points_data);
 	rendering_device.free_rid(parameters_data);
 	rendering_device.free_rid(pipeline);
 	

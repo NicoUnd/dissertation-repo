@@ -46,7 +46,7 @@ var rendering_device: RenderingDevice;
 					var resolution_strings: Array[String] = [];
 					for resoluton: int in TerrainGenerationMethodExplicit.RESOLUTIONS:
 						resolution_strings.append(str(resoluton) + "x" + str(resoluton));
-					ui.add_parameter(ParameterEnum.new("resolution", 2, resolution_strings), true);
+					ui.add_parameter(ParameterEnum.new("resolution", 5, resolution_strings), true);
 				
 				var amplitude: float = terrain_generation_method.default_amplitude;
 				ui.add_parameter(ParameterNumber.new("amplitude", amplitude, terrain_generation_method.min_amplitude, terrain_generation_method.max_amplitude, false, false, true), true);

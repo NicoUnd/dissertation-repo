@@ -2,7 +2,7 @@
 extends TerrainGenerationMethod;
 class_name TerrainGenerationMethodExplicit;
 
-const RESOLUTIONS: Array[int] = [256, 512, 1024, 2048, 4096];
+const RESOLUTIONS: Array[int] = [32, 64, 128, 256, 512, 1024, 2048, 4096];
 
 const HEIGHTMAP_SHADER = preload("uid://deuuby3m21rbw");
 const HEIGHTMAP_UNSHADED_SHADER = preload("uid://cq77nryhphey4");
