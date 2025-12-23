@@ -93,23 +93,21 @@ seed = 44.801236265629406
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(0.8632697, 0, 0.50473994, 0, 1, 0, -0.50473994, 0, 0.8632697, 0, 0, 0)
+transform = Transform3D(-0.9966046, 0, 0.082317926, 0, 1, 0, -0.082317926, 0, -0.9966046, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot"]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
 cull_mask = 1048573
 environment = SubResource("Environment_tefeu")
+current = true
 
 [node name="VisualisationOrthographicCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot"]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 0.76379603, 0.6454577, 0, -0.6454577, 0.76379603, 0, 45.542, 52.96)
 environment = SubResource("Environment_tefeu")
 projection = 1
-current = true
 size = 70.0
-
-[node name="FreeroamCamera3D" type="Camera3D" parent="VisualisationViewport"]
 
 [node name="HeightmapViewport" type="SubViewport" parent="."]
 unique_name_in_owner = true

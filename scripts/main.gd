@@ -7,6 +7,8 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 @onready var heightmap_viewport: SubViewport = %HeightmapViewport;
 
 @onready var visualisation_camera_pivot: Node3D = %VisualisationCameraPivot
+@onready var visualisation_perspective_camera_3d: Camera3D = %VisualisationPerspectiveCamera3D
+@onready var visualisation_orthographic_camera_3d: Camera3D = %VisualisationOrthographicCamera3D
 
 @onready var terrain_generation_method_visualiser: TerrainGenerationMethodVisualiser = %TerrainGenerationMethodVisualiser
 @onready var heightmap_terrain_generation_method_visualiser: TerrainGenerationMethodVisualiser = %HeightmapTerrainGenerationMethodVisualiser
@@ -55,11 +57,10 @@ var rendering_device: RenderingDevice;
 				
 				ui.set_terrain_generation_method_specific_parameters(terrain_generation_method.parameters);
 				if terrain_generation_method is TerrainGenerationMethodExplicit:
-					if terrain_generation_method.GPU_accelerated:
+					if terrain_generation_method.can_generate_CPU:
 						ui.add_parameter(ParameterButton.new("generate_CPU"), true);
+					if terrain_generation_method.can_generate_GPU:
 						ui.add_parameter(ParameterButton.new("generate_GPU"), true);
-					else:
-						ui.add_parameter(ParameterButton.new("generate"), true);
 			if terrain_generation_method is TerrainGenerationMethodExplicit:
 				terrain_generation_method.setup(rendering_device);
 		if heightmap_viewport:
@@ -80,6 +81,15 @@ func _ready() -> void:
 	
 	timer.start();
 
+func set_camera_type(camera_type: int) -> void:
+	match camera_type:
+		0:
+			visualisation_orthographic_camera_3d.current = false;
+			visualisation_perspective_camera_3d.current = true;
+		1:
+			visualisation_perspective_camera_3d.current = false;
+			visualisation_orthographic_camera_3d.current = true;
+
 func set_parameter(parameter_name: String, parameter_value: Variant, is_terrain_generation_method_specific: bool=true) -> void:
 	if parameter_name == "auto_randomise_seed":
 		auto_randomise_seed = parameter_value;
@@ -93,6 +103,9 @@ func set_parameter(parameter_name: String, parameter_value: Variant, is_terrain_
 	elif parameter_name in ["albedo_type", "unshaded"]:
 		terrain_generation_method_visualiser.set(parameter_name, parameter_value);
 		return;
+	elif parameter_name == "camera_type":
+		set_camera_type(parameter_value);
+		return;
 	elif parameter_name == "terrain_generation_method":
 		terrain_generation_method = TerrainGenerationMethodVisualiser.TERRAIN_GENERATION_METHODS[parameter_value];
 		return;
@@ -100,9 +113,9 @@ func set_parameter(parameter_name: String, parameter_value: Variant, is_terrain_
 		assert(terrain_generation_method is TerrainGenerationMethodExplicit);
 		var heightmap: Image;
 		if parameter_name == "generate_GPU":
-			assert(terrain_generation_method.GPU_accelerated);
+			assert(terrain_generation_method.can_generate_GPU);
 			heightmap = terrain_generation_method.generate_GPU(rendering_device);
-		else: # could be "generate" or "generate_CPU"
+		else: # "generate_CPU"
 			heightmap = terrain_generation_method.generate_CPU(rendering_device);
 		var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
 		terrain_generation_method_visualiser.mesh.material.set_shader_parameter("heightmap", heightmap_texture);
@@ -203,7 +216,7 @@ func generate_statistics() -> void:
 				var start_time = Time.get_ticks_msec();
 				if terrain_generation_method is TerrainGenerationMethodExplicit:
 					terrain_generation_method.resolution = heightmap_resolution;
-					if terrain_generation_method.GPU_accelerated:
+					if terrain_generation_method.can_generate_GPU:
 						heightmap = terrain_generation_method.generate_GPU(rendering_device);
 					else:
 						heightmap = terrain_generation_method.generate_CPU(rendering_device);

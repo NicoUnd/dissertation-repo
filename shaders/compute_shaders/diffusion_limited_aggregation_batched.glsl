@@ -26,12 +26,20 @@ int uv_to_linear(ivec2 uv) {
 	return (uv.y * int(parameter_buffer.resolution) + uv.x);
 }
 
+ivec2 attach_direction_to_move(int attach_direction){
+	if (attach_direction == 1) return ivec2(0, -1);
+	if (attach_direction == 2) return ivec2(1, 0);
+	if (attach_direction == 3) return ivec2(0, 1);
+	if (attach_direction == 4) return ivec2(-1, 0);
+	if (attach_direction == 5) return ivec2(1, -1);
+	if (attach_direction == 6) return ivec2(1, 1);
+	if (attach_direction == 7) return ivec2(-1, 1);
+	return ivec2(-1, -1); // attach_direction == 8
+}
+
 ivec2 next_rand_move(ivec2 uv, float seed){
-	int move = int(next_rand(uv, seed) * 4.0);
-	if (move == 0) return ivec2(0, -1);
-	if (move == 1) return ivec2(1, 0);
-	if (move == 2) return ivec2(0, 1);
-	return ivec2(-1, 0); // move == 3
+	int attach_direction = int(next_rand(uv, seed) * 4.0) + 1; // cant move diagonal
+	return attach_direction_to_move(attach_direction);
 }
 
 // The code we want to execute in each invocation

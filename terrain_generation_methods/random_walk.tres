@@ -39,6 +39,7 @@ metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
 [resource]
 script = ExtResource("1_fp4ug")
+can_generate_CPU = true
 name = "random_walk"
 min_amplitude = 1.0
 max_amplitude = 16.0

@@ -92,12 +92,12 @@ static func get_slopemap_data_GPU(heightmap: Image, rendering_device: RenderingD
 	var resolution: int = heightmap.get_width();
 	
 	var heightmap_bytes: PackedByteArray = heightmap.get_data();
-	var texture_data := RDTextureFormat.new();
-	texture_data.width = resolution;
-	texture_data.height = resolution;
-	texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT;
-	texture_data.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
-	var gpu_texture = rendering_device.texture_create(texture_data, RDTextureView.new(), [heightmap_bytes]);
+	var texture_format := RDTextureFormat.new();
+	texture_format.width = resolution;
+	texture_format.height = resolution;
+	texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT;
+	texture_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var texture_RID = rendering_device.texture_create(texture_format, RDTextureView.new(), [heightmap_bytes]);
 	
 	var sampler_state = RDSamplerState.new();
 	sampler_state.unnormalized_uvw = true;
@@ -107,28 +107,28 @@ static func get_slopemap_data_GPU(heightmap: Image, rendering_device: RenderingD
 	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE;
 	texture_uniform.binding = 0;
 	texture_uniform.add_id(sampler);
-	texture_uniform.add_id(gpu_texture);
+	texture_uniform.add_id(texture_RID);
 	
 	var slopemap_bytes = PackedByteArray();
 	slopemap_bytes.resize(resolution * resolution * 4);
-	var slopemap_texture_data := RDTextureFormat.new();
-	slopemap_texture_data.width = resolution;
-	slopemap_texture_data.height = resolution;
-	slopemap_texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT;
-	slopemap_texture_data.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
-	var slopemap_gpu_texture = rendering_device.texture_create(slopemap_texture_data, RDTextureView.new(), [slopemap_bytes]);
+	var slopemap_texture_format := RDTextureFormat.new();
+	slopemap_texture_format.width = resolution;
+	slopemap_texture_format.height = resolution;
+	slopemap_texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT;
+	slopemap_texture_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var slopemap_texture_RID = rendering_device.texture_create(slopemap_texture_format, RDTextureView.new(), [slopemap_bytes]);
 	
 	var slopemap_texture_uniform := RDUniform.new();
 	slopemap_texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
 	slopemap_texture_uniform.binding = 1;
-	slopemap_texture_uniform.add_id(slopemap_gpu_texture);
+	slopemap_texture_uniform.add_id(slopemap_texture_RID);
 	
 	var bytes: PackedByteArray = PackedInt32Array([resolution]).to_byte_array();
-	var resolution_buffer_data := rendering_device.storage_buffer_create(bytes.size(), bytes);
+	var resolution_buffer_RID := rendering_device.storage_buffer_create(bytes.size(), bytes);
 	var buffer_uniform := RDUniform.new();
 	buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
 	buffer_uniform.binding = 2 # this needs to match the "binding" in our shader file
-	buffer_uniform.add_id(resolution_buffer_data);
+	buffer_uniform.add_id(resolution_buffer_RID);
 	
 	var uniform_set := rendering_device.uniform_set_create([texture_uniform, slopemap_texture_uniform, buffer_uniform], compute_shader, 0);
 	
@@ -144,15 +144,15 @@ static func get_slopemap_data_GPU(heightmap: Image, rendering_device: RenderingD
 	rendering_device.submit();
 	rendering_device.sync();
 	
-	var output_bytes: PackedByteArray = rendering_device.texture_get_data(slopemap_gpu_texture, 0);
+	var output_bytes: PackedByteArray = rendering_device.texture_get_data(slopemap_texture_RID, 0);
 	
 	rendering_device.free_rid(uniform_set);
 	rendering_device.free_rid(pipeline);
 	rendering_device.free_rid(compute_shader);
-	rendering_device.free_rid(resolution_buffer_data);
-	rendering_device.free_rid(gpu_texture);
+	rendering_device.free_rid(resolution_buffer_RID);
+	rendering_device.free_rid(texture_RID);
 	rendering_device.free_rid(sampler);
-	rendering_device.free_rid(slopemap_gpu_texture);
+	rendering_device.free_rid(slopemap_texture_RID);
 	
 	return output_bytes;
 
@@ -161,11 +161,11 @@ static func mean_GPU(resolution: int, rendering_device: RenderingDevice, texture
 	var compute_shader := rendering_device.shader_create_from_spirv(shader_file.get_spirv());
 	
 	var bytes: PackedByteArray = PackedFloat32Array([float(0)]).to_byte_array();
-	var total_buffer_data := rendering_device.storage_buffer_create(bytes.size(), bytes);
+	var total_buffer_RID := rendering_device.storage_buffer_create(bytes.size(), bytes);
 	var buffer_uniform := RDUniform.new();
 	buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
 	buffer_uniform.binding = 1 # this needs to match the "binding" in our shader file
-	buffer_uniform.add_id(total_buffer_data);
+	buffer_uniform.add_id(total_buffer_RID);
 	
 	var uniform_set := rendering_device.uniform_set_create([texture_uniform, buffer_uniform], compute_shader, 0);
 	
@@ -181,13 +181,13 @@ static func mean_GPU(resolution: int, rendering_device: RenderingDevice, texture
 	rendering_device.submit();
 	rendering_device.sync();
 	
-	var output_bytes: PackedByteArray = rendering_device.buffer_get_data(total_buffer_data);
+	var output_bytes: PackedByteArray = rendering_device.buffer_get_data(total_buffer_RID);
 	var mean: float = output_bytes.to_float32_array()[0] / (resolution * resolution);
 	
 	rendering_device.free_rid(uniform_set);
 	rendering_device.free_rid(pipeline);
 	rendering_device.free_rid(compute_shader);
-	rendering_device.free_rid(total_buffer_data);
+	rendering_device.free_rid(total_buffer_RID);
 	
 	return mean;
 
@@ -196,11 +196,11 @@ static func std_dev_GPU(resolution: int, rendering_device: RenderingDevice, text
 	var compute_shader := rendering_device.shader_create_from_spirv(shader_file.get_spirv());
 	
 	var bytes: PackedByteArray = PackedFloat32Array([mean, float(0)]).to_byte_array();
-	var parameter_buffer_data := rendering_device.storage_buffer_create(bytes.size(), bytes);
+	var parameter_buffer_RID := rendering_device.storage_buffer_create(bytes.size(), bytes);
 	var buffer_uniform := RDUniform.new();
 	buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
 	buffer_uniform.binding = 1 # this needs to match the "binding" in our shader file
-	buffer_uniform.add_id(parameter_buffer_data);
+	buffer_uniform.add_id(parameter_buffer_RID);
 	
 	var uniform_set := rendering_device.uniform_set_create([texture_uniform, buffer_uniform], compute_shader, 0);
 	
@@ -216,13 +216,13 @@ static func std_dev_GPU(resolution: int, rendering_device: RenderingDevice, text
 	rendering_device.submit();
 	rendering_device.sync();
 	
-	var output_bytes: PackedByteArray = rendering_device.buffer_get_data(parameter_buffer_data);
+	var output_bytes: PackedByteArray = rendering_device.buffer_get_data(parameter_buffer_RID);
 	var std_dev: float = sqrt(output_bytes.to_float32_array()[1] / (resolution * resolution));
 	
 	rendering_device.free_rid(uniform_set);
 	rendering_device.free_rid(pipeline);
 	rendering_device.free_rid(compute_shader);
-	rendering_device.free_rid(parameter_buffer_data);
+	rendering_device.free_rid(parameter_buffer_RID);
 	
 	return std_dev;
 
@@ -274,12 +274,12 @@ static func get_erosion_score(heightmap: Image, rendering_device: RenderingDevic
 	#var std_dev_CPU: float = sqrt(total_CPU / (resolution * resolution));
 	#print("std_dev_CPU", str(std_dev_CPU));
 	
-	var texture_data := RDTextureFormat.new();
-	texture_data.width = resolution;
-	texture_data.height = resolution;
-	texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT;
-	texture_data.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
-	var gpu_texture = rendering_device.texture_create(texture_data, RDTextureView.new(), [slopemap_bytes]);
+	var texture_format := RDTextureFormat.new();
+	texture_format.width = resolution;
+	texture_format.height = resolution;
+	texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT;
+	texture_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var texture_RID = rendering_device.texture_create(texture_format, RDTextureView.new(), [slopemap_bytes]);
 	
 	var sampler_state = RDSamplerState.new();
 	sampler_state.unnormalized_uvw = true;
@@ -289,7 +289,7 @@ static func get_erosion_score(heightmap: Image, rendering_device: RenderingDevic
 	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE;
 	texture_uniform.binding = 0
 	texture_uniform.add_id(sampler);
-	texture_uniform.add_id(gpu_texture);
+	texture_uniform.add_id(texture_RID);
 	
 	var mean: float = mean_GPU(resolution, rendering_device, texture_uniform);
 	if mean == 0:
@@ -299,7 +299,7 @@ static func get_erosion_score(heightmap: Image, rendering_device: RenderingDevic
 	print("std_dev" + str(std_dev));
 	
 	rendering_device.free_rid(sampler);
-	rendering_device.free_rid(gpu_texture);
+	rendering_device.free_rid(texture_RID);
 	
 	return std_dev / mean;
 
@@ -310,12 +310,12 @@ static func max_min_GPU(heightmap: Image, rendering_device: RenderingDevice) -> 
 	var resolution: int = heightmap.get_width();
 	
 	var heightmap_bytes: PackedByteArray = heightmap.get_data();
-	var texture_data := RDTextureFormat.new();
-	texture_data.width = resolution;
-	texture_data.height = resolution;
-	texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT;
-	texture_data.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
-	var gpu_texture = rendering_device.texture_create(texture_data, RDTextureView.new(), [heightmap_bytes]);
+	var texture_format := RDTextureFormat.new();
+	texture_format.width = resolution;
+	texture_format.height = resolution;
+	texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT;
+	texture_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var texture_RID = rendering_device.texture_create(texture_format, RDTextureView.new(), [heightmap_bytes]);
 	
 	var sampler_state = RDSamplerState.new();
 	sampler_state.unnormalized_uvw = true;
@@ -325,14 +325,14 @@ static func max_min_GPU(heightmap: Image, rendering_device: RenderingDevice) -> 
 	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE;
 	texture_uniform.binding = 0
 	texture_uniform.add_id(sampler);
-	texture_uniform.add_id(gpu_texture);
+	texture_uniform.add_id(texture_RID);
 	
 	var bytes: PackedByteArray = PackedInt32Array([int(0), int(255)]).to_byte_array();
-	var max_min_buffer_data := rendering_device.storage_buffer_create(bytes.size(), bytes);
+	var max_min_buffer_RID := rendering_device.storage_buffer_create(bytes.size(), bytes);
 	var buffer_uniform := RDUniform.new();
 	buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
 	buffer_uniform.binding = 1 # this needs to match the "binding" in our shader file
-	buffer_uniform.add_id(max_min_buffer_data);
+	buffer_uniform.add_id(max_min_buffer_RID);
 	
 	var uniform_set := rendering_device.uniform_set_create([texture_uniform, buffer_uniform], compute_shader, 0);
 	
@@ -351,12 +351,12 @@ static func max_min_GPU(heightmap: Image, rendering_device: RenderingDevice) -> 
 	rendering_device.free_rid(uniform_set);
 	rendering_device.free_rid(pipeline);
 	rendering_device.free_rid(compute_shader);
-	rendering_device.free_rid(gpu_texture);
+	rendering_device.free_rid(texture_RID);
 	rendering_device.free_rid(sampler);
 	
-	return max_min_buffer_data;
+	return max_min_buffer_RID;
 
-static func normalise_GPU(heightmap: Image, max_min_buffer_data: RID, rendering_device: RenderingDevice) -> Image:
+static func normalise_GPU(heightmap: Image, max_min_buffer_RID: RID, rendering_device: RenderingDevice) -> Image:
 	var shader_file := load("res://shaders/compute_shaders/normalise.glsl");
 	var compute_shader := rendering_device.shader_create_from_spirv(shader_file.get_spirv());
 	
@@ -368,17 +368,17 @@ static func normalise_GPU(heightmap: Image, max_min_buffer_data: RID, rendering_
 	texture_data.height = resolution;
 	texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT;
 	texture_data.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
-	var gpu_texture = rendering_device.texture_create(texture_data, RDTextureView.new(), [heightmap_bytes]);
+	var texture_RID = rendering_device.texture_create(texture_data, RDTextureView.new(), [heightmap_bytes]);
 	
 	var texture_uniform := RDUniform.new();
 	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
 	texture_uniform.binding = 0;
-	texture_uniform.add_id(gpu_texture);
+	texture_uniform.add_id(texture_RID);
 	
 	var buffer_uniform := RDUniform.new();
 	buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
 	buffer_uniform.binding = 1 # this needs to match the "binding" in our shader file
-	buffer_uniform.add_id(max_min_buffer_data);
+	buffer_uniform.add_id(max_min_buffer_RID);
 	
 	var uniform_set := rendering_device.uniform_set_create([texture_uniform, buffer_uniform], compute_shader, 0);
 	
@@ -394,13 +394,13 @@ static func normalise_GPU(heightmap: Image, max_min_buffer_data: RID, rendering_
 	rendering_device.submit();
 	rendering_device.sync();
 	
-	var bytes: PackedByteArray = rendering_device.texture_get_data(gpu_texture, 0);
+	var bytes: PackedByteArray = rendering_device.texture_get_data(texture_RID, 0);
 	
 	rendering_device.free_rid(uniform_set);
 	rendering_device.free_rid(pipeline);
 	rendering_device.free_rid(compute_shader);
-	rendering_device.free_rid(gpu_texture);
-	rendering_device.free_rid(max_min_buffer_data);
+	rendering_device.free_rid(texture_RID);
+	rendering_device.free_rid(max_min_buffer_RID);
 	
 	return Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, bytes);
 
@@ -415,43 +415,43 @@ static func gaussian_blur(heightmap: Image, blur_size: int, rendering_device: Re
 	var resolution: int = heightmap.get_width();
 	
 	var heightmap_bytes: PackedByteArray = heightmap.get_data();
-	var texture_data := RDTextureFormat.new();
-	texture_data.width = resolution;
-	texture_data.height = resolution;
-	texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT;
-	texture_data.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
-	var gpu_texture = rendering_device.texture_create(texture_data, RDTextureView.new(), [heightmap_bytes]);
+	var texture_format := RDTextureFormat.new();
+	texture_format.width = resolution;
+	texture_format.height = resolution;
+	texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT;
+	texture_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var texture_RID = rendering_device.texture_create(texture_format, RDTextureView.new(), [heightmap_bytes]);
 	
 	var texture_uniform := RDUniform.new();
 	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
 	texture_uniform.binding = 1;
-	texture_uniform.add_id(gpu_texture);
+	texture_uniform.add_id(texture_RID);
 	
 	var blurred_heightmap_bytes: PackedByteArray = PackedByteArray();
 	blurred_heightmap_bytes.resize(resolution * resolution * 4);
-	var blurred_texture_data := RDTextureFormat.new();
-	blurred_texture_data.width = resolution;
-	blurred_texture_data.height = resolution;
-	blurred_texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT;
-	blurred_texture_data.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
-	var blurred_gpu_texture = rendering_device.texture_create(blurred_texture_data, RDTextureView.new(), [blurred_heightmap_bytes]);
+	var blurred_texture_format := RDTextureFormat.new();
+	blurred_texture_format.width = resolution;
+	blurred_texture_format.height = resolution;
+	blurred_texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT;
+	blurred_texture_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var blurred_texture_RID = rendering_device.texture_create(blurred_texture_format, RDTextureView.new(), [blurred_heightmap_bytes]);
 	
 	var blurred_texture_uniform := RDUniform.new();
 	blurred_texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
 	blurred_texture_uniform.binding = 2;
-	blurred_texture_uniform.add_id(blurred_gpu_texture);
+	blurred_texture_uniform.add_id(blurred_texture_RID);
 	
 	for horizontal: bool in [true, false]:
 		var parameters: PackedFloat32Array = PackedFloat32Array([float(horizontal), float(blur_size), float(blur_size) / 3, float(resolution)]); # 99.7% of a Gaussian distriution falls in 3 standard deviations
 		
-		var bytes: PackedByteArray = parameters.to_byte_array();
-		var buffer_data := rendering_device.storage_buffer_create(bytes.size(), bytes);
-		var buffer_uniform := RDUniform.new();
-		buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
-		buffer_uniform.binding = 0 # this needs to match the "binding" in our shader file
-		buffer_uniform.add_id(buffer_data);
+		var parameters_bytes: PackedByteArray = parameters.to_byte_array();
+		var parameters_buffer_RID := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
+		var parameters_buffer_uniform := RDUniform.new();
+		parameters_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+		parameters_buffer_uniform.binding = 0 # this needs to match the "binding" in our shader file
+		parameters_buffer_uniform.add_id(parameters_buffer_RID);
 		
-		var uniform_set := rendering_device.uniform_set_create([buffer_uniform, texture_uniform, blurred_texture_uniform], compute_shader, 0);
+		var uniform_set := rendering_device.uniform_set_create([parameters_buffer_uniform, texture_uniform, blurred_texture_uniform], compute_shader, 0);
 		
 		var pipeline := rendering_device.compute_pipeline_create(compute_shader);
 		var compute_list := rendering_device.compute_list_begin();
@@ -467,12 +467,12 @@ static func gaussian_blur(heightmap: Image, blur_size: int, rendering_device: Re
 		
 		rendering_device.free_rid(uniform_set);
 		rendering_device.free_rid(pipeline);
-		rendering_device.free_rid(buffer_data);
+		rendering_device.free_rid(parameters_buffer_RID);
 	
-	var output_bytes: PackedByteArray = rendering_device.texture_get_data(gpu_texture, 0); # use original GPU texture not blurred_GPU_texture as pass 1 will use image1 as input and image2 as output, then pass 2 will use image1 as output
+	var output_bytes: PackedByteArray = rendering_device.texture_get_data(texture_RID, 0); # use original GPU texture not blurred_GPU_texture as pass 1 will use image1 as input and image2 as output, then pass 2 will use image1 as output
 	
-	rendering_device.free_rid(gpu_texture);
-	rendering_device.free_rid(blurred_gpu_texture);
+	rendering_device.free_rid(texture_RID);
+	rendering_device.free_rid(blurred_texture_RID);
 	rendering_device.free_rid(compute_shader);
 	
 	return Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, output_bytes);

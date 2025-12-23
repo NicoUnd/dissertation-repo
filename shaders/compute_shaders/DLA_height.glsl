@@ -34,6 +34,8 @@ ivec2 attach_direction_to_move(int attach_direction){
 // The code we want to execute in each invocation
 void main() {
 	ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+	ivec2 last_pos = pos;
+	ivec2 last_last_pos = last_pos;
 	int pos_linear = uv_to_linear(pos);
 	int attach_direction = attach_directions_buffer.data[pos_linear];
 	if (attach_direction != 0) {
@@ -43,9 +45,12 @@ void main() {
 		
 		int step = 1;
 		ivec2 centre = ivec2(resolution / 2, resolution / 2);
-		while (pos != centre && step < 10) {
+		while (last_pos != centre && step < 100000) {
 			// move
+			last_last_pos = last_pos;
+			last_pos = pos;
 			pos += attach_direction_to_move(attach_directions_buffer.data[pos_linear]);
+			if (pos == last_last_pos) return; // in a loop
 			pos_linear = uv_to_linear(pos);
 			step += 1;
 			

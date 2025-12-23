@@ -32,5 +32,6 @@ float smooth_falloff(int x) {
 void main() {
 	ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
 	int pos_linear = uv_to_linear(pos);
+	//points_buffer.data[pos_linear] = float(int_points_buffer.data[pos_linear]);
 	points_buffer.data[pos_linear] = smooth_falloff(int_points_buffer.data[pos_linear]);
 }

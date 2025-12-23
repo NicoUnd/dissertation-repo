@@ -7,7 +7,8 @@ const RESOLUTIONS: Array[int] = [32, 64, 128, 256, 512, 1024, 2048, 4096];
 const HEIGHTMAP_SHADER = preload("uid://deuuby3m21rbw");
 const HEIGHTMAP_UNSHADED_SHADER = preload("uid://cq77nryhphey4");
 
-@export var GPU_accelerated: bool;
+@export var can_generate_CPU: bool;
+@export var can_generate_GPU: bool;
 
 var resolution: int = 1024;
 

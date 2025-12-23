@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://cw8mvp5xlywik"
+path="res://.godot/imported/upscale_bilinear_interpolation.glsl-48e3df6347b4637d79a6e8f3317cab76.res"
+
+[deps]
+
+source_file="res://shaders/compute_shaders/upscale_bilinear_interpolation.glsl"
+dest_files=["res://.godot/imported/upscale_bilinear_interpolation.glsl-48e3df6347b4637d79a6e8f3317cab76.res"]
+
+[params]
+

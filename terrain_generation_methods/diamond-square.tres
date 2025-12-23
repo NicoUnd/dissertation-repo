@@ -34,7 +34,8 @@ metadata/_custom_type_script = "uid://ppfcadcfq54h"
 
 [resource]
 script = ExtResource("1_i3x2c")
-GPU_accelerated = true
+can_generate_CPU = true
+can_generate_GPU = true
 name = "diamond-square"
 min_amplitude = 1.0
 max_amplitude = 32.0

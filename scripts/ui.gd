@@ -67,6 +67,7 @@ func _ready() -> void:
 	add_parameter(ParameterBool.new("circle", true), false);
 	add_parameter(ParameterBool.new("perturbate", false), false);
 	add_parameter(ParameterNumber.new("water_level", 0, 0, 1, false, false, false), false);
+	add_parameter(ParameterEnum.new("camera_type", 1, ["perspective", "orthographic"]), false);
 	
 	var plane_resolution_strings: Array[String] = [];
 	for plane_resolution: int in TerrainGenerationMethodVisualiser.PLANE_RESOLUTIONS:

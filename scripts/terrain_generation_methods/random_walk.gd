@@ -65,11 +65,11 @@ func blur_with_detail(heightmap: Image, rendering_device: RenderingDevice) -> Im
 	var workgroups: int = resolution * resolution / 1024;
 	
 	var points_bytes: PackedByteArray = heightmap.get_data();
-	var points_data := rendering_device.storage_buffer_create(points_bytes.size(), points_bytes);
+	var points_RID := rendering_device.storage_buffer_create(points_bytes.size(), points_bytes);
 	var points_uniform := RDUniform.new();
 	points_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
 	points_uniform.binding = 0 # this needs to match the "binding" in our shader file
-	points_uniform.add_id(points_data);
+	points_uniform.add_id(points_RID);
 	
 	#var blur_level_multiplier: float = 1;
 	for blur_level: int in blur_levels:
@@ -77,11 +77,11 @@ func blur_with_detail(heightmap: Image, rendering_device: RenderingDevice) -> Im
 		var blurred_heightmap: Image = gaussian_blur(heightmap, multiplier, rendering_device);
 		var blurred_points_bytes: PackedByteArray = PackedFloat32Array([multiplier]).to_byte_array();
 		blurred_points_bytes.append_array(blurred_heightmap.get_data());
-		var blurred_points_data := rendering_device.storage_buffer_create(blurred_points_bytes.size(), blurred_points_bytes);
+		var blurred_points_RID := rendering_device.storage_buffer_create(blurred_points_bytes.size(), blurred_points_bytes);
 		var blurred_points_uniform := RDUniform.new();
 		blurred_points_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
 		blurred_points_uniform.binding = 1 # this needs to match the "binding" in our shader file
-		blurred_points_uniform.add_id(blurred_points_data);
+		blurred_points_uniform.add_id(blurred_points_RID);
 		
 		var uniform_set := rendering_device.uniform_set_create([blurred_points_uniform, points_uniform], compute_shader, 0);
 		
@@ -96,15 +96,15 @@ func blur_with_detail(heightmap: Image, rendering_device: RenderingDevice) -> Im
 		rendering_device.sync();
 		
 		rendering_device.free_rid(uniform_set);
-		rendering_device.free_rid(blurred_points_data);
+		rendering_device.free_rid(blurred_points_RID);
 		rendering_device.free_rid(pipeline);
 		
 		#blur_level_multiplier /= 2;
 	
-	var output_bytes := rendering_device.buffer_get_data(points_data);
+	var output_bytes := rendering_device.buffer_get_data(points_RID);
 	var output := output_bytes.to_float32_array();
 	
-	rendering_device.free_rid(points_data);
+	rendering_device.free_rid(points_RID);
 	
 	var combined_heightmap: Image = points_to_heightmap(points_linear_to_nested(output));
 	combined_heightmap = normalise_heightmap(combined_heightmap, rendering_device);
@@ -121,11 +121,11 @@ func generate_CPU(rendering_device: RenderingDevice) -> Image:
 	var aggregate_points: PackedFloat32Array = PackedFloat32Array();
 	aggregate_points.resize(resolution * resolution);
 	var aggregate_points_bytes: PackedByteArray = aggregate_points.to_byte_array();
-	var aggregate_points_data := rendering_device.storage_buffer_create(aggregate_points_bytes.size(), aggregate_points_bytes);
+	var aggregate_points_RID := rendering_device.storage_buffer_create(aggregate_points_bytes.size(), aggregate_points_bytes);
 	var aggregate_points_uniform := RDUniform.new();
 	aggregate_points_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
 	aggregate_points_uniform.binding = 0 # this needs to match the "binding" in our shader file
-	aggregate_points_uniform.add_id(aggregate_points_data);
+	aggregate_points_uniform.add_id(aggregate_points_RID);
 	
 	@warning_ignore("integer_division")
 	var workgroups: int = resolution * resolution / 1024;
@@ -139,11 +139,11 @@ func generate_CPU(rendering_device: RenderingDevice) -> Image:
 		var points_bytes: PackedByteArray = PackedFloat32Array([1.0]).to_byte_array(); # multiplier is 1
 		#points_bytes.append_array(blurred_image.get_data());
 		points_bytes.append_array(points.to_byte_array());
-		var points_data := rendering_device.storage_buffer_create(points_bytes.size(), points_bytes);
+		var points_RID := rendering_device.storage_buffer_create(points_bytes.size(), points_bytes);
 		var points_uniform := RDUniform.new();
 		points_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
 		points_uniform.binding = 1 # this needs to match the "binding" in our shader file
-		points_uniform.add_id(points_data);
+		points_uniform.add_id(points_RID);
 		
 		var uniform_set := rendering_device.uniform_set_create([aggregate_points_uniform, points_uniform], compute_shader, 0);
 		
@@ -158,13 +158,13 @@ func generate_CPU(rendering_device: RenderingDevice) -> Image:
 		rendering_device.sync();
 		
 		rendering_device.free_rid(uniform_set);
-		rendering_device.free_rid(points_data);
+		rendering_device.free_rid(points_RID);
 		rendering_device.free_rid(pipeline);
 	
-	var output_bytes := rendering_device.buffer_get_data(aggregate_points_data);
+	var output_bytes := rendering_device.buffer_get_data(aggregate_points_RID);
 	var output := output_bytes.to_float32_array();
 	
-	rendering_device.free_rid(aggregate_points_data);
+	rendering_device.free_rid(aggregate_points_RID);
 	
 	var heightmap: Image = points_to_heightmap(points_linear_to_nested(output));
 	heightmap = blur_with_detail(heightmap, rendering_device);

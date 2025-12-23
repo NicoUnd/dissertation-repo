@@ -32,17 +32,17 @@ float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float
 
 vec3 get_normal(vec2 uv, int given_octaves, float base_period, float base_amp) {
 	const float delta = 4.0 / 1024.0;
-
-    float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_period, base_amp);
-    float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_period, base_amp);
-    float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_period, base_amp);
-    float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_period, base_amp);
-
-    float dx = hR - hL;
-    float dy = hU - hD;
-
-    vec3 normal = normalize(vec3(-dx, delta, -dy));
-    return normal;
+	
+	float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_period, base_amp);
+	float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_period, base_amp);
+	float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_period, base_amp);
+	float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_period, base_amp);
+	
+	float dx = hR - hL;
+	float dy = hU - hD;
+	
+	vec3 normal = normalize(vec3(-dx, delta, -dy));
+	return normal;
 }
 
 float get_fract_brownian_motion_max_height(int given_octaves, float base_amp) {

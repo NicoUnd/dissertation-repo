@@ -130,11 +130,11 @@ func generate_GPU(rendering_device: RenderingDevice) -> Image:
 	var points_bytes: PackedByteArray = points.to_byte_array();
 	print(points_bytes.size());
 	#var points_data := rendering_device.texture_buffer_create(points_bytes.size(), RenderingDevice.DATA_FORMAT_R32_SFLOAT, points_bytes);
-	var points_data := rendering_device.storage_buffer_create(points_bytes.size(), points_bytes);
+	var points_RID := rendering_device.storage_buffer_create(points_bytes.size(), points_bytes);
 	var points_uniform := RDUniform.new();
 	points_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
 	points_uniform.binding = 1 # this needs to match the "binding" in our shader file
-	points_uniform.add_id(points_data);
+	points_uniform.add_id(points_RID);
 	
 	var workgroups: int = ceil(float(resolution + 1) / 32); # + 1 for the fact that resolution + 1 x resolution + 1
 	
@@ -145,14 +145,14 @@ func generate_GPU(rendering_device: RenderingDevice) -> Image:
 		# diamond step
 		var parameters: PackedFloat32Array = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(wrap_around), float(distribution), float(true)]);
 		
-		var bytes: PackedByteArray = parameters.to_byte_array();
-		var buffer_data := rendering_device.storage_buffer_create(bytes.size(), bytes);
-		var buffer_uniform := RDUniform.new();
-		buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
-		buffer_uniform.binding = 0 # this needs to match the "binding" in our shader file
-		buffer_uniform.add_id(buffer_data);
+		var parameters_bytes: PackedByteArray = parameters.to_byte_array();
+		var parameters_RID := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
+		var parameters_uniform := RDUniform.new();
+		parameters_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+		parameters_uniform.binding = 0 # this needs to match the "binding" in our shader file
+		parameters_uniform.add_id(parameters_RID);
 		
-		var uniform_set := rendering_device.uniform_set_create([buffer_uniform, points_uniform], compute_shader, 0);
+		var uniform_set := rendering_device.uniform_set_create([parameters_uniform, points_uniform], compute_shader, 0);
 		
 		var pipeline := rendering_device.compute_pipeline_create(compute_shader);
 		var compute_list := rendering_device.compute_list_begin();
@@ -165,20 +165,20 @@ func generate_GPU(rendering_device: RenderingDevice) -> Image:
 		rendering_device.sync();
 		
 		rendering_device.free_rid(uniform_set);
-		rendering_device.free_rid(buffer_data);
+		rendering_device.free_rid(parameters_RID);
 		rendering_device.free_rid(pipeline);
 		
 		# square step
 		parameters = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(wrap_around), float(distribution), float(false)]);
 		
-		bytes = parameters.to_byte_array();
-		buffer_data = rendering_device.storage_buffer_create(bytes.size(), bytes);
-		buffer_uniform = RDUniform.new();
-		buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
-		buffer_uniform.binding = 0 # this needs to match the "binding" in our shader file
-		buffer_uniform.add_id(buffer_data);
+		parameters_bytes = parameters.to_byte_array();
+		parameters_RID = rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
+		parameters_uniform = RDUniform.new();
+		parameters_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+		parameters_uniform.binding = 0 # this needs to match the "binding" in our shader file
+		parameters_uniform.add_id(parameters_RID);
 		
-		uniform_set = rendering_device.uniform_set_create([buffer_uniform, points_uniform], compute_shader, 0);
+		uniform_set = rendering_device.uniform_set_create([parameters_uniform, points_uniform], compute_shader, 0);
 		
 		pipeline = rendering_device.compute_pipeline_create(compute_shader);
 		compute_list = rendering_device.compute_list_begin();
@@ -191,16 +191,16 @@ func generate_GPU(rendering_device: RenderingDevice) -> Image:
 		rendering_device.sync();
 		
 		rendering_device.free_rid(uniform_set);
-		rendering_device.free_rid(buffer_data);
+		rendering_device.free_rid(parameters_RID);
 		rendering_device.free_rid(pipeline);
 		
 		step_size /= 2;
 		random_scale *= pow(2, -smoothness);
 	
-	var output_bytes := rendering_device.buffer_get_data(points_data);
+	var output_bytes := rendering_device.buffer_get_data(points_RID);
 	var output := output_bytes.to_float32_array();
 	
-	rendering_device.free_rid(points_data);
+	rendering_device.free_rid(points_RID);
 	
 	var output_points: Array[PackedFloat32Array] = points_linear_to_nested(output);
 	

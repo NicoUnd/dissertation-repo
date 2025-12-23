@@ -1,25 +1,48 @@
-[gd_resource type="Resource" script_class="DiffusionLimitedAggregation" load_steps=5 format=3 uid="uid://c2vmmpdikh121"]
+[gd_resource type="Resource" script_class="DiffusionLimitedAggregation" load_steps=9 format=3 uid="uid://c2vmmpdikh121"]
 
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="1_77tkw"]
 [ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/parameters/parameter_number.gd" id="2_d0pff"]
 [ext_resource type="Script" uid="uid://b4xxvbdak0nxt" path="res://scripts/terrain_generation_methods/diffusion_limited_aggregation.gd" id="2_otslh"]
+[ext_resource type="Script" uid="uid://dh4wgjnv8j0ir" path="res://scripts/parameters/parameter_enum.gd" id="3_d0pff"]
 
 [sub_resource type="Resource" id="Resource_y5v37"]
 script = ExtResource("2_d0pff")
-min_value = 1024.0
-max_value = 65536.0
+min_value = 256.0
+max_value = 4096.0
 is_int = true
 is_exp = true
 name = "walk_hops_to_live"
-value = 8192
+value = 1024
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_otslh"]
+script = ExtResource("2_d0pff")
+max_value = 1.0
+name = "smoothing_layer_factor"
+value = 0.1
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_d0pff"]
+script = ExtResource("2_d0pff")
+min_value = 0.1
+max_value = 2.0
+name = "layer_weighting_factor"
+value = 0.75
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_gwdbk"]
+script = ExtResource("3_d0pff")
+options = Array[String](["centre", "corner", "edge", "random"])
+name = "start_from"
+value = 0
+metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
 [resource]
 script = ExtResource("2_otslh")
-GPU_accelerated = true
+can_generate_GPU = true
 name = "diffusion_limited_aggregation"
 min_amplitude = 1.0
-max_amplitude = 32.0
-default_amplitude = 16.0
-parameters = Array[ExtResource("1_77tkw")]([SubResource("Resource_y5v37")])
+max_amplitude = 16.0
+default_amplitude = 4.0
+parameters = Array[ExtResource("1_77tkw")]([SubResource("Resource_y5v37"), SubResource("Resource_otslh"), SubResource("Resource_d0pff"), SubResource("Resource_gwdbk")])
 metadata/_custom_type_script = "uid://b4xxvbdak0nxt"
