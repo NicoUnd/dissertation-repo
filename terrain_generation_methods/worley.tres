@@ -12,7 +12,7 @@ min_value = 1.0
 max_value = 64.0
 is_exp = true
 name = "period"
-value = 16.0
+value = 8.0
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
 [sub_resource type="Resource" id="Resource_25fsa"]
@@ -20,7 +20,7 @@ script = ExtResource("4_1t84t")
 min_value = -1.0
 max_value = 1.0
 name = "c1"
-value = 0.6
+value = 1.0
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
 [sub_resource type="Resource" id="Resource_waxsv"]
@@ -28,7 +28,7 @@ script = ExtResource("4_1t84t")
 min_value = -1.0
 max_value = 1.0
 name = "c2"
-value = 0.2
+value = -0.5
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
 [sub_resource type="Resource" id="Resource_1t84t"]
@@ -36,7 +36,7 @@ script = ExtResource("4_1t84t")
 min_value = -1.0
 max_value = 1.0
 name = "c3"
-value = -0.4
+value = 0.0
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
 [resource]
@@ -45,8 +45,8 @@ _shader = ExtResource("2_gqvn1")
 _unshaded_shader = ExtResource("4_waxsv")
 name = "worley"
 min_amplitude = 1.0
-max_amplitude = 32.0
-default_amplitude = 8.0
+max_amplitude = 16.0
+default_amplitude = 4.0
 parameters = Array[ExtResource("3_315ex")]([SubResource("Resource_315ex"), SubResource("Resource_25fsa"), SubResource("Resource_waxsv"), SubResource("Resource_1t84t")])
 can_generate_in_chunks = true
 metadata/_custom_type_script = "uid://b7uir5a8rvikp"
