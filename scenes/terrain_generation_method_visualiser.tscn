@@ -1,16 +1,39 @@
-[gd_scene load_steps=9 format=3 uid="uid://mknok0q1uv77"]
+[gd_scene load_steps=14 format=3 uid="uid://mknok0q1uv77"]
 
-[ext_resource type="Texture2D" uid="uid://bwrwr1amdu6se" path="res://assets/textures/dark-rock-wall-seamless-texture-free-105.png" id="1_md2q8"]
 [ext_resource type="Texture2D" uid="uid://d1gpbux8tchrn" path="res://assets/water_normal_map.png" id="3_i4yfv"]
 [ext_resource type="Script" uid="uid://c38b2dst17kuq" path="res://scripts/terrain_generation_method_visualiser.gd" id="3_md2q8"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_i4yfv"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7hvas"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_rec0i"]
-material = SubResource("ShaderMaterial_i4yfv")
-size = Vector2(64, 64)
-subdivide_width = 1027
-subdivide_depth = 1027
+[sub_resource type="PlaneMesh" id="PlaneMesh_i4yfv"]
+material = SubResource("ShaderMaterial_7hvas")
+size = Vector2(32, 32)
+subdivide_width = 511
+subdivide_depth = 511
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8sw0d"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_xfu5g"]
+material = SubResource("ShaderMaterial_8sw0d")
+size = Vector2(32, 32)
+subdivide_width = 511
+subdivide_depth = 511
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lcevk"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_s6bpt"]
+material = SubResource("ShaderMaterial_lcevk")
+size = Vector2(32, 32)
+subdivide_width = 511
+subdivide_depth = 511
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5day8"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_u2ctf"]
+material = SubResource("ShaderMaterial_5day8")
+size = Vector2(32, 32)
+subdivide_width = 511
+subdivide_depth = 511
 
 [sub_resource type="Shader" id="Shader_i4yfv"]
 code = "// NOTE: Shader automatically converted from Godot Engine 4.5.1.stable's StandardMaterial3D.
@@ -110,12 +133,27 @@ size = Vector2(64, 64)
 subdivide_width = 127
 subdivide_depth = 127
 
-[node name="TerrainGenerationMethodVisualiser" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_rec0i")
+[node name="TerrainGenerationMethodVisualiser" type="Node3D"]
 script = ExtResource("3_md2q8")
-seed = 44.27952408656701
-grass_texture = ExtResource("1_md2q8")
-dirt_texture = null
+
+[node name="Planes" type="Node" parent="."]
+unique_name_in_owner = true
+
+[node name="@MeshInstance3D@226452" type="MeshInstance3D" parent="Planes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, -16)
+mesh = SubResource("PlaneMesh_i4yfv")
+
+[node name="@MeshInstance3D@226453" type="MeshInstance3D" parent="Planes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, -16)
+mesh = SubResource("PlaneMesh_xfu5g")
+
+[node name="@MeshInstance3D@226454" type="MeshInstance3D" parent="Planes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, 16)
+mesh = SubResource("PlaneMesh_s6bpt")
+
+[node name="@MeshInstance3D@226455" type="MeshInstance3D" parent="Planes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 16)
+mesh = SubResource("PlaneMesh_u2ctf")
 
 [node name="WaterMeshInstance3D" type="MeshInstance3D" parent="."]
 unique_name_in_owner = true

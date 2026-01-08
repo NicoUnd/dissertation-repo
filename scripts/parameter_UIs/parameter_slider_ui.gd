@@ -8,7 +8,7 @@ var parameter_name_capitalized: String;
 var is_square_in_display: bool;
 var is_int: bool;
 
-func setup(parameter: ParameterNumber) -> void:
+func setup(parameter: ParameterNumber, on_change: Callable) -> void:
 	parameter_name_capitalized = parameter.name.capitalize();
 	is_square_in_display = parameter.is_square_in_display;
 	is_int = parameter.is_int;
@@ -24,6 +24,8 @@ func setup(parameter: ParameterNumber) -> void:
 	else:
 		h_slider.step = 0.01;
 	h_slider.value = value;
+	
+	h_slider.connect("value_changed", on_change);
 
 func update_text(new_value: float) -> void:
 	var new_value_string = str(int(new_value) if is_int else new_value);

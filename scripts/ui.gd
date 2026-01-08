@@ -1,10 +1,5 @@
 extends Control
-
-const PARAMETER_CHECK_BOX_UI_SCENE = preload("uid://bngc5tmbrhe76")
-const PARAMETER_SLIDER_UI_SCENE = preload("uid://u3fkap1o8cbi")
-const PARAMETER_OPTION_BUTTON_UI_SCENE = preload("uid://wgyphejds23x")
-const PARAMETER_IMAGE_UI_SCENE = preload("uid://337ax8mji8ac")
-const PARAMETER_BUTTON_UI_SCENE = preload("uid://c4n6m7j3yipbk")
+class_name UI;
 
 @onready var main: Control = $".."
 
@@ -13,34 +8,31 @@ const PARAMETER_BUTTON_UI_SCENE = preload("uid://c4n6m7j3yipbk")
 var seed_slider: ParameterSliderUI;
 var terrain_generation_method_specific_UIs: Array[Control] = [];
 
-func add_parameter(parameter: Parameter, is_terrain_generation_method_specific: bool) -> void:
-	var on_change: Callable = func (new_value: Variant): main.set_parameter(parameter.name, new_value, is_terrain_generation_method_specific);;
-	var new_parameter_UI: Control;
+static func parameter_to_parameter_ui(parameter: Parameter) -> Control:
+	const PARAMETER_CHECK_BOX_UI_SCENE = preload("uid://bngc5tmbrhe76")
+	const PARAMETER_SLIDER_UI_SCENE = preload("uid://u3fkap1o8cbi")
+	const PARAMETER_OPTION_BUTTON_UI_SCENE = preload("uid://wgyphejds23x")
+	const PARAMETER_IMAGE_UI_SCENE = preload("uid://337ax8mji8ac")
+	const PARAMETER_BUTTON_UI_SCENE = preload("uid://c4n6m7j3yipbk")
+	
 	if parameter is ParameterBool:
-		new_parameter_UI = PARAMETER_CHECK_BOX_UI_SCENE.instantiate();
-		parameters_v_box_container.add_child(new_parameter_UI);
-		new_parameter_UI.setup(parameter);
-		new_parameter_UI.connect("toggled", on_change);
+		return PARAMETER_CHECK_BOX_UI_SCENE.instantiate();
 	elif parameter is ParameterNumber:
-		new_parameter_UI = PARAMETER_SLIDER_UI_SCENE.instantiate();
-		parameters_v_box_container.add_child(new_parameter_UI);
-		new_parameter_UI.setup(parameter);
-		new_parameter_UI.h_slider.connect("value_changed", on_change);
+		return PARAMETER_SLIDER_UI_SCENE.instantiate();
 	elif parameter is ParameterEnum:
-		new_parameter_UI = PARAMETER_OPTION_BUTTON_UI_SCENE.instantiate();
-		parameters_v_box_container.add_child(new_parameter_UI);
-		new_parameter_UI.setup(parameter);
-		new_parameter_UI.option_button.connect("item_selected", on_change);
+		return PARAMETER_OPTION_BUTTON_UI_SCENE.instantiate();
 	elif parameter is ParameterImage:
-		new_parameter_UI = PARAMETER_IMAGE_UI_SCENE.instantiate();
-		parameters_v_box_container.add_child(new_parameter_UI);
-		new_parameter_UI.setup(parameter);
-		new_parameter_UI.connect("image_selected", on_change);
+		return PARAMETER_IMAGE_UI_SCENE.instantiate();
 	elif parameter is ParameterButton:
-		new_parameter_UI = PARAMETER_BUTTON_UI_SCENE.instantiate();
-		parameters_v_box_container.add_child(new_parameter_UI);
-		new_parameter_UI.setup(parameter);
-		new_parameter_UI.connect("pressed_down", on_change);
+		return PARAMETER_BUTTON_UI_SCENE.instantiate();
+	push_error("parameter type not recognised");
+	return;
+
+func add_parameter(parameter: Parameter, is_terrain_generation_method_specific: bool) -> void:
+	var on_change: Callable = func (new_value: Variant=null): main.set_parameter(parameter.name, new_value, is_terrain_generation_method_specific);;
+	var new_parameter_UI: Control = parameter_to_parameter_ui(parameter);
+	parameters_v_box_container.add_child(new_parameter_UI);
+	new_parameter_UI.setup(parameter, on_change);
 	
 	if parameter.name == "seed":
 		seed_slider = new_parameter_UI;
@@ -80,3 +72,4 @@ func _ready() -> void:
 	for terrain_generation_method in TerrainGenerationMethodVisualiser.TERRAIN_GENERATION_METHODS:
 		terrain_generation_method_names.append(terrain_generation_method.name.capitalize());
 	add_parameter(ParameterEnum.new("terrain_generation_method", -1, terrain_generation_method_names), false);
+	

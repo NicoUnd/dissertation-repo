@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3 uid="uid://xpucngsf7x4r"]
+
+[ext_resource type="Script" uid="uid://ca11ur2bemhnd" path="res://scripts/chunk_type_cell.gd" id="1_t4a3w"]
+
+[sub_resource type="Theme" id="Theme_qveug"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t4a3w"]
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+
+[node name="ChunkTypeCell" type="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_default_cursor_shape = 2
+theme = SubResource("Theme_qveug")
+theme_override_styles/panel = SubResource("StyleBoxFlat_t4a3w")
+script = ExtResource("1_t4a3w")
+
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

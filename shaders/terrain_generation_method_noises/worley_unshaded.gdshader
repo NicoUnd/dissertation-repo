@@ -60,7 +60,7 @@ vec3 get_normal(vec2 uv, float peri, float amp) {
 }
 
 void vertex() {
-	vec2 uv = VERTEX.xz;
+	vec2 uv = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz;
 	if (perturbate) {
 		uv += 2.0 * perlin_2D(uv * 0.25);
 	}

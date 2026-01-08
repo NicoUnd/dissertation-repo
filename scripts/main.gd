@@ -17,6 +17,8 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 
 @onready var ui: Control = %UI
 
+@onready var chunk_settings: Control = %ChunkSettings
+
 @onready var save_heightmap_file_dialog: FileDialog = %SaveHeightmapFileDialog
 
 @onready var generate_statistics_confirm_dialog: ConfirmationDialog = %GenerateStatisticsConfirmDialog
@@ -40,6 +42,7 @@ var rendering_device: RenderingDevice;
 			heightmap_terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
 			if terrain_generation_method:
 				randomise_seed();
+				terrain_generation_method_visualiser.set_planes(2, [[512, 512], [512, 512]]);
 		if terrain_generation_method:
 			if ui:
 				ui.clear_terrain_generation_method_specific_parameters();
@@ -52,7 +55,7 @@ var rendering_device: RenderingDevice;
 				
 				var amplitude: float = terrain_generation_method.default_amplitude;
 				ui.add_parameter(ParameterNumber.new("amplitude", amplitude, terrain_generation_method.min_amplitude, terrain_generation_method.max_amplitude, false, false, true), true);
-				terrain_generation_method_visualiser.mesh.material.set_shader_parameter("amplitude", amplitude);
+				terrain_generation_method_visualiser.set_planes_shader_parameter("amplitude", amplitude);
 				terrain_generation_method_visualiser.max_amplitude = terrain_generation_method.max_amplitude;
 				
 				ui.set_terrain_generation_method_specific_parameters(terrain_generation_method.parameters);
@@ -61,6 +64,8 @@ var rendering_device: RenderingDevice;
 						ui.add_parameter(ParameterButton.new("generate_CPU"), true);
 					if terrain_generation_method.can_generate_GPU:
 						ui.add_parameter(ParameterButton.new("generate_GPU"), true);
+				if terrain_generation_method.can_generate_in_chunks:
+					ui.add_parameter(ParameterButton.new("chunk_settings"), true);
 			if terrain_generation_method is TerrainGenerationMethodExplicit:
 				terrain_generation_method.setup(rendering_device);
 		if heightmap_viewport:
@@ -90,15 +95,13 @@ func set_camera_type(camera_type: int) -> void:
 			visualisation_perspective_camera_3d.current = false;
 			visualisation_orthographic_camera_3d.current = true;
 
-func set_parameter(parameter_name: String, parameter_value: Variant, is_terrain_generation_method_specific: bool=true) -> void:
+func set_parameter(parameter_name: String, parameter_value: Variant=null, is_terrain_generation_method_specific: bool=true) -> void:
 	if parameter_name == "auto_randomise_seed":
 		auto_randomise_seed = parameter_value;
 		return;
 	elif parameter_name == "resolution_of_plane":
 		var resolution: int = TerrainGenerationMethodVisualiser.PLANE_RESOLUTIONS[parameter_value];
-		var new_subdivide: int = int(resolution - 1);
-		terrain_generation_method_visualiser.mesh.subdivide_width = new_subdivide;
-		terrain_generation_method_visualiser.mesh.subdivide_depth = new_subdivide;
+		terrain_generation_method_visualiser.reset_to_one_plane(resolution);
 		return;
 	elif parameter_name in ["albedo_type", "unshaded"]:
 		terrain_generation_method_visualiser.set(parameter_name, parameter_value);
@@ -118,8 +121,11 @@ func set_parameter(parameter_name: String, parameter_value: Variant, is_terrain_
 		else: # "generate_CPU"
 			heightmap = terrain_generation_method.generate_CPU(rendering_device);
 		var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
-		terrain_generation_method_visualiser.mesh.material.set_shader_parameter("heightmap", heightmap_texture);
-		heightmap_terrain_generation_method_visualiser.mesh.material.set_shader_parameter("heightmap", heightmap_texture);
+		terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
+		heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
+	elif parameter_name == "chunk_settings":
+		assert(terrain_generation_method.can_generate_in_chunks);
+		chunk_settings.show();
 	
 	if is_terrain_generation_method_specific:
 		if terrain_generation_method is TerrainGenerationMethodExplicit and parameter_name != "amplitude":
@@ -128,8 +134,8 @@ func set_parameter(parameter_name: String, parameter_value: Variant, is_terrain_
 				return;
 			terrain_generation_method.set(parameter_name, parameter_value);
 		else:
-			terrain_generation_method_visualiser.mesh.material.set_shader_parameter(parameter_name, parameter_value);
-			heightmap_terrain_generation_method_visualiser.mesh.material.set_shader_parameter(parameter_name, parameter_value);
+			terrain_generation_method_visualiser.set_planes_shader_parameter(parameter_name, parameter_value);
+			heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter(parameter_name, parameter_value);
 	else:
 		if parameter_name == "seed":
 			set_seed(parameter_value);

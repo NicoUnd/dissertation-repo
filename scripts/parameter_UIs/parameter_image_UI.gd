@@ -6,8 +6,9 @@ signal image_selected(image_texture: ImageTexture)
 @onready var select_heightmap_file_dialog: FileDialog = %SelectHeightmapFileDialog
 @onready var failed_to_load_image_accept_dialog: AcceptDialog = %FailedToLoadImageAcceptDialog
 
-func setup(parameter: ParameterImage) -> void:
+func setup(parameter: ParameterImage, on_change: Callable) -> void:
 	text = parameter.name.capitalize();
+	connect("image_selected", on_change);
 
 func _on_pressed() -> void:
 	select_heightmap_file_dialog.show();

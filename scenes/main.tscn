@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://djov3pag7t3c"]
+[gd_scene load_steps=17 format=3 uid="uid://djov3pag7t3c"]
 
 [ext_resource type="PackedScene" uid="uid://mknok0q1uv77" path="res://scenes/terrain_generation_method_visualiser.tscn" id="1_o5qli"]
 [ext_resource type="Theme" uid="uid://bbvfb43bck665" path="res://themes/theme.tres" id="1_o6xl0"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://de0eqtkic42jj" path="res://assets/blueprint.jpg" id="6_o6xl0"]
 [ext_resource type="PackedScene" uid="uid://vsifhaplg8ve" path="res://scenes/ui.tscn" id="6_tefeu"]
 [ext_resource type="Theme" uid="uid://cs2nnup0f3ppn" path="res://themes/panel_container_clear.tres" id="7_o6xl0"]
+[ext_resource type="PackedScene" uid="uid://ccif6rael18m6" path="res://scenes/chunk_settings.tscn" id="8_tipki"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tefeu"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -28,14 +29,6 @@ glow_enabled = true
 [sub_resource type="World3D" id="World3D_85g3d"]
 environment = SubResource("Environment_tipki")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_o6xl0"]
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_tipki"]
-material = SubResource("ShaderMaterial_o6xl0")
-size = Vector2(64, 64)
-subdivide_width = 1027
-subdivide_depth = 1027
-
 [sub_resource type="Environment" id="Environment_tefeu"]
 ambient_light_source = 2
 ambient_light_color = Color(1, 1, 1, 1)
@@ -49,14 +42,6 @@ fog_depth_end = 150.0
 [sub_resource type="Environment" id="Environment_0wfyh"]
 background_mode = 1
 background_color = Color(0, 0, 0, 0)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_85g3d"]
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_choun"]
-material = SubResource("ShaderMaterial_85g3d")
-size = Vector2(64, 64)
-subdivide_width = 1027
-subdivide_depth = 1027
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_tbgi4"]
 viewport_path = NodePath("VisualisationViewport")
@@ -85,15 +70,12 @@ directional_shadow_max_distance = 20536.5
 
 [node name="TerrainGenerationMethodVisualiser" parent="VisualisationViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
-mesh = SubResource("PlaneMesh_tipki")
-skeleton = NodePath("../..")
-terrain_generation_method = null
 circle = true
 seed = 44.801236265629406
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(0.8632697, 0, 0.50473994, 0, 1, 0, -0.50473994, 0, 0.8632697, 0, 0, 0)
+transform = Transform3D(0.99440026, 0, -0.10566322, 0, 1, 0, 0.10566322, 0, 0.99440026, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot"]
 unique_name_in_owner = true
@@ -127,9 +109,6 @@ size = 64.0
 
 [node name="HeightmapTerrainGenerationMethodVisualiser" parent="HeightmapViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
-layers = 2
-mesh = SubResource("PlaneMesh_choun")
-terrain_generation_method = null
 unshaded = true
 albedo_type = 1
 seed = 15.226760436685916
@@ -157,7 +136,6 @@ expand_mode = 1
 
 [node name="UI" parent="." instance=ExtResource("6_tefeu")]
 unique_name_in_owner = true
-z_index = 1
 layout_mode = 1
 
 [node name="VisualisationTextureRect" type="TextureRect" parent="."]
@@ -195,10 +173,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/margin_left = 100
-theme_override_constants/margin_top = 100
-theme_override_constants/margin_right = 100
-theme_override_constants/margin_bottom = 100
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 40
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
 layout_mode = 2
@@ -276,6 +254,11 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(1600, 100)
 layout_mode = 2
 show_percentage = false
+
+[node name="ChunkSettings" parent="." instance=ExtResource("8_tipki")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
 
 [node name="SaveHeightmapFileDialog" type="FileDialog" parent="."]
 unique_name_in_owner = true
