@@ -20,7 +20,7 @@ func get_square_average(points: Array[PackedFloat32Array], x: int, y: int, half_
 			#	breakpoint;
 	return square_average;
 
-func get_diamond_average(points: Array[PackedFloat32Array], x: int, y: int, half_step_size: int) -> float:
+func get_diamond_average(points: Array[PackedFloat32Array], x: int, y: int, half_step_size: int, resolution: int) -> float:
 	var diamond_total: float = 0;
 	var num_of_corners_used: int = 0;
 	for diamond_corner_y: int in [y - half_step_size, y + half_step_size]:
@@ -58,6 +58,13 @@ func random_offset(random_number_generator: RandomNumberGenerator, random_scale:
 	else: # guassian
 		return random_number_generator.randfn(0, 0.5 * random_scale);
 
+func world_pos_random_offset(world_pos: Vector2, random_scale: float) -> float:
+	if distribution == 0: # uniform
+		#print("world_pos_random_offset returning: " + str((world_pos_randf(seed, world_pos) - 0.5) * random_scale));
+		return (world_pos_randf(seed, world_pos) - 0.5) * random_scale;
+	else: # guassian
+		return world_pos_randfn(seed, world_pos, 0, 0.5 * random_scale);
+
 func setup(rendering_device: RenderingDevice) -> void:
 	#rendering_device = RenderingServer.create_local_rendering_device();
 	
@@ -68,7 +75,20 @@ func setdown(rendering_device: RenderingDevice) -> void:
 	rendering_device.free_rid(compute_shader);
 	#rendering_device.free();
 
-func generate_CPU(rendering_device: RenderingDevice) -> Image:
+static func uv_to_world_pos(resolution: int, chunk_coord: Vector2i, uv: Vector2i) -> Vector2:
+	return (Vector2(uv) / float(resolution) + Vector2(chunk_coord)) * 64;
+
+static func world_pos_randf(seed: float, world_pos: Vector2i) -> float:
+	var random_number_generator: RandomNumberGenerator = RandomNumberGenerator.new();
+	random_number_generator.seed = hash(seed + hash(world_pos));
+	return random_number_generator.randf();
+
+static func world_pos_randfn(seed: float, world_pos: Vector2i, mean: float, std_dev: float) -> float:
+	var random_number_generator: RandomNumberGenerator = RandomNumberGenerator.new();
+	random_number_generator.seed = hash(seed + hash(world_pos));
+	return random_number_generator.randfn(mean, std_dev);
+
+func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image:
 	var points: Array[PackedFloat32Array] = [];
 	points.resize(resolution + 1);
 	for row_index: int in resolution + 1:
@@ -76,13 +96,22 @@ func generate_CPU(rendering_device: RenderingDevice) -> Image:
 		row.resize(resolution + 1);
 		points[row_index] = row;
 	
-	var random_number_generator: RandomNumberGenerator = RandomNumberGenerator.new();
-	random_number_generator.seed = hash(seed);
+	#var random_number_generator: RandomNumberGenerator = RandomNumberGenerator.new();
+	#random_number_generator.seed = hash(seed);
 	
-	points[0][0] = random_number_generator.randf();
-	points[0][resolution] = random_number_generator.randf();
-	points[resolution][0] = random_number_generator.randf();
-	points[resolution][resolution] = random_number_generator.randf();
+	#points[0][0] = random_number_generator.randf();
+	#points[0][resolution] = random_number_generator.randf();
+	#points[resolution][0] = random_number_generator.randf();
+	#points[resolution][resolution] = random_number_generator.randf();
+	
+	points[0][0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(0, 0)));
+	print(points[0][0]);
+	points[0][resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(0, resolution)));
+	print(points[0][resolution]);
+	points[resolution][0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution, 0)));
+	print(points[resolution][0]);
+	points[resolution][resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution, resolution)));
+	print(points[resolution][resolution]);
 	
 	var step_size: int = resolution;
 	var random_scale: float = 1;
@@ -94,13 +123,13 @@ func generate_CPU(rendering_device: RenderingDevice) -> Image:
 		var diamond_indecies: Array = range(half_step_size, resolution + 1, step_size);
 		for y: int in diamond_indecies:
 			for x: int in diamond_indecies:
-				points[y][x] = clamp(get_square_average(points, x, y, half_step_size) + random_offset(random_number_generator, random_scale), 0, 1);
+				points[y][x] = clamp(get_square_average(points, x, y, half_step_size) + random_offset(RandomNumberGenerator.new(), random_scale), 0, 1); # world_pos_random_offset(uv_to_world_pos(resolution, chunk_coord, Vector2i(x, y)), random_scale)
 				#print("square_avg: " + str(points[y][x]))
 		
 		# square step
 		for y: int in range(0, resolution + 1, half_step_size):
 			for x: int in range(posmod(y + half_step_size, step_size), resolution + 1, step_size):
-				points[y][x] = clamp(get_diamond_average(points, x, y, half_step_size) + random_offset(random_number_generator, random_scale), 0, 1);
+				points[y][x] = clamp(get_diamond_average(points, x, y, half_step_size, resolution) + random_offset(RandomNumberGenerator.new(), random_scale), 0, 1); # world_pos_random_offset(uv_to_world_pos(resolution, chunk_coord, Vector2i(x, y)), random_scale)
 				#print("diamond_avg: " + str(points[y][x]))
 		
 		step_size /= 2;
@@ -115,7 +144,7 @@ func generate_CPU(rendering_device: RenderingDevice) -> Image:
 		heightmap = normalise_heightmap(heightmap, rendering_device);
 	return heightmap;
 
-func generate_GPU(rendering_device: RenderingDevice) -> Image:
+func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image:
 	var points: PackedFloat32Array = PackedFloat32Array();
 	points.resize((resolution + 1) * (resolution + 1));
 	
@@ -136,7 +165,7 @@ func generate_GPU(rendering_device: RenderingDevice) -> Image:
 	points_uniform.binding = 1 # this needs to match the "binding" in our shader file
 	points_uniform.add_id(points_RID);
 	
-	var workgroups: int = ceil(float(resolution + 1) / 32); # + 1 for the fact that resolution + 1 x resolution + 1
+	var workgroups: int = ceil(float(resolution + 1) / 4); # + 1 for the fact that resolution + 1 x resolution + 1
 	
 	var step_size: int = resolution;
 	var random_scale: float = 1;

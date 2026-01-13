@@ -18,7 +18,7 @@ func setup(rendering_device: RenderingDevice) -> void:
 func setdown(rendering_device: RenderingDevice) -> void:
 	rendering_device.free_rid(compute_shader);
 
-func create_layer(given_seed: float, value: float) -> Array[PackedFloat32Array]:
+func create_layer(given_seed: float, value: float, resolution: int) -> Array[PackedFloat32Array]:
 	const MOVES: Array[Vector2i] = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT];
 	const NEAR_CENTRE_AMOUNT: float = 2.1;
 	
@@ -62,6 +62,7 @@ func create_layer(given_seed: float, value: float) -> Array[PackedFloat32Array]:
 	return points;
 
 func blur_with_detail(heightmap: Image, rendering_device: RenderingDevice) -> Image:
+	var resolution: int = heightmap.get_height();
 	var workgroups: int = resolution * resolution / 1024;
 	
 	var points_bytes: PackedByteArray = heightmap.get_data();
@@ -110,13 +111,13 @@ func blur_with_detail(heightmap: Image, rendering_device: RenderingDevice) -> Im
 	combined_heightmap = normalise_heightmap(combined_heightmap, rendering_device);
 	return combined_heightmap;
 
-func generate_CPU(rendering_device: RenderingDevice) -> Image:
+func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image:
 	var threads: Array[Thread] = [];
 	threads.resize(walks);
 	var value = 1.0 / walks;
 	for layer: int in walks:
 		threads[layer] = Thread.new();
-		threads[layer].start(create_layer.bind(seed + layer, value)); # offsets the seed for each layer
+		threads[layer].start(create_layer.bind(seed + layer, value, resolution)); # offsets the seed for each layer
 	
 	var aggregate_points: PackedFloat32Array = PackedFloat32Array();
 	aggregate_points.resize(resolution * resolution);
@@ -170,6 +171,6 @@ func generate_CPU(rendering_device: RenderingDevice) -> Image:
 	heightmap = blur_with_detail(heightmap, rendering_device);
 	return heightmap;
 
-func generate_GPU(rendering_device: RenderingDevice) -> Image: # will never happen as not GPU accelerated
+func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image: # will never happen as not GPU accelerated
 	assert(false);
 	return;

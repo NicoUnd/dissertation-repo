@@ -194,7 +194,7 @@ func setdown(rendering_device: RenderingDevice) -> void:
 	#heightmap = normalise_heightmap(heightmap, rendering_device);
 	#return heightmap;
 
-func generate_CPU(rendering_device: RenderingDevice) -> Image:
+func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image:
 	assert(false);
 	return;
 
@@ -417,7 +417,7 @@ func add_crisp_onto_blurry_GPU(rendering_device: RenderingDevice, blurry_bytes: 
 	
 	return output_bytes;
 
-func generate_GPU(rendering_device: RenderingDevice) -> Image:
+func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image:
 	var attach_directions: PackedInt32Array = PackedInt32Array();
 	attach_directions.resize(INITIAL_RESOLUTION * INITIAL_RESOLUTION);
 	

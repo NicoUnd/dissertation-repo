@@ -34,7 +34,7 @@ func set_chunk_types_grid() -> void:
 	for chunk_type_cell: ChunkTypeCell in chunk_types_grid_container.get_children():
 		chunk_type_cell.free();
 	
-	chunk_types_grid_container.columns = chunk_grid_resolution;
+	chunk_types_grid_container.columns = max(1, chunk_grid_resolution);
 	
 	for y: int in chunk_grid_resolution:
 		for x: int in chunk_grid_resolution:
@@ -58,7 +58,7 @@ func get_LOD_preset_max_distance(LOD_preset: LOD_PRESET) -> float:
 func get_LOD_preset_distance(coord: Vector2i, LOD_preset: LOD_PRESET) -> float:
 	match LOD_preset:
 		LOD_PRESET.CENTRE:
-			return coord.distance_to(Vector2i.ONE * chunk_grid_resolution/2);
+			return Vector2(coord).distance_to(Vector2.ONE * float(chunk_grid_resolution - 1)/2);
 		LOD_PRESET.CORNER:
 			return coord.distance_to(Vector2i.ZERO);
 		LOD_PRESET.EDGE:
@@ -97,6 +97,7 @@ func finish() -> void:
 	hide();
 	for ui: Control in settings_v_box_container.get_children():
 		ui.queue_free();
+	main.set_explicit_chunk_generation_and_update_UI(true);
 
 func _on_visibility_changed() -> void:
 	if not visible:

@@ -48,6 +48,9 @@ func get_specific_parameters() -> Array[Array]: # Arrar[Array[String], Array[Var
 		return [[], []];
 	var specific_parameter_names: Array[String] = ["amplitude"];
 	var specific_parameter_values: Array[Variant] = [plane.mesh.material.get_shader_parameter("amplitude")];
+	if terrain_generation_method is TerrainGenerationMethodExplicit:
+		specific_parameter_names.append("heightmap");
+		specific_parameter_values.append(plane.mesh.material.get_shader_parameter("heightmap"));
 	for specific_parameter: Parameter in specific_parameters:
 		var specific_parameter_name: String = specific_parameter.name;
 		specific_parameter_names.append(specific_parameter_name);
@@ -126,9 +129,11 @@ func set_planes(grid_resolution: int, resolutions: Array[Array]) -> void: # Arra
 			if resolution == 0:
 				continue;
 			
-			var new_plane: MeshInstance3D = MeshInstance3D.new();
+			var new_plane: Chunk = Chunk.new();
 			planes.add_child(new_plane);
 			new_plane.owner = self;
+			
+			new_plane.coord = Vector2i(x, y);
 			
 			new_plane.mesh = PlaneMesh.new();
 			var mesh_size: float = 64.0 / float(grid_resolution);
@@ -152,7 +157,7 @@ func set_planes(grid_resolution: int, resolutions: Array[Array]) -> void: # Arra
 func _ready() -> void:
 	print("MAIN READY")
 	remove_planes();
-	#reset_to_one_plane(1024);
-	set_planes(2, [[512, 512], [512, 512]])
+	reset_to_one_plane(1024);
+	#set_planes(2, [[512, 512], [512, 512]])
 	
 	terrain_generation_method = null;

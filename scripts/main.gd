@@ -20,6 +20,7 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 @onready var chunk_settings: Control = %ChunkSettings
 
 @onready var save_heightmap_file_dialog: FileDialog = %SaveHeightmapFileDialog
+@onready var save_render_file_dialog: FileDialog = %SaveRenderFileDialog
 
 @onready var generate_statistics_confirm_dialog: ConfirmationDialog = %GenerateStatisticsConfirmDialog
 #@onready var statistics_accept_dialog: AcceptDialog = %StatisticsAcceptDialog
@@ -30,7 +31,27 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 @onready var statistics_progress_center_container: CenterContainer = %StatisticsProgressCenterContainer
 @onready var statistics_progress_bar: ProgressBar = %StatisticsProgressBar
 
+@onready var visualisation_texture_rect: TextureRect = %VisualisationTextureRect
+
 var rendering_device: RenderingDevice;
+
+var last_resolution_of_plane: int = 1024;
+
+var filled_UI: bool = false;
+var explicit_chunk_generation: bool = false; # for explicit generation methods, can either generate in chunks or one plane, UI dialog will show this
+func set_explicit_chunk_generation_and_update_UI(new_explicit_chunk_generation: bool) -> void:
+	explicit_chunk_generation = new_explicit_chunk_generation;
+	if not filled_UI: # bottom buttons won't be the generate buttons
+		return;
+	var generate_chunks_string: String = "chunks_" if explicit_chunk_generation else "";
+	if terrain_generation_method is TerrainGenerationMethodExplicit:
+		if terrain_generation_method.can_generate_GPU:
+			ui.pop_terrain_generation_method_specific_parameter();
+		if terrain_generation_method.can_generate_CPU:
+			ui.pop_terrain_generation_method_specific_parameter();
+			ui.add_parameter(ParameterButton.new("generate_" + generate_chunks_string + "CPU"), true);
+		if terrain_generation_method.can_generate_GPU:
+			ui.add_parameter(ParameterButton.new("generate_" + generate_chunks_string + "GPU"), true);
 
 @export var terrain_generation_method: TerrainGenerationMethod:
 	set(new_terrain_generation_method):
@@ -42,10 +63,13 @@ var rendering_device: RenderingDevice;
 			heightmap_terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
 			if terrain_generation_method:
 				randomise_seed();
-				terrain_generation_method_visualiser.set_planes(2, [[512, 512], [512, 512]]);
+				terrain_generation_method_visualiser.reset_to_one_plane(last_resolution_of_plane);
+				explicit_chunk_generation = false;
+				
 		if terrain_generation_method:
 			if ui:
 				ui.clear_terrain_generation_method_specific_parameters();
+				filled_UI = false;
 				
 				if terrain_generation_method is TerrainGenerationMethodExplicit:
 					var resolution_strings: Array[String] = [];
@@ -59,13 +83,14 @@ var rendering_device: RenderingDevice;
 				terrain_generation_method_visualiser.max_amplitude = terrain_generation_method.max_amplitude;
 				
 				ui.set_terrain_generation_method_specific_parameters(terrain_generation_method.parameters);
+				if terrain_generation_method.can_generate_in_chunks:
+					ui.add_parameter(ParameterButton.new("chunk_settings"), true);
 				if terrain_generation_method is TerrainGenerationMethodExplicit:
 					if terrain_generation_method.can_generate_CPU:
 						ui.add_parameter(ParameterButton.new("generate_CPU"), true);
 					if terrain_generation_method.can_generate_GPU:
 						ui.add_parameter(ParameterButton.new("generate_GPU"), true);
-				if terrain_generation_method.can_generate_in_chunks:
-					ui.add_parameter(ParameterButton.new("chunk_settings"), true);
+				filled_UI = true;
 			if terrain_generation_method is TerrainGenerationMethodExplicit:
 				terrain_generation_method.setup(rendering_device);
 		if heightmap_viewport:
@@ -80,20 +105,44 @@ func _ready() -> void:
 	
 	print("OKAY")
 	heightmap_terrain_generation_method_visualiser.albedo_type = 1;
+	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(512);
 	#terrain_generation_method = preload("uid://bunfkxpwyox5q")
 	
 	rendering_device = RenderingServer.create_local_rendering_device();
 	
 	timer.start();
 
-func set_camera_type(camera_type: int) -> void:
-	match camera_type:
-		0:
-			visualisation_orthographic_camera_3d.current = false;
-			visualisation_perspective_camera_3d.current = true;
-		1:
-			visualisation_perspective_camera_3d.current = false;
-			visualisation_orthographic_camera_3d.current = true;
+func generate(generate_button_string: String) -> void:
+	if explicit_chunk_generation:
+		var planes: Array = terrain_generation_method_visualiser.planes.get_children();
+		@warning_ignore("narrowing_conversion")
+		var chunk_grid_resolution: int = sqrt(planes.size());
+		for plane_index: int in planes.size():
+			print("GENERATING FOR PLANE")
+			var plane: Chunk = planes[plane_index];
+			var resolution: int = plane.mesh.subdivide_depth + 1;
+			@warning_ignore("integer_division")
+			#var chunk_coord: Vector2i = Vector2i(plane_index / chunk_grid_resolution, plane_index % chunk_grid_resolution);
+			var heightmap: Image;
+			if generate_button_string == "generate_chunks_GPU":
+				assert(terrain_generation_method.can_generate_GPU);
+				heightmap = terrain_generation_method.generate_GPU(rendering_device, terrain_generation_method.resolution);
+			else: # "generate_chunks_CPU"
+				assert(terrain_generation_method.can_generate_CPU);
+				heightmap = terrain_generation_method.generate_CPU(rendering_device, resolution, plane.coord);
+			var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
+			plane.mesh.material.set_shader_parameter("heightmap", heightmap_texture);
+	else:
+		var heightmap: Image;
+		if generate_button_string == "generate_GPU":
+			assert(terrain_generation_method.can_generate_GPU);
+			heightmap = terrain_generation_method.generate_GPU(rendering_device, terrain_generation_method.resolution);
+		else: # "generate_CPU"
+			assert(terrain_generation_method.can_generate_CPU);
+			heightmap = terrain_generation_method.generate_CPU(rendering_device, terrain_generation_method.resolution);
+		var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
+		terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
+		heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
 
 func set_parameter(parameter_name: String, parameter_value: Variant=null, is_terrain_generation_method_specific: bool=true) -> void:
 	if parameter_name == "auto_randomise_seed":
@@ -102,27 +151,23 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 	elif parameter_name == "resolution_of_plane":
 		var resolution: int = TerrainGenerationMethodVisualiser.PLANE_RESOLUTIONS[parameter_value];
 		terrain_generation_method_visualiser.reset_to_one_plane(resolution);
+		last_resolution_of_plane = resolution;
 		return;
 	elif parameter_name in ["albedo_type", "unshaded"]:
 		terrain_generation_method_visualiser.set(parameter_name, parameter_value);
 		return;
 	elif parameter_name == "camera_type":
-		set_camera_type(parameter_value);
+		visualisation_texture_rect.set_camera_type(parameter_value);
+		return;
+	elif parameter_name in ["rotation_type", "rotation_speed"]:
+		visualisation_texture_rect.set(parameter_name, parameter_value);
 		return;
 	elif parameter_name == "terrain_generation_method":
 		terrain_generation_method = TerrainGenerationMethodVisualiser.TERRAIN_GENERATION_METHODS[parameter_value];
 		return;
 	elif parameter_name.substr(0, "generate".length()) == "generate":
 		assert(terrain_generation_method is TerrainGenerationMethodExplicit);
-		var heightmap: Image;
-		if parameter_name == "generate_GPU":
-			assert(terrain_generation_method.can_generate_GPU);
-			heightmap = terrain_generation_method.generate_GPU(rendering_device);
-		else: # "generate_CPU"
-			heightmap = terrain_generation_method.generate_CPU(rendering_device);
-		var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
-		terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
-		heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
+		generate(parameter_name);
 	elif parameter_name == "chunk_settings":
 		assert(terrain_generation_method.can_generate_in_chunks);
 		chunk_settings.show();
@@ -130,7 +175,8 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 	if is_terrain_generation_method_specific:
 		if terrain_generation_method is TerrainGenerationMethodExplicit and parameter_name != "amplitude":
 			if parameter_name == "resolution":
-				terrain_generation_method.set("resolution", terrain_generation_method.RESOLUTIONS[parameter_value]);
+				terrain_generation_method.resolution = terrain_generation_method.RESOLUTIONS[parameter_value];
+				set_explicit_chunk_generation_and_update_UI(false);
 				return;
 			terrain_generation_method.set(parameter_name, parameter_value);
 		else:
@@ -173,6 +219,20 @@ func _on_timer_timeout() -> void:
 func _on_save_heightmap_button_pressed() -> void:
 	save_heightmap_file_dialog.show();
 	save_heightmap_file_dialog.get_line_edit().text = "Heightmap.exr";
+
+func _on_save_render_button_pressed() -> void:
+	save_render_file_dialog.show();
+	save_render_file_dialog.get_line_edit().text = "Render.jpg";
+
+func _on_save_render_file_dialog_confirmed() -> void:
+	var render: Image = visualisation_viewport.get_texture().get_image();
+	
+	var save_path = save_render_file_dialog.current_dir.path_join(save_render_file_dialog.get_line_edit().text);
+	if render.is_compressed():
+		render.decompress();
+	if not save_path.ends_with(".jpg"):
+		save_path += ".jpg";
+	render.save_jpg(save_path, 1);
 
 func capture_heightmap(resolution: int) -> Image:
 	heightmap_viewport.size = Vector2(resolution, resolution);

@@ -19,9 +19,9 @@ func get_shader(unshaded: bool) -> Shader:
 
 @abstract func setdown(rendering_device: RenderingDevice) -> void;
 
-@abstract func generate_CPU(rendering_device: RenderingDevice) -> Image;
+@abstract func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image;
 
-@abstract func generate_GPU(rendering_device: RenderingDevice) -> Image;
+@abstract func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image;
 
 func log2(x: float) -> float:
 	return log(x) / log(2);

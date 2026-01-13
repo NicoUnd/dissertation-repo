@@ -47,6 +47,9 @@ func clear_terrain_generation_method_specific_parameters() -> void:
 		terrain_generation_method_specific_UI.queue_free();
 	terrain_generation_method_specific_UIs = [];
 
+func pop_terrain_generation_method_specific_parameter() -> void:
+	terrain_generation_method_specific_UIs.pop_back().queue_free();
+
 func set_terrain_generation_method_specific_parameters(terrain_generation_method_specific_parameters: Array[Parameter]) -> void:
 	for terrain_generation_method_specific_parameter: Parameter in terrain_generation_method_specific_parameters:
 		add_parameter(terrain_generation_method_specific_parameter, true);
@@ -59,7 +62,9 @@ func _ready() -> void:
 	add_parameter(ParameterBool.new("circle", true), false);
 	add_parameter(ParameterBool.new("perturbate", false), false);
 	add_parameter(ParameterNumber.new("water_level", 0, 0, 1, false, false, false), false);
-	add_parameter(ParameterEnum.new("camera_type", 1, ["perspective", "orthographic"]), false);
+	add_parameter(ParameterEnum.new("camera_type", 1, ["perspective", "orthographic", "freeroam"]), false);
+	add_parameter(ParameterEnum.new("rotation_type", 0, ["camera", "light", "both", "none"]), false);
+	add_parameter(ParameterNumber.new("rotation_speed", 0.1, 0.01, 1, false, false, true), false);
 	
 	var plane_resolution_strings: Array[String] = [];
 	for plane_resolution: int in TerrainGenerationMethodVisualiser.PLANE_RESOLUTIONS:
@@ -72,4 +77,3 @@ func _ready() -> void:
 	for terrain_generation_method in TerrainGenerationMethodVisualiser.TERRAIN_GENERATION_METHODS:
 		terrain_generation_method_names.append(terrain_generation_method.name.capitalize());
 	add_parameter(ParameterEnum.new("terrain_generation_method", -1, terrain_generation_method_names), false);
-	
