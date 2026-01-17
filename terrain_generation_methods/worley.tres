@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="TerrainGenerationMethodNoise" load_steps=10 format=3 uid="uid://dsrbtacjgyx26"]
+[gd_resource type="Resource" script_class="TerrainGenerationMethodNoise" load_steps=11 format=3 uid="uid://dsrbtacjgyx26"]
 
 [ext_resource type="Script" uid="uid://b7uir5a8rvikp" path="res://scripts/terrain_generation_methods/terrain_generation_method_noise.gd" id="1_xg2hl"]
 [ext_resource type="Shader" uid="uid://dw4uox3mjbeqn" path="res://shaders/terrain_generation_method_noises/worley.gdshader" id="2_gqvn1"]
+[ext_resource type="Shader" uid="uid://csawji543e5dk" path="res://shaders/terrain_generation_method_noises/worley_wireframe.gdshader" id="3_1t84t"]
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="3_315ex"]
 [ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/parameters/parameter_number.gd" id="4_1t84t"]
 [ext_resource type="Shader" uid="uid://c3ehsorlioocq" path="res://shaders/terrain_generation_method_noises/worley_unshaded.gdshader" id="4_waxsv"]
@@ -43,6 +44,7 @@ metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 script = ExtResource("1_xg2hl")
 _shader = ExtResource("2_gqvn1")
 _unshaded_shader = ExtResource("4_waxsv")
+_wireframe_shader = ExtResource("3_1t84t")
 name = "worley"
 min_amplitude = 1.0
 max_amplitude = 16.0

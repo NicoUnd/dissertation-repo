@@ -3,7 +3,7 @@ class_name ChunkSettings
 
 const CHUNK_GRID_RESOLUTIONS: Array[int] = [1, 2, 4, 8, 16, 32];
 
-enum LOD_PRESET {CENTRE, CORNER, EDGE}
+enum LOD_PRESET {CENTRE, CORNER, EDGE, CHECKERED}
 var LOD_preset: LOD_PRESET:
 	set(new_LOD_preset):
 		LOD_preset = new_LOD_preset;
@@ -72,8 +72,12 @@ func apply_LOD_preset() -> void:
 	var y: int = 0;
 	var x: int = 0;
 	for chunk_type_cell: ChunkTypeCell in chunk_types_grid_container.get_children():
-		var dist: float = get_LOD_preset_distance(Vector2i(x, y), LOD_preset);
-		chunk_type_cell.LOD = clamp(int(8 * LOD_preset_sensitivity * dist / max_distance), 0, 7) as ChunkTypeCell.LODS;
+		match LOD_preset:
+			LOD_PRESET.CHECKERED:
+				chunk_type_cell.LOD = LOD_brush if (x + y) % 2 == 0 else ChunkTypeCell.LODS.UNLOADED;
+			_:
+				var dist: float = get_LOD_preset_distance(Vector2i(x, y), LOD_preset);
+				chunk_type_cell.LOD = clamp(int(8 * LOD_preset_sensitivity * dist / max_distance), 0, 7) as ChunkTypeCell.LODS;
 		x = (x + 1) % chunk_grid_resolution;
 		if x == 0:
 			y += 1;
@@ -89,6 +93,7 @@ func get_resolutions() -> Array[Array]: # Array[Array[int]]
 		x = (x + 1) % chunk_grid_resolution;
 		if x == 0:
 			y += 1;
+	print(resolutions)
 	return resolutions;
 
 func finish() -> void:
@@ -97,7 +102,14 @@ func finish() -> void:
 	hide();
 	for ui: Control in settings_v_box_container.get_children():
 		ui.queue_free();
-	main.set_explicit_chunk_generation_and_update_UI(true);
+	main.set_explicit_chunk_generation_and_update_UI_and_planes(true);
+	
+	var total_verticies: int = 0;
+	for row: Array in resolutions:
+		for resolution: int in row:
+			total_verticies += resolution * resolution;
+	main.update_verticies(total_verticies);
+	main.update_chunked_specific_parameters();
 
 func _on_visibility_changed() -> void:
 	if not visible:

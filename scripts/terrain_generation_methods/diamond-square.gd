@@ -5,7 +5,7 @@ var smoothness: float;
 
 var distribution: int;
 
-var wrap_around: bool;
+var diamond_average_type: int;
 
 var normalise: bool;
 
@@ -24,32 +24,27 @@ func get_diamond_average(points: Array[PackedFloat32Array], x: int, y: int, half
 	var diamond_total: float = 0;
 	var num_of_corners_used: int = 0;
 	for diamond_corner_y: int in [y - half_step_size, y + half_step_size]:
-		if wrap_around:
-			if diamond_corner_y < 0:
-				diamond_corner_y += resolution;
-			elif diamond_corner_y > resolution:
-				diamond_corner_y -= resolution;
-			# diamond_corner_y = posmod(diamond_corner_y, resolution + 1);
-		elif diamond_corner_y > resolution or diamond_corner_y < 0:
+		if (diamond_average_type == 2 and y in [0, resolution]) or (diamond_average_type in [1, 2] and (diamond_corner_y < 0 or diamond_corner_y > resolution)):
 			continue;
+		if diamond_corner_y < 0:
+			diamond_corner_y += resolution;
+		elif diamond_corner_y > resolution:
+			diamond_corner_y -= resolution;
+		# diamond_corner_y = posmod(diamond_corner_y, resolution + 1);
 		diamond_total += points[diamond_corner_y][x];
 		num_of_corners_used += 1;
-		#if points[diamond_corner_y][x] == 0:
-		#	breakpoint;
 	for diamond_corner_x: int in [x - half_step_size, x + half_step_size]:
-		if wrap_around:
-			if diamond_corner_x < 0:
-				diamond_corner_x += resolution;
-			elif diamond_corner_x > resolution:
-				diamond_corner_x -= resolution;
-		elif diamond_corner_x > resolution or diamond_corner_x < 0:
+		if (diamond_average_type == 2 and x in [0, resolution]) or (diamond_average_type in [1, 2] and (diamond_corner_x < 0 or diamond_corner_x > resolution)):
 			continue;
+		if diamond_corner_x < 0:
+			diamond_corner_x += resolution;
+		elif diamond_corner_x > resolution:
+			diamond_corner_x -= resolution;
+		# diamond_corner_x = posmod(diamond_corner_x, resolution + 1);
 		diamond_total += points[y][diamond_corner_x];
 		num_of_corners_used += 1;
-		#if points[y][diamond_corner_x] == 0:
-		#	breakpoint;
 	
-	assert(num_of_corners_used == 3 or num_of_corners_used == 4);
+	assert(num_of_corners_used in [2, 3, 4]);
 	return diamond_total / num_of_corners_used;
 
 func random_offset(random_number_generator: RandomNumberGenerator, random_scale: float) -> float:
@@ -76,7 +71,7 @@ func setdown(rendering_device: RenderingDevice) -> void:
 	#rendering_device.free();
 
 static func uv_to_world_pos(resolution: int, chunk_coord: Vector2i, uv: Vector2i) -> Vector2:
-	return (Vector2(uv) / float(resolution) + Vector2(chunk_coord)) * 64;
+	return (Vector2(uv) / float(resolution) + Vector2(chunk_coord)) * 4096; # * 4096 to avoid floating point errors
 
 static func world_pos_randf(seed: float, world_pos: Vector2i) -> float:
 	var random_number_generator: RandomNumberGenerator = RandomNumberGenerator.new();
@@ -104,36 +99,69 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	#points[resolution][0] = random_number_generator.randf();
 	#points[resolution][resolution] = random_number_generator.randf();
 	
-	points[0][0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(0, 0)));
-	print(points[0][0]);
-	points[0][resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(0, resolution)));
-	print(points[0][resolution]);
-	points[resolution][0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution, 0)));
-	print(points[resolution][0]);
-	points[resolution][resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution, resolution)));
-	print(points[resolution][resolution]);
+	#print("GENERATING DIAMOND SQUARE")
+	#points[0][0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(0, 0)));
+	#print(points[0][0]);
+	#points[resolution][0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(0, resolution)));
+	#print(points[0][resolution]);
+	#points[0][resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution, 0)));
+	#print(points[resolution][0]);
+	#points[resolution][resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution, resolution)));
+	#print(points[resolution][resolution]);
 	
 	var step_size: int = resolution;
 	var random_scale: float = 1;
 	while step_size > 1:
 		assert(posmod(step_size, 2) == 0) # step_size is even
+		@warning_ignore("integer_division")
 		var half_step_size: int = step_size / 2;
 		
 		# diamond step
 		var diamond_indecies: Array = range(half_step_size, resolution + 1, step_size);
 		for y: int in diamond_indecies:
 			for x: int in diamond_indecies:
-				points[y][x] = clamp(get_square_average(points, x, y, half_step_size) + random_offset(RandomNumberGenerator.new(), random_scale), 0, 1); # world_pos_random_offset(uv_to_world_pos(resolution, chunk_coord, Vector2i(x, y)), random_scale)
+				points[y][x] = clamp(get_square_average(points, x, y, half_step_size) + world_pos_random_offset(uv_to_world_pos(resolution, chunk_coord, Vector2i(x, y)), random_scale), 0, 1); # world_pos_random_offset(uv_to_world_pos(resolution, chunk_coord, Vector2i(x, y)), random_scale)
 				#print("square_avg: " + str(points[y][x]))
 		
 		# square step
 		for y: int in range(0, resolution + 1, half_step_size):
 			for x: int in range(posmod(y + half_step_size, step_size), resolution + 1, step_size):
-				points[y][x] = clamp(get_diamond_average(points, x, y, half_step_size, resolution) + random_offset(RandomNumberGenerator.new(), random_scale), 0, 1); # world_pos_random_offset(uv_to_world_pos(resolution, chunk_coord, Vector2i(x, y)), random_scale)
+				#print(Vector2i(x, y));
+				#if Vector2i(x, y) == Vector2i(resolution/2, 0) and chunk_coord == Vector2i(0, 1):
+					#print("res/2, 0:")
+					#breakpoint;
+					#print(get_diamond_average(points, x, y, half_step_size, resolution))
+					#print(get_diamond_average(points, x, y, half_step_size, resolution))
+				#if Vector2i(x, y) == Vector2i(resolution/2, resolution) and chunk_coord == Vector2i.ZERO:
+					#print("res/2, res:")
+					#breakpoint;
+					#print(get_diamond_average(points, x, y, half_step_size, resolution))
+					#print(get_diamond_average(points, x, y, half_step_size, resolution))
+				points[y][x] = clamp(get_diamond_average(points, x, y, half_step_size, resolution) + world_pos_random_offset(uv_to_world_pos(resolution, chunk_coord, Vector2i(x, y)), random_scale), 0, 1); # world_pos_random_offset(uv_to_world_pos(resolution, chunk_coord, Vector2i(x, y)), random_scale)
 				#print("diamond_avg: " + str(points[y][x]))
 		
 		step_size /= 2;
 		random_scale *= pow(2, -smoothness);
+	
+	#var world_pos: Vector2;
+	#world_pos = uv_to_world_pos(resolution, chunk_coord, Vector2i(0, resolution/2));
+	#print(str(world_pos) + ": " + str(points[resolution/2][0]));
+	#world_pos = uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution, resolution/2));
+	#print(str(world_pos) + ": " + str(points[resolution/2][resolution]));
+	#world_pos = uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution/2, 0));
+	#print(str(world_pos) + ": " + str(points[0][resolution/2]));
+	#world_pos = uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution/2, resolution));
+	#print(str(world_pos) + ": " + str(points[resolution][resolution/2]));
+	#
+	#print("CHUNK COORD: " + str(chunk_coord))
+	#if chunk_coord == Vector2i.ZERO:
+		#print("BOTTOM ROW OF TOP LEFT")
+		#print(points[resolution][resolution/2]);
+	#else:
+		#print(points[0][resolution/2]);
+	#
+	#print("FIRST ROW: " + str(points[0]))
+	#print("LAST ROW: " + str(points[resolution]))
 	
 	points.resize(resolution);
 	for row: PackedFloat32Array in points:
@@ -172,7 +200,7 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image:
 	while step_size > 1:
 		assert(posmod(step_size, 2) == 0) # step_size is even
 		# diamond step
-		var parameters: PackedFloat32Array = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(wrap_around), float(distribution), float(true)]);
+		var parameters: PackedFloat32Array = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(diamond_average_type), float(distribution), float(true)]); # DIFFERENT NEEDS TO BE UPDATED IN SHADER
 		
 		var parameters_bytes: PackedByteArray = parameters.to_byte_array();
 		var parameters_RID := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
@@ -198,7 +226,7 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image:
 		rendering_device.free_rid(pipeline);
 		
 		# square step
-		parameters = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(wrap_around), float(distribution), float(false)]);
+		parameters = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(diamond_average_type), float(distribution), float(false)]); # DIFFERENT NEEDS TO BE UPDATED IN SHADER
 		
 		parameters_bytes = parameters.to_byte_array();
 		parameters_RID = rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);

@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode depth_prepass_alpha, unshaded;
+render_mode depth_prepass_alpha, wireframe;
 
 #include "res://shaders/shader_include.gdshaderinc"
 

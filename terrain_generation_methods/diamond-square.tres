@@ -1,10 +1,23 @@
-[gd_resource type="Resource" script_class="DiamondSquare" load_steps=10 format=3 uid="uid://ba8lnm4iollr1"]
+[gd_resource type="Resource" script_class="DiamondSquare" load_steps=12 format=3 uid="uid://ba8lnm4iollr1"]
 
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="1_1rd5d"]
 [ext_resource type="Script" uid="uid://ddkes5jhoum04" path="res://scripts/terrain_generation_methods/diamond-square.gd" id="1_i3x2c"]
 [ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/parameters/parameter_number.gd" id="2_dvls0"]
 [ext_resource type="Script" uid="uid://dh4wgjnv8j0ir" path="res://scripts/parameters/parameter_enum.gd" id="3_dvls0"]
 [ext_resource type="Script" uid="uid://ppfcadcfq54h" path="res://scripts/parameters/parameter_bool.gd" id="4_gxwsg"]
+
+[sub_resource type="Resource" id="Resource_ikv75"]
+script = ExtResource("3_dvls0")
+options = Array[String](["wrap_around", "ignore_outside", "chunk_compatible"])
+name = "diamond_average_type"
+value = 2
+metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
+
+[sub_resource type="Resource" id="Resource_mgpmt"]
+script = ExtResource("4_gxwsg")
+name = "normalise"
+value = false
+metadata/_custom_type_script = "uid://ppfcadcfq54h"
 
 [sub_resource type="Resource" id="Resource_gxwsg"]
 script = ExtResource("2_dvls0")
@@ -21,10 +34,11 @@ value = 0
 metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
 [sub_resource type="Resource" id="Resource_q4gjg"]
-script = ExtResource("4_gxwsg")
-name = "wrap_around"
-value = false
-metadata/_custom_type_script = "uid://ppfcadcfq54h"
+script = ExtResource("3_dvls0")
+options = Array[String](["wrap_around", "ignore_outside", "chunk_compatible"])
+name = "diamond_average_type"
+value = 1
+metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
 [sub_resource type="Resource" id="Resource_krgyn"]
 script = ExtResource("4_gxwsg")
@@ -42,4 +56,5 @@ max_amplitude = 32.0
 default_amplitude = 16.0
 parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_gxwsg"), SubResource("Resource_2on8b"), SubResource("Resource_q4gjg"), SubResource("Resource_krgyn")])
 can_generate_in_chunks = true
+chunked_specific_parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_ikv75"), SubResource("Resource_mgpmt")])
 metadata/_custom_type_script = "uid://ddkes5jhoum04"

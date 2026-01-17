@@ -4,9 +4,13 @@ class_name ParameterOptionButtonUI
 @onready var label: Label = %Label
 @onready var option_button: OptionButton = %OptionButton
 
+var parameter_name: String;
+
 func setup(parameter: ParameterEnum, on_change: Callable) -> void:
-	label.text = parameter.name.capitalize();
+	parameter_name = parameter.name;
+	label.text = parameter_name.capitalize();
 	
+	option_button.clear();
 	for parameter_option: String in parameter.options:
 		option_button.add_item(parameter_option.capitalize());
 	option_button.selected = parameter.value;

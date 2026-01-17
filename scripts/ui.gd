@@ -29,18 +29,19 @@ static func parameter_to_parameter_ui(parameter: Parameter) -> Control:
 	return;
 
 func add_parameter(parameter: Parameter, is_terrain_generation_method_specific: bool) -> void:
-	var on_change: Callable = func (new_value: Variant=null): main.set_parameter(parameter.name, new_value, is_terrain_generation_method_specific);;
+	var parameter_name: String = parameter.name;
+	var on_change: Callable = func (new_value: Variant=null): main.set_parameter(parameter_name, new_value, is_terrain_generation_method_specific);;
 	var new_parameter_UI: Control = parameter_to_parameter_ui(parameter);
 	parameters_v_box_container.add_child(new_parameter_UI);
 	new_parameter_UI.setup(parameter, on_change);
 	
-	if parameter.name == "seed":
+	if parameter_name == "seed":
 		seed_slider = new_parameter_UI;
 	
 	if is_terrain_generation_method_specific:
 		terrain_generation_method_specific_UIs.append(new_parameter_UI)
 		if not parameter is ParameterButton:
-			main.set_parameter(parameter.name, parameter.value, true);
+			main.set_parameter(parameter_name, parameter.value, true);
 
 func clear_terrain_generation_method_specific_parameters() -> void:
 	for terrain_generation_method_specific_UI: Control in terrain_generation_method_specific_UIs:
@@ -54,11 +55,23 @@ func set_terrain_generation_method_specific_parameters(terrain_generation_method
 	for terrain_generation_method_specific_parameter: Parameter in terrain_generation_method_specific_parameters:
 		add_parameter(terrain_generation_method_specific_parameter, true);
 
+func update_chunked_specific_parameters(chunked_specific_parameters: Array[Parameter]) -> void:
+	for chunked_specific_parameter: Parameter in chunked_specific_parameters:
+		var chunked_specific_parameter_name: String = chunked_specific_parameter.name;
+		var on_change: Callable = func (new_value: Variant=null):
+			main.set_parameter(chunked_specific_parameter_name, new_value, true);
+			if main.explicit_chunk_generation:
+				main.set_explicit_chunk_generation_and_update_UI_and_planes(false);; # if these parameters are changed, no longer generating in chunks
+		for terrain_generation_method_specific_UI: Control in terrain_generation_method_specific_UIs:
+			if terrain_generation_method_specific_UI.parameter_name == chunked_specific_parameter.name:
+				terrain_generation_method_specific_UI.setup(chunked_specific_parameter, on_change);
+				main.set_parameter(chunked_specific_parameter_name, chunked_specific_parameter.value, true);
+
 func _ready() -> void:
 	add_parameter(ParameterNumber.new("seed", 1, 1, 64, false, false, false), false);
 	add_parameter(ParameterBool.new("auto_randomise_seed",false), false);
 	add_parameter(ParameterEnum.new("albedo_type", 0, ["texture", "heightmap", "normal"]), false);
-	add_parameter(ParameterBool.new("unshaded", false), false);
+	add_parameter(ParameterEnum.new("render_mode", 0, ["shaded", "unshaded", "wireframe"]), false);
 	add_parameter(ParameterBool.new("circle", true), false);
 	add_parameter(ParameterBool.new("perturbate", false), false);
 	add_parameter(ParameterNumber.new("water_level", 0, 0, 1, false, false, false), false);

@@ -11,10 +11,13 @@ class_name TerrainGenerationMethod;
 @export var parameters: Array[Parameter] = [];
 
 @export var can_generate_in_chunks: bool;
+@export var chunked_specific_parameters: Array[Parameter] = [];
 
 var seed: float;
 
-@abstract func get_shader(unshaded: bool) -> Shader;
+enum SHADER_TYPE {NORMAL, UNSHADED, WIREFRAME}
+
+@abstract func get_shader(shader_type: SHADER_TYPE) -> Shader;
 
 static func points_to_heightmap(points: Array[PackedFloat32Array]) -> Image:
 	var resolution: int = points.size();

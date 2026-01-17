@@ -4,12 +4,13 @@ class_name ParameterSliderUI
 @onready var label: Label = %Label
 @onready var h_slider: HSlider = %HSlider
 
-var parameter_name_capitalized: String;
+var parameter_name: String;
+
 var is_square_in_display: bool;
 var is_int: bool;
 
 func setup(parameter: ParameterNumber, on_change: Callable) -> void:
-	parameter_name_capitalized = parameter.name.capitalize();
+	parameter_name = parameter.name;
 	is_square_in_display = parameter.is_square_in_display;
 	is_int = parameter.is_int;
 	
@@ -29,9 +30,9 @@ func setup(parameter: ParameterNumber, on_change: Callable) -> void:
 
 func update_text(new_value: float) -> void:
 	var new_value_string = str(int(new_value) if is_int else new_value);
-	label.text = parameter_name_capitalized + " (" + new_value_string + (("x" + new_value_string) if is_square_in_display else "")+ ")"
+	label.text = parameter_name.capitalize() + " (" + new_value_string + (("x" + new_value_string) if is_square_in_display else "")+ ")"
 
 func _to_string() -> String:
 	var value: float = h_slider.value;
 	var value_string = str(int(value) if is_int else value);
-	return parameter_name_capitalized + ": " + value_string + (("x" + value_string) if is_square_in_display else "");
+	return parameter_name.capitalize() + ": " + value_string + (("x" + value_string) if is_square_in_display else "");

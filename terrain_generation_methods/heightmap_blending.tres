@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="TerrainGenerationMethodNoise" load_steps=16 format=3 uid="uid://uir8vm75yx0o"]
+[gd_resource type="Resource" script_class="TerrainGenerationMethodNoise" load_steps=17 format=3 uid="uid://uir8vm75yx0o"]
 
 [ext_resource type="Script" uid="uid://b7uir5a8rvikp" path="res://scripts/terrain_generation_methods/terrain_generation_method_noise.gd" id="1_b7ql0"]
 [ext_resource type="Shader" uid="uid://dn1ae62elc7nb" path="res://shaders/terrain_generation_method_noises/heightmap_blending.gdshader" id="2_ygccv"]
+[ext_resource type="Shader" uid="uid://cydlinnasn1m" path="res://shaders/terrain_generation_method_noises/heightmap_blending_wireframe.gdshader" id="3_auc3n"]
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="3_ygccv"]
 [ext_resource type="Script" uid="uid://b2pyma2gu2m37" path="res://scripts/parameters/parameter_image.gd" id="4_hq3wy"]
 [ext_resource type="Shader" uid="uid://dyloah226q4rq" path="res://shaders/terrain_generation_method_noises/heightmap_blending_unshaded.gdshader" id="5_33twg"]
@@ -64,9 +65,10 @@ metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 script = ExtResource("1_b7ql0")
 _shader = ExtResource("2_ygccv")
 _unshaded_shader = ExtResource("5_33twg")
+_wireframe_shader = ExtResource("3_auc3n")
 name = "heightmap_blending"
 min_amplitude = 1.0
 max_amplitude = 64.0
-default_amplitude = 32.0
+default_amplitude = 8.0
 parameters = Array[ExtResource("3_ygccv")]([SubResource("Resource_33twg"), SubResource("Resource_5mavw"), SubResource("Resource_hq3wy"), SubResource("Resource_ch6t7"), SubResource("Resource_auc3n"), SubResource("Resource_7w5ie"), SubResource("Resource_1rdl3"), SubResource("Resource_i1px2")])
 metadata/_custom_type_script = "uid://b7uir5a8rvikp"

@@ -39,7 +39,7 @@ func remove_planes() -> void:
 			for plane: MeshInstance3D in planes.get_children():
 				plane.mesh.material = ShaderMaterial.new();
 		else:
-			set_shader(terrain_generation_method.get_shader(unshaded), terrain_generation_method.parameters);
+			set_shader(terrain_generation_method.get_shader(render_mode), terrain_generation_method.parameters);
 
 func get_specific_parameters() -> Array[Array]: # Arrar[Array[String], Array[Variant]]
 	var specific_parameters = terrain_generation_method.parameters;
@@ -61,12 +61,12 @@ func set_specific_parameters(prev_specific_parameter_names: Array[String], prev_
 	for specific_parameter_index: int in prev_specific_parameter_names.size():
 		set_planes_shader_parameter(prev_specific_parameter_names[specific_parameter_index], prev_specific_parameter_values[specific_parameter_index]);
 
-@export var unshaded: bool = false:
-	set(new_unshaded):
-		unshaded = new_unshaded;
+@export var render_mode: int = 0:
+	set(new_render_mode):
+		render_mode = new_render_mode;
 		if terrain_generation_method:
 			var prev_specific_parameters: Array[Array] = get_specific_parameters();
-			set_shader(terrain_generation_method.get_shader(unshaded), terrain_generation_method.parameters);
+			set_shader(terrain_generation_method.get_shader(render_mode), terrain_generation_method.parameters);
 			set_specific_parameters(prev_specific_parameters[0], prev_specific_parameters[1]);
 
 func apply_shader_options() -> void:
@@ -143,13 +143,13 @@ func set_planes(grid_resolution: int, resolutions: Array[Array]) -> void: # Arra
 				new_plane.position = Vector3((x - half_grid_resolution) * plane_offset + half_plane_offset, 0, (y - half_grid_resolution) * plane_offset + half_plane_offset);
 			
 			@warning_ignore("narrowing_conversion")
-			var subdivides: int = resolution - 1;
+			var subdivides: int = resolution - 2;
 			new_plane.mesh.subdivide_depth = subdivides;
 			new_plane.mesh.subdivide_width = subdivides;
 			
 			new_plane.mesh.material = ShaderMaterial.new();
 			if terrain_generation_method:
-				new_plane.mesh.material.shader = terrain_generation_method.get_shader(unshaded);
+				new_plane.mesh.material.shader = terrain_generation_method.get_shader(render_mode);
 				apply_shader_options();
 			if retain_prev_specific_parameters:
 				set_specific_parameters(prev_specific_parameters[0], prev_specific_parameters[1]);

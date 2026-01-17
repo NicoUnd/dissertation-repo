@@ -33,14 +33,18 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 
 @onready var visualisation_texture_rect: TextureRect = %VisualisationTextureRect
 
+@onready var vertices_label: Label = $MarginContainer/VerticesLabel
+
 var rendering_device: RenderingDevice;
 
 var last_resolution_of_plane: int = 1024;
 
 var filled_UI: bool = false;
 var explicit_chunk_generation: bool = false; # for explicit generation methods, can either generate in chunks or one plane, UI dialog will show this
-func set_explicit_chunk_generation_and_update_UI(new_explicit_chunk_generation: bool) -> void:
+func set_explicit_chunk_generation_and_update_UI_and_planes(new_explicit_chunk_generation: bool) -> void:
 	explicit_chunk_generation = new_explicit_chunk_generation;
+	if not explicit_chunk_generation:
+		reset_to_one_plane(last_resolution_of_plane);
 	if not filled_UI: # bottom buttons won't be the generate buttons
 		return;
 	var generate_chunks_string: String = "chunks_" if explicit_chunk_generation else "";
@@ -53,8 +57,13 @@ func set_explicit_chunk_generation_and_update_UI(new_explicit_chunk_generation: 
 		if terrain_generation_method.can_generate_GPU:
 			ui.add_parameter(ParameterButton.new("generate_" + generate_chunks_string + "GPU"), true);
 
+func reset_to_one_plane(resolution: int) -> void:
+	terrain_generation_method_visualiser.reset_to_one_plane(resolution);
+	update_verticies(resolution * resolution);
+
 @export var terrain_generation_method: TerrainGenerationMethod:
 	set(new_terrain_generation_method):
+		filled_UI = false;
 		if terrain_generation_method is TerrainGenerationMethodExplicit:
 			terrain_generation_method.setdown(rendering_device);
 		terrain_generation_method = new_terrain_generation_method;
@@ -63,8 +72,7 @@ func set_explicit_chunk_generation_and_update_UI(new_explicit_chunk_generation: 
 			heightmap_terrain_generation_method_visualiser.terrain_generation_method = terrain_generation_method;
 			if terrain_generation_method:
 				randomise_seed();
-				terrain_generation_method_visualiser.reset_to_one_plane(last_resolution_of_plane);
-				explicit_chunk_generation = false;
+				set_explicit_chunk_generation_and_update_UI_and_planes(false);
 				
 		if terrain_generation_method:
 			if ui:
@@ -120,7 +128,7 @@ func generate(generate_button_string: String) -> void:
 		for plane_index: int in planes.size():
 			print("GENERATING FOR PLANE")
 			var plane: Chunk = planes[plane_index];
-			var resolution: int = plane.mesh.subdivide_depth + 1;
+			var resolution: int = plane.mesh.subdivide_depth + 2;
 			@warning_ignore("integer_division")
 			#var chunk_coord: Vector2i = Vector2i(plane_index / chunk_grid_resolution, plane_index % chunk_grid_resolution);
 			var heightmap: Image;
@@ -144,16 +152,28 @@ func generate(generate_button_string: String) -> void:
 		terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
 		heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
 
+func update_verticies(vertices: int) -> void:
+	var vertices_string: String = str(vertices);
+	var formatted_vertices: String = "";
+	var last_character_index: int = vertices_string.length() - 1;
+	var count: int = 0;
+	for index: int in range(last_character_index, -1, -1):
+		if count > 0 and count % 3 == 0:
+			formatted_vertices = "," + formatted_vertices;
+		formatted_vertices = vertices_string[index] + formatted_vertices;
+		count += 1;
+	vertices_label.text = "Vertices: " + formatted_vertices;
+
 func set_parameter(parameter_name: String, parameter_value: Variant=null, is_terrain_generation_method_specific: bool=true) -> void:
 	if parameter_name == "auto_randomise_seed":
 		auto_randomise_seed = parameter_value;
 		return;
 	elif parameter_name == "resolution_of_plane":
 		var resolution: int = TerrainGenerationMethodVisualiser.PLANE_RESOLUTIONS[parameter_value];
-		terrain_generation_method_visualiser.reset_to_one_plane(resolution);
+		reset_to_one_plane(resolution);
 		last_resolution_of_plane = resolution;
 		return;
-	elif parameter_name in ["albedo_type", "unshaded"]:
+	elif parameter_name in ["albedo_type", "render_mode"]:
 		terrain_generation_method_visualiser.set(parameter_name, parameter_value);
 		return;
 	elif parameter_name == "camera_type":
@@ -176,7 +196,8 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 		if terrain_generation_method is TerrainGenerationMethodExplicit and parameter_name != "amplitude":
 			if parameter_name == "resolution":
 				terrain_generation_method.resolution = terrain_generation_method.RESOLUTIONS[parameter_value];
-				set_explicit_chunk_generation_and_update_UI(false);
+				if explicit_chunk_generation:
+					set_explicit_chunk_generation_and_update_UI_and_planes(false);
 				return;
 			terrain_generation_method.set(parameter_name, parameter_value);
 		else:
@@ -191,6 +212,9 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 			heightmap_terrain_generation_method_visualiser.set(parameter_name, parameter_value);
 	
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
+
+func update_chunked_specific_parameters() -> void:
+	ui.update_chunked_specific_parameters(terrain_generation_method.chunked_specific_parameters);
 
 #func save_heightmap() -> void:
 	#const heightmap_save_path = "res://heightmap.png";

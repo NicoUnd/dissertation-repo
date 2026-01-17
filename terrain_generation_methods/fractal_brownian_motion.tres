@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="TerrainGenerationMethodNoise" load_steps=10 format=3 uid="uid://mbxq372yw5px"]
+[gd_resource type="Resource" script_class="TerrainGenerationMethodNoise" load_steps=11 format=3 uid="uid://mbxq372yw5px"]
 
 [ext_resource type="Script" uid="uid://b7uir5a8rvikp" path="res://scripts/terrain_generation_methods/terrain_generation_method_noise.gd" id="1_40yf8"]
 [ext_resource type="Shader" uid="uid://bmtxdjjq3087p" path="res://shaders/terrain_generation_method_noises/fractal_brownian_motion.gdshader" id="2_ur1vb"]
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="3_25fsa"]
+[ext_resource type="Shader" uid="uid://5irxpoalskg5" path="res://shaders/terrain_generation_method_noises/fractal_brownian_motion_wireframe.gdshader" id="3_wried"]
 [ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/parameters/parameter_number.gd" id="4_ur1vb"]
 [ext_resource type="Script" uid="uid://dh4wgjnv8j0ir" path="res://scripts/parameters/parameter_enum.gd" id="5_ur1vb"]
 [ext_resource type="Shader" uid="uid://ct0u3mljs5wmj" path="res://shaders/terrain_generation_method_noises/fractal_brownian_motion_unshaded.gdshader" id="6_wried"]
@@ -36,6 +37,7 @@ metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 script = ExtResource("1_40yf8")
 _shader = ExtResource("2_ur1vb")
 _unshaded_shader = ExtResource("6_wried")
+_wireframe_shader = ExtResource("3_wried")
 name = "fractal_brownian_motion"
 min_amplitude = 1.0
 max_amplitude = 32.0

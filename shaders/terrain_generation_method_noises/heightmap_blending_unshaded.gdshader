@@ -6,10 +6,10 @@ render_mode depth_prepass_alpha, unshaded;
 // terrain generation method specific parameters
 uniform float amplitude: hint_range(1.0, 64.0);
 
-uniform sampler2D heightmap1;
-uniform sampler2D heightmap2;
-uniform sampler2D heightmap3;
-uniform sampler2D heightmap4;
+uniform sampler2D heightmap1: repeat_disable;
+uniform sampler2D heightmap2: repeat_disable;
+uniform sampler2D heightmap3: repeat_disable;
+uniform sampler2D heightmap4: repeat_disable;
 
 uniform float c1: hint_range(0.0, 1.0, 0.1);
 uniform float c2: hint_range(0.0, 1.0, 0.1);
@@ -27,16 +27,13 @@ float blend_heightmaps(vec2 uv, float amp, sampler2D h1, sampler2D h2, sampler2D
 }
 
 vec3 get_normal(vec2 uv, float amp, sampler2D h1, sampler2D h2, sampler2D h3, sampler2D h4, float given_c1, float given_c2, float given_c3, float given_c4) {
-	const float delta = 1.0 / 4096.0;
+	ivec2 heightmap_size = textureSize(h1, 0);
+	float delta = 1.0 / float(heightmap_size.x);
 
-	vec2 uv_clamped = clamp(vec2(uv.x - delta, uv.y), 0.0, 1.0);
-    float hL = blend_heightmaps(uv_clamped, amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
-	uv_clamped = clamp(vec2(uv.x + delta, uv.y), 0.0, 1.0);
-    float hR = blend_heightmaps(uv_clamped, amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
-	uv_clamped = clamp(vec2(uv.x, uv.y - delta), 0.0, 1.0);
-    float hD = blend_heightmaps(uv_clamped, amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
-	uv_clamped = clamp(vec2(uv.x, uv.y + delta), 0.0, 1.0);
-    float hU = blend_heightmaps(uv_clamped, amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
+	float hL = blend_heightmaps(vec2(uv.x - delta, uv.y), amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
+    float hR = blend_heightmaps(vec2(uv.x + delta, uv.y), amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
+    float hD = blend_heightmaps(vec2(uv.x, uv.y - delta), amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
+    float hU = blend_heightmaps(vec2(uv.x, uv.y + delta), amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
 
     float dx = hR - hL;
     float dy = hU - hD;

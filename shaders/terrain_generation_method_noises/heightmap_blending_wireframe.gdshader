@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode depth_prepass_alpha;
+render_mode depth_prepass_alpha, wireframe;
 
 #include "res://shaders/shader_include.gdshaderinc"
 
@@ -30,7 +30,7 @@ vec3 get_normal(vec2 uv, float amp, sampler2D h1, sampler2D h2, sampler2D h3, sa
 	ivec2 heightmap_size = textureSize(h1, 0);
 	float delta = 1.0 / float(heightmap_size.x);
 
-    float hL = blend_heightmaps(vec2(uv.x - delta, uv.y), amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
+	float hL = blend_heightmaps(vec2(uv.x - delta, uv.y), amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
     float hR = blend_heightmaps(vec2(uv.x + delta, uv.y), amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
     float hD = blend_heightmaps(vec2(uv.x, uv.y - delta), amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);
     float hU = blend_heightmaps(vec2(uv.x, uv.y + delta), amp, h1, h2, h3, h4, given_c1, given_c2, given_c3, given_c4);

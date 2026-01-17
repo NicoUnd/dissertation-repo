@@ -6,7 +6,7 @@ render_mode depth_prepass_alpha;
 // terrain generation method specific parameters
 uniform float amplitude: hint_range(1.0, 64.0);
 
-uniform sampler2D heightmap;
+uniform sampler2D heightmap: repeat_disable;
 
 
 float sample_heightmap(vec2 uv, float amp, sampler2D h) {
@@ -14,16 +14,13 @@ float sample_heightmap(vec2 uv, float amp, sampler2D h) {
 }
 
 vec3 get_normal(vec2 uv, float amp, sampler2D h) {
-	const float delta = 1.0 / 4096.0;
+	ivec2 heightmap_size = textureSize(h, 0);
+	float delta = 1.0 / float(heightmap_size.x);
 
-	vec2 uv_clamped = clamp(vec2(uv.x - delta, uv.y), 0.0, 1.0);
-    float hL = sample_heightmap(uv_clamped, amp, h);
-	uv_clamped = clamp(vec2(uv.x + delta, uv.y), 0.0, 1.0);
-    float hR = sample_heightmap(uv_clamped, amp, h);
-	uv_clamped = clamp(vec2(uv.x, uv.y - delta), 0.0, 1.0);
-    float hD = sample_heightmap(uv_clamped, amp, h);
-	uv_clamped = clamp(vec2(uv.x, uv.y + delta), 0.0, 1.0);
-    float hU = sample_heightmap(uv_clamped, amp, h);
+	float hL = sample_heightmap(vec2(uv.x - delta, uv.y), amp, h);
+	float hR = sample_heightmap(vec2(uv.x + delta, uv.y), amp, h);
+	float hD = sample_heightmap(vec2(uv.x, uv.y - delta), amp, h);
+	float hU = sample_heightmap(vec2(uv.x, uv.y + delta), amp, h);
 
     float dx = hR - hL;
     float dy = hU - hD;
