@@ -57,17 +57,29 @@ func get_specific_parameters() -> Array[Array]: # Arrar[Array[String], Array[Var
 		specific_parameter_values.append(plane.mesh.material.get_shader_parameter(specific_parameter_name));
 	return [specific_parameter_names, specific_parameter_values];
 
+func get_heightmaps() -> Array[ImageTexture]:
+	var heightmaps: Array[ImageTexture] = [];
+	for plane: Chunk in planes.get_children():
+		heightmaps.append(plane.mesh.material.get_shader_parameter("heightmap"));
+	return heightmaps;
+
 func set_specific_parameters(prev_specific_parameter_names: Array[String], prev_specific_parameter_values: Array[Variant]) -> void:
 	for specific_parameter_index: int in prev_specific_parameter_names.size():
 		set_planes_shader_parameter(prev_specific_parameter_names[specific_parameter_index], prev_specific_parameter_values[specific_parameter_index]);
+
+func set_heightmaps(heightmaps: Array[ImageTexture]) -> void:
+	for plane: Chunk in planes.get_children():
+		plane.mesh.material.set_shader_parameter("heightmap", heightmaps.pop_front());
 
 @export var render_mode: int = 0:
 	set(new_render_mode):
 		render_mode = new_render_mode;
 		if terrain_generation_method:
 			var prev_specific_parameters: Array[Array] = get_specific_parameters();
+			var prev_heightmaps: Array[ImageTexture] = get_heightmaps();
 			set_shader(terrain_generation_method.get_shader(render_mode), terrain_generation_method.parameters);
 			set_specific_parameters(prev_specific_parameters[0], prev_specific_parameters[1]);
+			set_heightmaps(prev_heightmaps);
 
 func apply_shader_options() -> void:
 	set_planes_shader_parameter("seed", seed);
@@ -132,6 +144,8 @@ func set_planes(grid_resolution: int, resolutions: Array[Array]) -> void: # Arra
 			var new_plane: Chunk = Chunk.new();
 			planes.add_child(new_plane);
 			new_plane.owner = self;
+			
+			new_plane.extra_cull_margin = INF;
 			
 			new_plane.coord = Vector2i(x, y);
 			

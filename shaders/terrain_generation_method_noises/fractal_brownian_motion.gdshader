@@ -32,15 +32,15 @@ float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float
 
 vec3 get_normal(vec2 uv, int given_octaves, float base_period, float base_amp) {
 	const float delta = 4.0 / 1024.0;
-	
+
 	float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_period, base_amp);
 	float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_period, base_amp);
 	float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_period, base_amp);
 	float hU = fract_brownian_motion(vec2(uv.x, uv.y + delta), given_octaves, base_period, base_amp);
-	
+
 	float dx = hR - hL;
 	float dy = hU - hD;
-	
+
 	vec3 normal = normalize(vec3(-dx, delta, -dy));
 	return normal;
 }
@@ -88,23 +88,6 @@ void fragment() {
 	vec3 world_normal = get_normal(uv, octaves, period, amplitude);
 	//float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
 
-	if (albedo_type == 0) {
-		//vec2 texture_uv = fract(world_pos.xz);
-		//texture_uv += 2.0 * perlin_2D(texture_uv * 0.25);
-		float steepness = dot(world_normal, vec3(0.0, 1.0, 0.0));
-		steepness *= steepness;
-		float highness = smoothstep(0.15, 0.7, world_pos.y * 2.0 / amplitude);
-		ALBEDO = (steepness * (highness * vec4(1.0, 1.0, 1.0, 1.0) + (1.0 - highness) * vec4(0.15, 0.25, 0.18, 1.0)) +
-		(1.0 - steepness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
-		//ALBEDO = (steepness * vec4(0.2, 0.25, 0.2, 1.0) +
-		//(1.0 - steepness) * vec4(0.05, 0.05, 0.05, 1.0)).xyz;
-	} else {
-		if (albedo_type == 1) {
-			ALBEDO = vec3((world_pos.y / amplitude + 1.0) * 0.5);
-		} else { // albedo_type == 2
-			ALBEDO = world_normal;
-		}
-	}
-
+	ALBEDO = get_albedo(world_pos, world_normal, amplitude);
 	ALPHA = get_alpha(world_pos);
 }

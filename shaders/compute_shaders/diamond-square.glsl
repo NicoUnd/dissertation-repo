@@ -10,7 +10,7 @@ layout(set = 0, binding = 0, std430) restrict buffer Parameters {
 	float resolution;
 	float step_size;
 	float random_scale;
-	float wrap_around;
+	float diamond_average_type;
 	float distribution;
 	float diamond_step;
 }
@@ -63,7 +63,7 @@ float get_square_average() {
 }
 
 float get_diamond_corner(ivec2 corner_uv) { // returns -1 if the corner is not used
-	bool wrap_around = bool(parameter_buffer.wrap_around);
+	int diamond_average_type = int(parameter_buffer.diamond_average_type);
 	int resolution = int(parameter_buffer.resolution);
 	if (corner_uv.y > resolution || corner_uv.y < 0) {
 		if (!wrap_around) {

@@ -1,19 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://mknok0q1uv77"]
+[gd_scene load_steps=6 format=3 uid="uid://mknok0q1uv77"]
 
-[ext_resource type="Script" uid="uid://dxknf8qisgktm" path="res://scripts/chunk.gd" id="2_i4yfv"]
-[ext_resource type="Shader" uid="uid://kk8do6q6jwl6" path="res://test.gdshader" id="2_rec0i"]
 [ext_resource type="Texture2D" uid="uid://d1gpbux8tchrn" path="res://assets/water_normal_map.png" id="3_i4yfv"]
 [ext_resource type="Script" uid="uid://c38b2dst17kuq" path="res://scripts/terrain_generation_method_visualiser.gd" id="3_md2q8"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_8sw0d"]
-render_priority = 0
-shader = ExtResource("2_rec0i")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_xfu5g"]
-material = SubResource("ShaderMaterial_8sw0d")
-size = Vector2(64, 64)
-subdivide_width = 1022
-subdivide_depth = 1022
 
 [sub_resource type="Shader" id="Shader_i4yfv"]
 code = "// NOTE: Shader automatically converted from Godot Engine 4.5.1.stable's StandardMaterial3D.
@@ -115,14 +103,9 @@ subdivide_depth = 127
 
 [node name="TerrainGenerationMethodVisualiser" type="Node3D"]
 script = ExtResource("3_md2q8")
-render_mode = null
 
 [node name="Planes" type="Node" parent="."]
 unique_name_in_owner = true
-
-[node name="@MeshInstance3D@21364" type="MeshInstance3D" parent="Planes"]
-mesh = SubResource("PlaneMesh_xfu5g")
-script = ExtResource("2_i4yfv")
 
 [node name="WaterMeshInstance3D" type="MeshInstance3D" parent="."]
 unique_name_in_owner = true

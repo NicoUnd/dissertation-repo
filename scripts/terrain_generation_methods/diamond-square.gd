@@ -167,6 +167,22 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	for row: PackedFloat32Array in points:
 		row.resize(resolution);
 	
+	var max: float = -INF;
+	var min: float = INF;
+	for row: PackedFloat32Array in points:
+		for point: float in row:
+			max = max(max, point);
+			min = min(min, point);
+	print("MAX: " + str(max) + " | MIN: " + str(min))
+	
+	var new_points: Array[PackedFloat32Array] = [];
+	for row: PackedFloat32Array in points:
+		var new_row: PackedFloat32Array = PackedFloat32Array();
+		for point: float in row:
+			new_row.append(point * 2);
+		new_points.append(new_row);
+	points = new_points;
+	
 	var heightmap: Image = points_to_heightmap(points);
 	if normalise:
 		heightmap = normalise_heightmap(heightmap, rendering_device);

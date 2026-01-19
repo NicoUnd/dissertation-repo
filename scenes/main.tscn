@@ -72,20 +72,19 @@ directional_shadow_max_distance = 20536.5
 
 [node name="TerrainGenerationMethodVisualiser" parent="VisualisationViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
-render_mode = 0
 circle = true
 seed = 42.78947755553328
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(0.06128233, 0, 0.99811876, 0, 1, 0, -0.99811876, 0, 0.06128233, 0, 0, 0)
+transform = Transform3D(0.09988733, 0, 0.994997, 0, 1, 0, -0.994997, 0, 0.09988733, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot"]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 0.76432526, 0.6448309, 0, -0.6448309, 0.76432526, 0, 31.667217, 52.959587)
 cull_mask = 1048573
 environment = SubResource("Environment_tefeu")
-near = 0.001
+fov = 37.849285
 
 [node name="VisualisationOrthographicCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot"]
 unique_name_in_owner = true
@@ -113,7 +112,6 @@ size = 64.0
 
 [node name="HeightmapTerrainGenerationMethodVisualiser" parent="HeightmapViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
-render_mode = 0
 albedo_type = 1
 seed = 42.78947755553328
 

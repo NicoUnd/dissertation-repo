@@ -16,6 +16,29 @@ vec2 random(vec2 uv){
     //return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * (seed - TIME * 0.000001));
 }
 
+vec3 get_albedo(vec3 world_pos, vec3 world_normal, float amplitude) {
+	switch(albedo_type) {
+		case 0:
+			//vec2 texture_uv = fract(world_pos.xz);
+			//texture_uv += 2.0 * perlin_2D(texture_uv * 0.25);
+			float steepness = dot(world_normal, vec3(0.0, 1.0, 0.0));
+			steepness *= steepness;
+			float highness = smoothstep(0.15, 0.7, world_pos.y * 2.0 / amplitude);
+			return (steepness * (highness * vec4(1.0, 1.0, 1.0, 1.0) + (1.0 - highness) * vec4(0.15, 0.25, 0.18, 1.0)) +
+			(1.0 - steepness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
+			//ALBEDO = (steepness * vec4(0.2, 0.25, 0.2, 1.0) +
+			//(1.0 - steepness) * vec4(0.05, 0.05, 0.05, 1.0)).xyz;
+		case 1:
+			return vec3((world_pos.y / amplitude + 1.0) * 0.5);
+		case 2:
+			return world_normal;
+		case 3:
+			return vec3(1.0);
+		case 4:
+			return vec3(0.0);
+	}
+}
+
 float get_alpha(vec3 world_pos) {
 	if (circle) {
 		return 1.0 - smoothstep(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5, 32.0, sqrt(world_pos.x * world_pos.x + world_pos.z * world_pos.z));

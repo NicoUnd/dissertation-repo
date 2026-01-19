@@ -21,6 +21,10 @@ var LOD_preset_sensitivity: float:
 	set(new_LOD_preset_sensitivity):
 		LOD_preset_sensitivity = new_LOD_preset_sensitivity;
 		set_chunk_types_grid();
+var LOD_preset_start_LOD: ChunkTypeCell.LODS = ChunkTypeCell.LODS.MAX:
+	set(new_LOD_preset_start_LOD):
+		LOD_preset_start_LOD = new_LOD_preset_start_LOD;
+		set_chunk_types_grid();
 
 var chunk_grid_resolution: int:
 	set(new_chunk_grid_resolution):
@@ -74,10 +78,10 @@ func apply_LOD_preset() -> void:
 	for chunk_type_cell: ChunkTypeCell in chunk_types_grid_container.get_children():
 		match LOD_preset:
 			LOD_PRESET.CHECKERED:
-				chunk_type_cell.LOD = LOD_brush if (x + y) % 2 == 0 else ChunkTypeCell.LODS.UNLOADED;
+				chunk_type_cell.LOD = LOD_preset_start_LOD if (x + y) % 2 == 0 else ChunkTypeCell.LODS.UNLOADED;
 			_:
 				var dist: float = get_LOD_preset_distance(Vector2i(x, y), LOD_preset);
-				chunk_type_cell.LOD = clamp(int(8 * LOD_preset_sensitivity * dist / max_distance), 0, 7) as ChunkTypeCell.LODS;
+				chunk_type_cell.LOD = clamp(int(lerp(0, 8, LOD_preset_sensitivity * dist / max_distance + float(LOD_preset_start_LOD)/8)), 0, 7) as ChunkTypeCell.LODS;
 		x = (x + 1) % chunk_grid_resolution;
 		if x == 0:
 			y += 1;
@@ -141,10 +145,15 @@ func _on_visibility_changed() -> void:
 	
 	settings_v_box_container.add_child(HSeparator.new());
 	
-	var LOD_preset_sensitivity_parameter: ParameterNumber = ParameterNumber.new("sensitivity", 1, 0.25, 4, false, false, true);
+	var LOD_preset_sensitivity_parameter: ParameterNumber = ParameterNumber.new("sensitivity", 1, 0.125, 8, false, false, true);
 	var LOD_preset_sensitivity_UI: ParameterSliderUI = UI.parameter_to_parameter_ui(LOD_preset_sensitivity_parameter);
 	settings_v_box_container.add_child(LOD_preset_sensitivity_UI);
 	LOD_preset_sensitivity_UI.setup(LOD_preset_sensitivity_parameter, func (value: float): LOD_preset_sensitivity = value);
+	
+	var LOD_preset_start_LOD_parameter: ParameterEnum = ParameterEnum.new("start_LOD", 0, LOD_strings);
+	var LOD_preset_start_LOD_UI: ParameterOptionButtonUI = UI.parameter_to_parameter_ui(LOD_preset_start_LOD_parameter);
+	settings_v_box_container.add_child(LOD_preset_start_LOD_UI);
+	LOD_preset_start_LOD_UI.setup(LOD_preset_start_LOD_parameter, func (option: int): LOD_preset_start_LOD = option as ChunkTypeCell.LODS);
 	
 	var LOD_preset_strings: Array[String] = [];
 	for LOD_preset_string in LOD_PRESET.keys():
@@ -164,3 +173,4 @@ func _on_visibility_changed() -> void:
 	LOD_preset = LOD_PRESET.CENTRE;
 	LOD_preset_sensitivity = 1;
 	chunk_grid_resolution = 8;
+	LOD_preset_start_LOD = ChunkTypeCell.LODS.MAX;
