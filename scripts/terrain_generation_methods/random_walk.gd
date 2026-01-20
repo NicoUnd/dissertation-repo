@@ -171,6 +171,6 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	heightmap = blur_with_detail(heightmap, rendering_device);
 	return heightmap;
 
-func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image: # will never happen as not GPU accelerated
+func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image: # will never happen as not GPU accelerated
 	assert(false);
 	return;

@@ -27,9 +27,9 @@ func get_diamond_average(points: Array[PackedFloat32Array], x: int, y: int, half
 		if (diamond_average_type == 2 and y in [0, resolution]) or (diamond_average_type in [1, 2] and (diamond_corner_y < 0 or diamond_corner_y > resolution)):
 			continue;
 		if diamond_corner_y < 0:
-			diamond_corner_y += resolution;
+			diamond_corner_y += resolution + 1;
 		elif diamond_corner_y > resolution:
-			diamond_corner_y -= resolution;
+			diamond_corner_y -= resolution + 1;
 		# diamond_corner_y = posmod(diamond_corner_y, resolution + 1);
 		diamond_total += points[diamond_corner_y][x];
 		num_of_corners_used += 1;
@@ -37,9 +37,9 @@ func get_diamond_average(points: Array[PackedFloat32Array], x: int, y: int, half
 		if (diamond_average_type == 2 and x in [0, resolution]) or (diamond_average_type in [1, 2] and (diamond_corner_x < 0 or diamond_corner_x > resolution)):
 			continue;
 		if diamond_corner_x < 0:
-			diamond_corner_x += resolution;
+			diamond_corner_x += resolution + 1;
 		elif diamond_corner_x > resolution:
-			diamond_corner_x -= resolution;
+			diamond_corner_x -= resolution + 1;
 		# diamond_corner_x = posmod(diamond_corner_x, resolution + 1);
 		diamond_total += points[y][diamond_corner_x];
 		num_of_corners_used += 1;
@@ -100,13 +100,13 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	#points[resolution][resolution] = random_number_generator.randf();
 	
 	#print("GENERATING DIAMOND SQUARE")
-	#points[0][0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(0, 0)));
+	points[0][0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i.ZERO));
 	#print(points[0][0]);
-	#points[resolution][0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(0, resolution)));
+	points[resolution][0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i.DOWN * resolution));
 	#print(points[0][resolution]);
-	#points[0][resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution, 0)));
+	points[0][resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i.RIGHT * resolution));
 	#print(points[resolution][0]);
-	#points[resolution][resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(resolution, resolution)));
+	points[resolution][resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i.ONE * resolution));
 	#print(points[resolution][resolution]);
 	
 	var step_size: int = resolution;
@@ -188,17 +188,14 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 		heightmap = normalise_heightmap(heightmap, rendering_device);
 	return heightmap;
 
-func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image:
+func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image:
 	var points: PackedFloat32Array = PackedFloat32Array();
 	points.resize((resolution + 1) * (resolution + 1));
 	
-	var random_number_generator: RandomNumberGenerator = RandomNumberGenerator.new();
-	random_number_generator.seed = hash(seed);
-	
-	points[0] = random_number_generator.randf();
-	points[resolution] = random_number_generator.randf();
-	points[(resolution + 1) * resolution] = random_number_generator.randf();
-	points[(resolution + 1) * (resolution + 1) - 1] = random_number_generator.randf();
+	points[0] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i.ZERO));
+	points[resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i.RIGHT * resolution));
+	points[(resolution + 1) * resolution] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i.DOWN * resolution));
+	points[(resolution + 1) * (resolution + 1) - 1] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i.ONE * resolution));
 	
 	var points_bytes: PackedByteArray = points.to_byte_array();
 	print(points_bytes.size());
@@ -216,7 +213,7 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image:
 	while step_size > 1:
 		assert(posmod(step_size, 2) == 0) # step_size is even
 		# diamond step
-		var parameters: PackedFloat32Array = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(diamond_average_type), float(distribution), float(true)]); # DIFFERENT NEEDS TO BE UPDATED IN SHADER
+		var parameters: PackedFloat32Array = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(diamond_average_type), float(distribution), float(true), float(chunk_coord.x), float(chunk_coord.y)]); # DIFFERENT NEEDS TO BE UPDATED IN SHADER
 		
 		var parameters_bytes: PackedByteArray = parameters.to_byte_array();
 		var parameters_RID := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
@@ -242,7 +239,7 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image:
 		rendering_device.free_rid(pipeline);
 		
 		# square step
-		parameters = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(diamond_average_type), float(distribution), float(false)]); # DIFFERENT NEEDS TO BE UPDATED IN SHADER
+		parameters = PackedFloat32Array([seed, float(resolution), float(step_size), float(random_scale), float(diamond_average_type), float(distribution), float(false), float(chunk_coord.x), float(chunk_coord.y)]); # DIFFERENT NEEDS TO BE UPDATED IN SHADER
 		
 		parameters_bytes = parameters.to_byte_array();
 		parameters_RID = rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);

@@ -13,6 +13,8 @@ layout(set = 0, binding = 0, std430) restrict buffer Parameters {
 	float diamond_average_type;
 	float distribution;
 	float diamond_step;
+	float chunk_coord_x;
+	float chunk_coord_y;
 }
 parameter_buffer;
 
@@ -29,6 +31,11 @@ float rand(ivec2 uv, float seed){ // random 0-1
 	return fract(sin(dot(vec2(uv), vec2(12.9898, 78.233))) * 437.5453 * seed);
 }
 
+
+float world_pos_rand(ivec2 uv, float seed, ivec2 chunk_coord){ // random 0-1
+	return fract(sin(dot(vec2(uv), vec2(float(chunk_coord.x) * 621.421 + 12.9898, float(chunk_coord.y) * 125.1298 + 78.233))) * 437.5453 * seed);
+}
+
 // Box-Muller transform
 float rand_normal(ivec2 uv, float seed) { // normal random value with mean=0 and stddev=1
 	float u1 = rand(uv, seed);
@@ -39,13 +46,23 @@ float rand_normal(ivec2 uv, float seed) { // normal random value with mean=0 and
 	return z;
 }
 
+float world_pos_rand_normal(ivec2 uv, float seed, ivec2 chunk_coord) { // normal random value with mean=0 and stddev=1
+	float u1 = world_pos_rand(uv, seed, chunk_coord);
+	float u2 = world_pos_rand(uv + ivec2(1.3123, 42.145), seed, chunk_coord); // small offset for another random number
+	
+	u1 = max(u1, 0.0001); // avoid log(0)
+	float z = sqrt(-2.0 * log(u1)) * cos(6.2831853 * u2); // 2 pi = 6.2831853
+	return z;
+}
+
 float random_offset() {
 	ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
 	float random_scale = parameter_buffer.random_scale;
+	ivec2 chunk_coord = ivec2(int(parameter_buffer.chunk_coord_x), int(parameter_buffer.chunk_coord_y));
 	if (parameter_buffer.distribution == 0) { // uniform
-		return (rand(uv, parameter_buffer.seed) - 0.5) * random_scale;
+		return (world_pos_rand(uv, parameter_buffer.seed, chunk_coord) - 0.5) * random_scale;
 	} else { // guassian
-		return rand_normal(uv, parameter_buffer.seed) * 0.5 * random_scale; // base std dev is 0.5
+		return world_pos_rand_normal(uv, parameter_buffer.seed, chunk_coord) * 0.5 * random_scale; // base std dev is 0.5
 	}
 }
 
@@ -62,21 +79,17 @@ float get_square_average() {
 	return square_total / 4.0;
 }
 
-float get_diamond_corner(ivec2 corner_uv) { // returns -1 if the corner is not used
+float get_diamond_corner(ivec2 corner_uv, ivec2 uv) { // returns -1 if the corner is not used
 	int diamond_average_type = int(parameter_buffer.diamond_average_type);
 	int resolution = int(parameter_buffer.resolution);
-	if (corner_uv.y > resolution || corner_uv.y < 0) {
-		if (!wrap_around) {
-			return -1.0;
-		}
-		corner_uv.y = corner_uv.y % (resolution + 1);
+	if ((diamond_average_type == 2 && (uv.y == 0 || uv.y == resolution)) || (diamond_average_type >= 1 && (corner_uv.y > resolution || corner_uv.y < 0))) {
+		return -1.0;
 	}
-	if (corner_uv.x > resolution || corner_uv.x < 0) {
-		if (!wrap_around) {
-			return -1.0;
-		}
-		corner_uv.x = corner_uv.x % (resolution + 1);
+	corner_uv.y = corner_uv.y % (resolution + 1);
+	if ((diamond_average_type == 2 && (uv.x == 0 || uv.x == resolution)) || (diamond_average_type >= 1 && (corner_uv.x > resolution || corner_uv.x < 0))) {
+		return -1.0;
 	}
+	corner_uv.x = corner_uv.x % (resolution + 1);
 	return points_buffer.data[uv_to_linear(corner_uv)];
 }
 
@@ -87,22 +100,22 @@ float get_diamond_average() {
 	
 	float diamond_total = 0.0;
 	int corners_used = 0;
-	float corner_value = get_diamond_corner(ivec2(uv.x, uv.y - half_step_size));
+	float corner_value = get_diamond_corner(ivec2(uv.x, uv.y - half_step_size), uv);
 	if (corner_value != -1.0) {
 		diamond_total += corner_value;
 		corners_used += 1;
 	}
-	corner_value = get_diamond_corner(ivec2(uv.x, uv.y + half_step_size));
+	corner_value = get_diamond_corner(ivec2(uv.x, uv.y + half_step_size), uv);
 	if (corner_value != -1.0) {
 		diamond_total += corner_value;
 		corners_used += 1;
 	}
-	corner_value = get_diamond_corner(ivec2(uv.x - half_step_size, uv.y));
+	corner_value = get_diamond_corner(ivec2(uv.x - half_step_size, uv.y), uv);
 	if (corner_value != -1.0) {
 		diamond_total += corner_value;
 		corners_used += 1;
 	}
-	corner_value = get_diamond_corner(ivec2(uv.x + half_step_size, uv.y));
+	corner_value = get_diamond_corner(ivec2(uv.x + half_step_size, uv.y), uv);
 	if (corner_value != -1.0) {
 		diamond_total += corner_value;
 		corners_used += 1;

@@ -417,7 +417,7 @@ func add_crisp_onto_blurry_GPU(rendering_device: RenderingDevice, blurry_bytes: 
 	
 	return output_bytes;
 
-func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image:
+func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image:
 	var attach_directions: PackedInt32Array = PackedInt32Array();
 	attach_directions.resize(INITIAL_RESOLUTION * INITIAL_RESOLUTION);
 	

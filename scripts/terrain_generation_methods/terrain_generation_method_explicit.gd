@@ -30,7 +30,7 @@ func get_shader(shader_type: SHADER_TYPE) -> Shader:
 
 @abstract func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image;
 
-@abstract func generate_GPU(rendering_device: RenderingDevice, resolution: int) -> Image;
+@abstract func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image;
 
 func log2(x: float) -> float:
 	return log(x) / log(2);

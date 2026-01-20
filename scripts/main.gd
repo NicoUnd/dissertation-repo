@@ -134,7 +134,7 @@ func generate(generate_button_string: String) -> void:
 			var heightmap: Image;
 			if generate_button_string == "generate_chunks_GPU":
 				assert(terrain_generation_method.can_generate_GPU);
-				heightmap = terrain_generation_method.generate_GPU(rendering_device, terrain_generation_method.resolution);
+				heightmap = terrain_generation_method.generate_GPU(rendering_device, resolution, plane.coord);
 			else: # "generate_chunks_CPU"
 				assert(terrain_generation_method.can_generate_CPU);
 				heightmap = terrain_generation_method.generate_CPU(rendering_device, resolution, plane.coord);
