@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="DiamondSquare" load_steps=12 format=3 uid="uid://ba8lnm4iollr1"]
+[gd_resource type="Resource" script_class="DiamondSquare" load_steps=13 format=3 uid="uid://ba8lnm4iollr1"]
 
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="1_1rd5d"]
 [ext_resource type="Script" uid="uid://ddkes5jhoum04" path="res://scripts/terrain_generation_methods/diamond-square.gd" id="1_i3x2c"]
@@ -18,6 +18,13 @@ script = ExtResource("4_gxwsg")
 name = "normalise"
 value = false
 metadata/_custom_type_script = "uid://ppfcadcfq54h"
+
+[sub_resource type="Resource" id="Resource_22u67"]
+script = ExtResource("3_dvls0")
+options = Array[String](["uniform", "guassian"])
+name = "distribution"
+value = 0
+metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
 [sub_resource type="Resource" id="Resource_gxwsg"]
 script = ExtResource("2_dvls0")
@@ -56,5 +63,5 @@ max_amplitude = 32.0
 default_amplitude = 16.0
 parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_gxwsg"), SubResource("Resource_2on8b"), SubResource("Resource_q4gjg"), SubResource("Resource_krgyn")])
 can_generate_in_chunks = true
-chunked_specific_parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_ikv75"), SubResource("Resource_mgpmt")])
+chunked_specific_parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_ikv75"), SubResource("Resource_mgpmt"), SubResource("Resource_22u67")])
 metadata/_custom_type_script = "uid://ddkes5jhoum04"

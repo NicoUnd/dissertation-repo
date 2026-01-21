@@ -33,7 +33,10 @@ float rand(ivec2 uv, float seed){ // random 0-1
 
 
 float world_pos_rand(ivec2 uv, float seed, ivec2 chunk_coord){ // random 0-1
-	return fract(sin(dot(vec2(uv), vec2(float(chunk_coord.x) * 621.421 + 12.9898, float(chunk_coord.y) * 125.1298 + 78.233))) * 437.5453 * seed);
+	float resolution = parameter_buffer.resolution;
+	vec2 world_pos = (vec2(uv) / resolution + vec2(chunk_coord)) * 4096.0; // chunk size
+	return fract(sin(dot(world_pos, vec2(12.9898, 78.233))) * 437.5453 * seed);
+	//return fract(sin(dot(vec2(uv), vec2(float(chunk_coord.x) * 621.421 + 12.9898, float(chunk_coord.y) * 125.1298 + 78.233))) * 437.5453 * seed);
 }
 
 // Box-Muller transform
@@ -82,14 +85,16 @@ float get_square_average() {
 float get_diamond_corner(ivec2 corner_uv, ivec2 uv) { // returns -1 if the corner is not used
 	int diamond_average_type = int(parameter_buffer.diamond_average_type);
 	int resolution = int(parameter_buffer.resolution);
-	if ((diamond_average_type == 2 && (uv.y == 0 || uv.y == resolution)) || (diamond_average_type >= 1 && (corner_uv.y > resolution || corner_uv.y < 0))) {
+	if ((diamond_average_type == 2 && corner_uv.y != uv.y && (uv.y == 0 || uv.y == resolution)) || (diamond_average_type >= 1 && (corner_uv.y > resolution || corner_uv.y < 0))) {
 		return -1.0;
 	}
-	corner_uv.y = corner_uv.y % (resolution + 1);
-	if ((diamond_average_type == 2 && (uv.x == 0 || uv.x == resolution)) || (diamond_average_type >= 1 && (corner_uv.x > resolution || corner_uv.x < 0))) {
+	if (corner_uv.y > resolution) corner_uv.y -= (resolution + 1);
+	if (corner_uv.y < 0) corner_uv.y += (resolution + 1);
+	if ((diamond_average_type == 2 && corner_uv.x != uv.x && (uv.x == 0 || uv.x == resolution)) || (diamond_average_type >= 1 && (corner_uv.x > resolution || corner_uv.x < 0))) {
 		return -1.0;
 	}
-	corner_uv.x = corner_uv.x % (resolution + 1);
+	if (corner_uv.x > resolution) corner_uv.x -= (resolution + 1);
+	if (corner_uv.x < 0) corner_uv.x += (resolution + 1);
 	return points_buffer.data[uv_to_linear(corner_uv)];
 }
 

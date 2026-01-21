@@ -23,7 +23,7 @@ vec3 get_albedo(vec3 world_pos, vec3 world_normal, float amplitude) {
 			//texture_uv += 2.0 * perlin_2D(texture_uv * 0.25);
 			float steepness = dot(world_normal, vec3(0.0, 1.0, 0.0));
 			steepness *= steepness;
-			float highness = smoothstep(0.15, 0.7, world_pos.y * 2.0 / amplitude);
+			float highness = smoothstep(0.25, 0.8, world_pos.y * 2.0 / amplitude);
 			return (steepness * (highness * vec4(1.0, 1.0, 1.0, 1.0) + (1.0 - highness) * vec4(0.15, 0.25, 0.18, 1.0)) +
 			(1.0 - steepness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
 			//ALBEDO = (steepness * vec4(0.2, 0.25, 0.2, 1.0) +
