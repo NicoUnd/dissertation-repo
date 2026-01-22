@@ -1,6 +1,3 @@
-shader_type spatial;
-render_mode depth_prepass_alpha;
-
 #include "res://shaders/shader_include.gdshaderinc"
 
 // terrain generation method specific parameters

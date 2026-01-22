@@ -1,11 +1,11 @@
 [gd_resource type="Resource" script_class="TerrainGenerationMethodNoise" load_steps=17 format=3 uid="uid://uir8vm75yx0o"]
 
 [ext_resource type="Script" uid="uid://b7uir5a8rvikp" path="res://scripts/terrain_generation_methods/terrain_generation_method_noise.gd" id="1_b7ql0"]
-[ext_resource type="Shader" uid="uid://dn1ae62elc7nb" path="res://shaders/terrain_generation_method_noises/heightmap_blending.gdshader" id="2_ygccv"]
-[ext_resource type="Shader" uid="uid://cydlinnasn1m" path="res://shaders/terrain_generation_method_noises/heightmap_blending_wireframe.gdshader" id="3_auc3n"]
+[ext_resource type="Shader" uid="uid://dn1ae62elc7nb" path="res://shaders/terrain_generation_method_noises/heightmap_blending/heightmap_blending_shaded.gdshader" id="2_ygccv"]
+[ext_resource type="Shader" uid="uid://cydlinnasn1m" path="res://shaders/terrain_generation_method_noises/heightmap_blending/heightmap_blending_wireframe.gdshader" id="3_auc3n"]
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="3_ygccv"]
 [ext_resource type="Script" uid="uid://b2pyma2gu2m37" path="res://scripts/parameters/parameter_image.gd" id="4_hq3wy"]
-[ext_resource type="Shader" uid="uid://dyloah226q4rq" path="res://shaders/terrain_generation_method_noises/heightmap_blending_unshaded.gdshader" id="5_33twg"]
+[ext_resource type="Shader" uid="uid://dyloah226q4rq" path="res://shaders/terrain_generation_method_noises/heightmap_blending/heightmap_blending_unshaded.gdshader" id="5_33twg"]
 [ext_resource type="Texture2D" uid="uid://cae7u70gsgr8y" path="res://assets/black.jpg" id="5_hq3wy"]
 [ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/parameters/parameter_number.gd" id="6_33twg"]
 

@@ -1,6 +1,3 @@
-shader_type spatial;
-render_mode depth_prepass_alpha;
-
 #include "res://shaders/shader_include.gdshaderinc"
 
 // terrain generation method specific parameters
@@ -76,8 +73,3 @@ void fragment() {
 	ALBEDO = get_albedo(world_pos, world_normal, amplitude);
 	ALPHA = get_alpha(world_pos);
 }
-
-//void light() {
-//	// Called for every pixel for every light affecting the material.
-//	// Uncomment to replace the default light processing function with this one.
-//}

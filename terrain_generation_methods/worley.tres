@@ -1,11 +1,11 @@
 [gd_resource type="Resource" script_class="TerrainGenerationMethodNoise" load_steps=11 format=3 uid="uid://dsrbtacjgyx26"]
 
 [ext_resource type="Script" uid="uid://b7uir5a8rvikp" path="res://scripts/terrain_generation_methods/terrain_generation_method_noise.gd" id="1_xg2hl"]
-[ext_resource type="Shader" uid="uid://dw4uox3mjbeqn" path="res://shaders/terrain_generation_method_noises/worley.gdshader" id="2_gqvn1"]
-[ext_resource type="Shader" uid="uid://csawji543e5dk" path="res://shaders/terrain_generation_method_noises/worley_wireframe.gdshader" id="3_1t84t"]
+[ext_resource type="Shader" uid="uid://dw4uox3mjbeqn" path="res://shaders/terrain_generation_method_noises/worley/worley_shaded.gdshader" id="2_gqvn1"]
+[ext_resource type="Shader" uid="uid://csawji543e5dk" path="res://shaders/terrain_generation_method_noises/worley/worley_wireframe.gdshader" id="3_1t84t"]
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="3_315ex"]
 [ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/parameters/parameter_number.gd" id="4_1t84t"]
-[ext_resource type="Shader" uid="uid://c3ehsorlioocq" path="res://shaders/terrain_generation_method_noises/worley_unshaded.gdshader" id="4_waxsv"]
+[ext_resource type="Shader" uid="uid://c3ehsorlioocq" path="res://shaders/terrain_generation_method_noises/worley/worley_unshaded.gdshader" id="4_waxsv"]
 
 [sub_resource type="Resource" id="Resource_315ex"]
 script = ExtResource("4_1t84t")
