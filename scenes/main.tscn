@@ -77,7 +77,7 @@ seed = 42.78947755553328
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport"]
 unique_name_in_owner = true
-transform = Transform3D(-0.78707695, 0, -0.616852, 0, 1, 0, 0.616852, 0, -0.78707695, 0, 0, 0)
+transform = Transform3D(0.50748944, 0, 0.86165595, 0, 1, 0, -0.86165595, 0, 0.50748944, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot"]
 unique_name_in_owner = true
@@ -113,8 +113,7 @@ near = 0.001
 
 [node name="HeightmapTerrainGenerationMethodVisualiser" parent="HeightmapViewport" instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
-albedo_type = 1
-seed = 42.78947755553328
+seed = 41.089
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1

@@ -1,3 +1,4 @@
+@tool
 extends TerrainGenerationMethodExplicit;
 class_name DiffusionLimitedAggregation;
 

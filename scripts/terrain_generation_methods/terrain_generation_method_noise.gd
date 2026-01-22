@@ -1,3 +1,4 @@
+@tool
 extends TerrainGenerationMethod;
 class_name TerrainGenerationMethodNoise;
 

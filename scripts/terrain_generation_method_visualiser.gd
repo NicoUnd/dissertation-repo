@@ -18,8 +18,9 @@ const PLANE_RESOLUTIONS: Array[int] = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 20
 @onready var water_mesh_instance_3d: MeshInstance3D = %WaterMeshInstance3D
 
 func set_shader(new_shader: Shader, terrain_generation_method_specific_parameters: Array[Parameter]) -> void:
-	for plane: MeshInstance3D in planes.get_children():
-		plane.mesh.material.shader = new_shader; #.duplicate();
+	if planes:
+		for plane: MeshInstance3D in planes.get_children():
+			plane.mesh.material.shader = new_shader; #.duplicate();
 	for terrain_generation_method_specific_parameter: Parameter in terrain_generation_method_specific_parameters:
 		set_planes_shader_parameter(terrain_generation_method_specific_parameter.name, terrain_generation_method_specific_parameter.value);
 	apply_shader_options();
@@ -40,6 +41,7 @@ func remove_planes() -> void:
 				plane.mesh.material = ShaderMaterial.new();
 		else:
 			set_shader(terrain_generation_method.get_shader(render_mode), terrain_generation_method.parameters);
+		set_planes_shader_parameter("heightmap", null);
 
 func get_specific_parameters() -> Array[Array]: # Arrar[Array[String], Array[Variant]]
 	var specific_parameters = terrain_generation_method.parameters;

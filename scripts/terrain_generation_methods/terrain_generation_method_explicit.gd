@@ -1,4 +1,5 @@
 @abstract
+@tool
 extends TerrainGenerationMethod;
 class_name TerrainGenerationMethodExplicit;
 

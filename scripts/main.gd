@@ -87,8 +87,9 @@ func reset_to_one_plane(resolution: int) -> void:
 				
 				var amplitude: float = terrain_generation_method.default_amplitude;
 				ui.add_parameter(ParameterNumber.new("amplitude", amplitude, terrain_generation_method.min_amplitude, terrain_generation_method.max_amplitude, false, false, true), true);
-				terrain_generation_method_visualiser.set_planes_shader_parameter("amplitude", amplitude);
+				#terrain_generation_method_visualiser.set_planes_shader_parameter("amplitude", amplitude);
 				terrain_generation_method_visualiser.max_amplitude = terrain_generation_method.max_amplitude;
+				#heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("amplitude", 1);
 				
 				ui.set_terrain_generation_method_specific_parameters(terrain_generation_method.parameters);
 				if terrain_generation_method.can_generate_in_chunks:
@@ -113,6 +114,7 @@ func _ready() -> void:
 	
 	print("OKAY")
 	heightmap_terrain_generation_method_visualiser.albedo_type = 1;
+	heightmap_terrain_generation_method_visualiser.render_mode = 1;
 	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(512);
 	#terrain_generation_method = preload("uid://bunfkxpwyox5q")
 	
@@ -188,9 +190,14 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 	elif parameter_name.substr(0, "generate".length()) == "generate":
 		assert(terrain_generation_method is TerrainGenerationMethodExplicit);
 		generate(parameter_name);
+		return;
 	elif parameter_name == "chunk_settings":
 		assert(terrain_generation_method.can_generate_in_chunks);
 		chunk_settings.show();
+		return;
+	elif parameter_name in ["circle", "water_level"]:
+		terrain_generation_method_visualiser.set(parameter_name, parameter_value);
+		return;
 	
 	if is_terrain_generation_method_specific:
 		if terrain_generation_method is TerrainGenerationMethodExplicit and parameter_name != "amplitude":
@@ -201,6 +208,7 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 				return;
 			terrain_generation_method.set(parameter_name, parameter_value);
 		else:
+			print("SETTING: " + parameter_name + " to " + str(parameter_value));
 			terrain_generation_method_visualiser.set_planes_shader_parameter(parameter_name, parameter_value);
 			heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter(parameter_name, parameter_value);
 	else:
@@ -208,8 +216,7 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 			set_seed(parameter_value);
 			return;
 		terrain_generation_method_visualiser.set(parameter_name, parameter_value);
-		if not parameter_name in ["circle", "water_level"]:
-			heightmap_terrain_generation_method_visualiser.set(parameter_name, parameter_value);
+		heightmap_terrain_generation_method_visualiser.set(parameter_name, parameter_value);
 	
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 
