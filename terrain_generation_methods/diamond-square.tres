@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="DiamondSquare" load_steps=13 format=3 uid="uid://ba8lnm4iollr1"]
+[gd_resource type="Resource" script_class="DiamondSquare" format=3 uid="uid://ba8lnm4iollr1"]
 
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="1_1rd5d"]
 [ext_resource type="Script" uid="uid://ddkes5jhoum04" path="res://scripts/terrain_generation_methods/diamond-square.gd" id="1_i3x2c"]

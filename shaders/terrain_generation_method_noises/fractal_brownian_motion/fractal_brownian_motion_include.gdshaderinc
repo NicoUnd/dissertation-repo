@@ -28,8 +28,9 @@ float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float
 }
 
 vec3 get_normal(vec2 uv, int given_octaves, float base_period, float base_amp) {
-	const float delta = 4.0 / 1024.0;
+	const float delta = 8.0 / 1024.0;
 
+	//float h = fract_brownian_motion(uv, given_octaves, base_period, base_amp);
 	float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_period, base_amp);
 	float hR = fract_brownian_motion(vec2(uv.x + delta, uv.y), given_octaves, base_period, base_amp);
 	float hD = fract_brownian_motion(vec2(uv.x, uv.y - delta), given_octaves, base_period, base_amp);

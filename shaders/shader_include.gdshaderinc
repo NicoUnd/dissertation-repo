@@ -11,7 +11,7 @@ uniform bool perturbate;
 vec2 random(vec2 uv){
 	uv += vec2(seed * 124.231, seed * 74.512);
     uv = vec2( dot(uv, vec2(127.1 ,311.7) ),
-               dot(uv, vec2(269.5,183.3) ) );
+               dot(uv, vec2(269.5, 183.3) ) );
 	return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123);
     //return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * (seed - TIME * 0.000001));
 }
@@ -21,11 +21,12 @@ vec3 get_albedo(vec3 world_pos, vec3 world_normal, float amplitude) {
 		case 0:
 			//vec2 texture_uv = fract(world_pos.xz);
 			//texture_uv += 2.0 * perlin_2D(texture_uv * 0.25);
-			float steepness = dot(world_normal, vec3(0.0, 1.0, 0.0));
-			steepness *= steepness;
-			float highness = smoothstep(0.25, 0.8, world_pos.y * 2.0 / amplitude);
-			return (steepness * (highness * vec4(1.0, 1.0, 1.0, 1.0) + (1.0 - highness) * vec4(0.15, 0.25, 0.18, 1.0)) +
-			(1.0 - steepness) * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
+			float steepness = 1.0 - dot(world_normal, vec3(0.0, 1.0, 0.0));
+			//steepness *= steepness;
+			steepness = sqrt(steepness);
+			float highness = smoothstep(0.5, 1.1, world_pos.y * 2.0 / amplitude);
+			return ((1.0 - steepness) * (highness * vec4(0.9, 0.9, 0.9, 1.0) + (1.0 - highness) * vec4(0.15, 0.22, 0.18, 1.0)) +
+			steepness * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
 			//ALBEDO = (steepness * vec4(0.2, 0.25, 0.2, 1.0) +
 			//(1.0 - steepness) * vec4(0.05, 0.05, 0.05, 1.0)).xyz;
 		case 1:
@@ -33,7 +34,7 @@ vec3 get_albedo(vec3 world_pos, vec3 world_normal, float amplitude) {
 		case 2:
 			return world_normal;
 		case 3:
-			return vec3(1.0);
+			return vec3(0.2);
 		case 4:
 			return vec3(0.0);
 	}

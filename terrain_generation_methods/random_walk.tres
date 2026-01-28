@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="RandomWalk" load_steps=9 format=3 uid="uid://cixop5xmfwmc6"]
+[gd_resource type="Resource" script_class="RandomWalk" format=3 uid="uid://cixop5xmfwmc6"]
 
 [ext_resource type="Script" uid="uid://b3m1lspbw6sua" path="res://scripts/terrain_generation_methods/random_walk.gd" id="1_fp4ug"]
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="1_vd25m"]

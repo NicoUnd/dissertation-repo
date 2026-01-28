@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="TerrainGenerationMethodNoise" load_steps=11 format=3 uid="uid://dsrbtacjgyx26"]
+[gd_resource type="Resource" script_class="TerrainGenerationMethodNoise" format=3 uid="uid://dsrbtacjgyx26"]
 
 [ext_resource type="Script" uid="uid://b7uir5a8rvikp" path="res://scripts/terrain_generation_methods/terrain_generation_method_noise.gd" id="1_xg2hl"]
 [ext_resource type="Shader" uid="uid://dw4uox3mjbeqn" path="res://shaders/terrain_generation_method_noises/worley/worley_shaded.gdshader" id="2_gqvn1"]

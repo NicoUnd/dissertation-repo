@@ -167,6 +167,7 @@ func update_verticies(vertices: int) -> void:
 	vertices_label.text = "Vertices: " + formatted_vertices;
 
 func set_parameter(parameter_name: String, parameter_value: Variant=null, is_terrain_generation_method_specific: bool=true) -> void:
+	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 	if parameter_name == "auto_randomise_seed":
 		auto_randomise_seed = parameter_value;
 		return;
@@ -217,8 +218,6 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 			return;
 		terrain_generation_method_visualiser.set(parameter_name, parameter_value);
 		heightmap_terrain_generation_method_visualiser.set(parameter_name, parameter_value);
-	
-	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 
 func update_chunked_specific_parameters() -> void:
 	ui.update_chunked_specific_parameters(terrain_generation_method.chunked_specific_parameters);
@@ -292,6 +291,8 @@ func _on_generate_statistics_button_pressed() -> void:
 func generate_statistics() -> void:
 	var NUMBER_OF_SAMPLES_TO_AVERAGE: int = int(statistics_samples_h_slider.value);
 	
+	reset_to_one_plane(last_resolution_of_plane);
+	
 	if terrain_generation_method:
 		var heightmap_generation_times: Array[int] = [];
 		
@@ -314,21 +315,26 @@ func generate_statistics() -> void:
 				if terrain_generation_method is TerrainGenerationMethodExplicit:
 					terrain_generation_method.resolution = heightmap_resolution;
 					if terrain_generation_method.can_generate_GPU:
-						heightmap = terrain_generation_method.generate_GPU(rendering_device);
+						heightmap = terrain_generation_method.generate_GPU(rendering_device, terrain_generation_method.resolution);
 					else:
-						heightmap = terrain_generation_method.generate_CPU(rendering_device);
+						heightmap = terrain_generation_method.generate_CPU(rendering_device, terrain_generation_method.resolution);
 				else:
 					heightmap = capture_heightmap(heightmap_resolution);
 				average_time += (Time.get_ticks_msec() - start_time) / float(NUMBER_OF_SAMPLES_TO_AVERAGE);
 				
-				average_erosion_score += TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device) / float(NUMBER_OF_SAMPLES_TO_AVERAGE * HEIGHTMAP_RESOLUTIONS.size());
-				#print("escore: " + str(TerrainGenerationMethod.get_erosion_score(heightmap)))
+				var erosion_score = TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device) / float(NUMBER_OF_SAMPLES_TO_AVERAGE * HEIGHTMAP_RESOLUTIONS.size());
+				average_erosion_score += erosion_score;
+				print("erosion score: " + str(erosion_score))
+				
+				var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
+				terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
 				
 				statistics_progress_bar.value += 1;
 				await get_tree().process_frame;
 			heightmap_generation_times.append(int(average_time));
 		print(heightmap_generation_times);
 		statistics_progress_center_container.hide();
+		average_erosion_score /= HEIGHTMAP_RESOLUTIONS.size() * NUMBER_OF_SAMPLES_TO_AVERAGE;
 		if terrain_generation_method is TerrainGenerationMethodExplicit:
 			terrain_generation_method.resolution = original_resolution;
 		

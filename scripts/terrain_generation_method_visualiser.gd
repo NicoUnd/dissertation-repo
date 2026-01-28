@@ -127,9 +127,8 @@ func reset_to_one_plane(resolution: int) -> void:
 
 func set_planes(grid_resolution: int, resolutions: Array[Array]) -> void: # Array[Array[int]]
 	assert(resolutions.size() == grid_resolution);
-	var prev_plane: MeshInstance3D = planes.get_child(0);
 	var prev_specific_parameters: Array[Array];
-	var retain_prev_specific_parameters: bool = prev_plane and terrain_generation_method;
+	var retain_prev_specific_parameters: bool = planes.get_child_count() > 0 and terrain_generation_method;
 	if retain_prev_specific_parameters:
 		prev_specific_parameters = get_specific_parameters();
 	remove_planes();

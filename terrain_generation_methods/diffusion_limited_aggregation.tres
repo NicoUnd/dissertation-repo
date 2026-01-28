@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="DiffusionLimitedAggregation" load_steps=9 format=3 uid="uid://c2vmmpdikh121"]
+[gd_resource type="Resource" script_class="DiffusionLimitedAggregation" format=3 uid="uid://c2vmmpdikh121"]
 
 [ext_resource type="Script" uid="uid://cllw715ufr57u" path="res://scripts/parameters/parameter.gd" id="1_77tkw"]
 [ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/parameters/parameter_number.gd" id="2_d0pff"]
