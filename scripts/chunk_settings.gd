@@ -1,7 +1,7 @@
 extends Control
 class_name ChunkSettings
 
-const CHUNK_GRID_RESOLUTIONS: Array[int] = [1, 2, 4, 8, 16, 32];
+const CHUNK_GRID_RESOLUTIONS: Array[int] = [2, 4, 8, 16, 32];
 
 enum LOD_PRESET {CENTRE, CORNER, EDGE, CHECKERED}
 var LOD_preset: LOD_PRESET:
@@ -34,7 +34,7 @@ var chunk_grid_resolution: int:
 static var LOD_brush: ChunkTypeCell.LODS = ChunkTypeCell.LODS.MAX;
 
 func set_chunk_types_grid() -> void:
-	print("SETTING CHUNK TYPES GRID")
+	#print("SETTING CHUNK TYPES GRID")
 	for chunk_type_cell: ChunkTypeCell in chunk_types_grid_container.get_children():
 		chunk_type_cell.free();
 	
@@ -97,8 +97,13 @@ func get_resolutions() -> Array[Array]: # Array[Array[int]]
 		x = (x + 1) % chunk_grid_resolution;
 		if x == 0:
 			y += 1;
-	print(resolutions)
+	#print(resolutions)
 	return resolutions;
+
+func cancel() -> void:
+	hide();
+	for ui: Control in settings_v_box_container.get_children():
+		ui.queue_free();
 
 func finish() -> void:
 	var resolutions: Array[Array] = get_resolutions();
@@ -122,7 +127,7 @@ func _on_visibility_changed() -> void:
 	var chunk_grid_resolution_strings: Array[String] = [];
 	for chunk_grid_resolution: int in CHUNK_GRID_RESOLUTIONS:
 		chunk_grid_resolution_strings.append(str(chunk_grid_resolution) + "x" + str(chunk_grid_resolution));
-	var chunk_grid_resolution_parameter: ParameterEnum = ParameterEnum.new("chunk_grid_resolution", 3, chunk_grid_resolution_strings);
+	var chunk_grid_resolution_parameter: ParameterEnum = ParameterEnum.new("chunk_grid_resolution", 2, chunk_grid_resolution_strings);
 	var chunk_grid_resolution_UI: ParameterOptionButtonUI = UI.parameter_to_parameter_ui(chunk_grid_resolution_parameter);
 	settings_v_box_container.add_child(chunk_grid_resolution_UI);
 	chunk_grid_resolution_UI.setup(chunk_grid_resolution_parameter, func (option: int): chunk_grid_resolution = CHUNK_GRID_RESOLUTIONS[option]);
@@ -169,6 +174,11 @@ func _on_visibility_changed() -> void:
 	var finish_UI: ParameterButtonUI = UI.parameter_to_parameter_ui(finish_parameter);
 	settings_v_box_container.add_child(finish_UI);
 	finish_UI.setup(finish_parameter, finish);
+	
+	var cancel_parameter: ParameterButton = ParameterButton.new("cancel");
+	var cancel_UI: ParameterButtonUI = UI.parameter_to_parameter_ui(cancel_parameter);
+	settings_v_box_container.add_child(cancel_UI);
+	cancel_UI.setup(cancel_parameter, cancel)
 	
 	LOD_preset = LOD_PRESET.CENTRE;
 	LOD_preset_sensitivity = 1;

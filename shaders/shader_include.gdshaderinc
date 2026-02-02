@@ -7,6 +7,7 @@ uniform bool circle;
 
 uniform bool perturbate;
 
+uniform bool no_fade;
 
 vec2 random(vec2 uv){
 	uv += vec2(seed * 124.231, seed * 74.512);
@@ -41,6 +42,7 @@ vec3 get_albedo(vec3 world_pos, vec3 world_normal, float amplitude) {
 }
 
 float get_alpha(vec3 world_pos) {
+	if (no_fade) return 1.0;
 	if (circle) {
 		return 1.0 - smoothstep(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5, 32.0, sqrt(world_pos.x * world_pos.x + world_pos.z * world_pos.z));
 	} else {

@@ -299,8 +299,8 @@ static func get_erosion_score(heightmap: Image, rendering_device: RenderingDevic
 	if mean == 0:
 		return 0;
 	var std_dev: float = std_dev_GPU(resolution, rendering_device, texture_uniform, mean);
-	print("mean" + str(mean));
-	print("std_dev" + str(std_dev));
+	#print("mean" + str(mean));
+	#print("std_dev" + str(std_dev));
 	
 	rendering_device.free_rid(sampler);
 	rendering_device.free_rid(texture_RID);

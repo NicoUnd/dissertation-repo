@@ -15,6 +15,7 @@ const DEFAULT_CAMERA_SPEED: float = 5;
 @onready var visualisation_perspective_camera_3d: Camera3D = %VisualisationPerspectiveCamera3D
 @onready var visualisation_orthographic_camera_3d: Camera3D = %VisualisationOrthographicCamera3D
 
+@onready var erosion_settings: ErosionSettings = %ErosionSettings
 @onready var save_render_file_dialog: FileDialog = %SaveRenderFileDialog
 
 var rotation_type: int = 0;
@@ -56,7 +57,7 @@ func _input(event: InputEvent) -> void:
 	const MAX_ZOOM: float = 0.1;
 	const MIN_SIZE: float = 4;
 	const MAX_CAMERA_SPEED: float = 15;
-	const MIN_CAMERA_SPEED: float = 1;
+	const MIN_CAMERA_SPEED: float = 0.2;
 	
 	if not freeroam_camera and Input.get_current_cursor_shape() == Input.CURSOR_HSIZE:
 		if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -95,7 +96,7 @@ func _input(event: InputEvent) -> void:
 			visualisation_perspective_camera_3d.rotation.y += yaw;
 
 func _process(delta: float) -> void:
-	if save_render_file_dialog.visible:
+	if save_render_file_dialog.visible or erosion_settings.visible:
 		return;
 	
 	if freeroam_camera:

@@ -199,7 +199,7 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	points[(resolution + 1) * (resolution + 1) - 1] = world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i.ONE * resolution));
 	
 	var points_bytes: PackedByteArray = points.to_byte_array();
-	print(points_bytes.size());
+	#print(points_bytes.size());
 	#var points_data := rendering_device.texture_buffer_create(points_bytes.size(), RenderingDevice.DATA_FORMAT_R32_SFLOAT, points_bytes);
 	var points_RID := rendering_device.storage_buffer_create(points_bytes.size(), points_bytes);
 	var points_uniform := RDUniform.new();

@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://ca3hvhuf6apkv"]
+
+[ext_resource type="Script" uid="uid://dfolt2rwwt2e3" path="res://scripts/erosion_settings.gd" id="1_gt13x"]
+
+[node name="ErosionSettings" type="Control" unique_id=339949691]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_gt13x")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1750003346]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.11764706, 0.13333334, 0.13725491, 0.89411765)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=95682018]
+layout_mode = 0
+offset_right = 4096.0
+offset_bottom = 2160.0
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 60
+
+[node name="SettingsVBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1650980869]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1500, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[connection signal="visibility_changed" from="." to="." method="_on_visibility_changed"]

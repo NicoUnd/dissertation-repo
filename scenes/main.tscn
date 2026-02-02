@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://vsifhaplg8ve" path="res://scenes/ui.tscn" id="6_tefeu"]
 [ext_resource type="Theme" uid="uid://cs2nnup0f3ppn" path="res://themes/panel_container_clear.tres" id="7_o6xl0"]
 [ext_resource type="PackedScene" uid="uid://ccif6rael18m6" path="res://scenes/chunk_settings.tscn" id="8_tipki"]
+[ext_resource type="PackedScene" uid="uid://ca3hvhuf6apkv" path="res://scenes/erosion_settings.tscn" id="9_85g3d"]
 
 [sub_resource type="Environment" id="Environment_tefeu"]
 ambient_light_source = 2
@@ -18,7 +19,7 @@ fog_enabled = true
 fog_mode = 1
 fog_density = 1.0
 fog_depth_curve = 3.7321322
-fog_depth_begin = 30.0
+fog_depth_begin = 0.0
 fog_depth_end = 150.0
 
 [sub_resource type="World3D" id="World3D_85g3d"]
@@ -70,7 +71,7 @@ seed = 42.78947755553328
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport" unique_id=621889884]
 unique_name_in_owner = true
-transform = Transform3D(-0.95236593, 0, 0.30495143, 0, 1, 0, -0.30495143, 0, -0.95236593, 0, 0, 0)
+transform = Transform3D(-0.9525609, 0, 0.3043419, 0, 1, 0, -0.3043419, 0, -0.9525609, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot" unique_id=1459652782]
 unique_name_in_owner = true
@@ -91,6 +92,8 @@ near = 0.001
 [node name="HeightmapViewport" type="SubViewport" parent="." unique_id=606691504]
 unique_name_in_owner = true
 transparent_bg = true
+use_debanding = true
+debug_draw = 1
 use_hdr_2d = true
 render_target_update_mode = 1
 
@@ -180,7 +183,8 @@ size_flags_horizontal = 0
 size_flags_vertical = 8
 
 [node name="HeightmapTextureRect" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=699647725]
-custom_minimum_size = Vector2(512, 512)
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 400)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 8
@@ -207,6 +211,11 @@ layout_mode = 2
 size_flags_horizontal = 0
 text = "Save Heightmap"
 alignment = 0
+
+[node name="ErodeHeightmapButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=2145673335]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Erode Heightmap"
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=555753400]
 layout_mode = 2
@@ -268,6 +277,11 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 1
 
+[node name="ErosionSettings" parent="." unique_id=339949691 instance=ExtResource("9_85g3d")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
 [node name="SaveHeightmapFileDialog" type="FileDialog" parent="." unique_id=766618564]
 unique_name_in_owner = true
 oversampling_override = 1.0
@@ -312,6 +326,7 @@ autostart = true
 
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/SaveRenderButton" to="." method="_on_save_render_button_pressed"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/SaveHeightmapButton" to="." method="_on_save_heightmap_button_pressed"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/ErodeHeightmapButton" to="." method="_on_erode_heightmap_button_pressed"]
 [connection signal="value_changed" from="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer/StatisticsSamplesHSlider" to="." method="_on_statistics_samples_h_slider_value_changed"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/GenerateStatisticsButton" to="." method="_on_generate_statistics_button_pressed"]
 [connection signal="confirmed" from="SaveHeightmapFileDialog" to="." method="_on_save_heightmap_file_dialog_confirmed"]

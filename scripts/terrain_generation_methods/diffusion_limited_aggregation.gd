@@ -204,13 +204,13 @@ func fill_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, at
 	var workgroups = layer_resolution / INITIAL_RESOLUTION;
 	
 	var output_bytes := rendering_device.buffer_get_data(add);
-	@warning_ignore("integer_division")
-	print(output_bytes.to_int32_array()[layer_resolution * layer_resolution / 2 + layer_resolution / 2]);
-	if layer_resolution == INITIAL_RESOLUTION or layer_resolution == INITIAL_RESOLUTION * 2:
-		var total: int = 0;
-		for x in output_bytes.to_int32_array():
-			total += x;
-		print("TOTAL: " + str(total));
+	#@warning_ignore("integer_division")
+	#print(output_bytes.to_int32_array()[layer_resolution * layer_resolution / 2 + layer_resolution / 2]);
+	#if layer_resolution == INITIAL_RESOLUTION or layer_resolution == INITIAL_RESOLUTION * 2:
+		#var total: int = 0;
+		#for x in output_bytes.to_int32_array():
+		#	total += x;
+		#print("TOTAL: " + str(total));
 	
 	for i: int in INITIAL_RESOLUTION * 2: # this will be the same for every layer, just larget batches
 		# need to update the seed so that each calling will get different random numbers
@@ -239,13 +239,13 @@ func fill_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, at
 		rendering_device.free_rid(pipeline);
 	
 	output_bytes = rendering_device.buffer_get_data(add);
-	@warning_ignore("integer_division")
-	print(output_bytes.to_int32_array()[layer_resolution * layer_resolution / 2 + layer_resolution / 2]);
-	if layer_resolution == INITIAL_RESOLUTION or layer_resolution == INITIAL_RESOLUTION * 2:
-		var total: int = 0;
-		for x in output_bytes.to_int32_array():
-			total += x;
-		print("TOTAL: " + str(total));
+	#@warning_ignore("integer_division")
+	#print(output_bytes.to_int32_array()[layer_resolution * layer_resolution / 2 + layer_resolution / 2]);
+	#if layer_resolution == INITIAL_RESOLUTION or layer_resolution == INITIAL_RESOLUTION * 2:
+		#var total: int = 0;
+		#for x in output_bytes.to_int32_array():
+		#	total += x;
+		#print("TOTAL: " + str(total));
 
 func get_blurry_upscale_bytes_GPU(layer_bytes: PackedByteArray, rendering_device: RenderingDevice) -> PackedByteArray:
 	var layer_resolution: int = sqrt(layer_bytes.size() / 4);
@@ -481,7 +481,7 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 		#heightmap = normalise_heightmap(heightmap, rendering_device);
 		#return heightmap;
 		
-		print("FINISHED LAYER " + str(layer_resolution));
+		#print("FINISHED LAYER " + str(layer_resolution));
 		layer_resolution *= 2;
 	assert(layer_resolution == resolution);
 	

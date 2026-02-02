@@ -170,7 +170,7 @@ func set_planes(grid_resolution: int, resolutions: Array[Array]) -> void: # Arra
 				set_specific_parameters(prev_specific_parameters[0], prev_specific_parameters[1]);
 
 func _ready() -> void:
-	print("MAIN READY")
+	#print("MAIN READY")
 	remove_planes();
 	reset_to_one_plane(1024);
 	#set_planes(2, [[512, 512], [512, 512]])

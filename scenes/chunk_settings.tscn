@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://ccif6rael18m6"]
+[gd_scene format=3 uid="uid://ccif6rael18m6"]
 
 [ext_resource type="Theme" uid="uid://bbvfb43bck665" path="res://themes/theme.tres" id="1_obqph"]
 [ext_resource type="Script" uid="uid://dchmdkrngsudp" path="res://scripts/chunk_settings.gd" id="1_w45oc"]
 
-[node name="ChunkSettings" type="Control"]
+[node name="ChunkSettings" type="Control" unique_id=2032597291]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +13,7 @@ grow_vertical = 2
 theme = ExtResource("1_obqph")
 script = ExtResource("1_w45oc")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1253709926]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -22,23 +22,23 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.11764706, 0.13333334, 0.13725491, 0.89411765)
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1129549598]
 layout_mode = 0
 offset_right = 4096.0
 offset_bottom = 2160.0
-theme_override_constants/margin_left = 200
-theme_override_constants/margin_top = 160
-theme_override_constants/margin_right = 200
-theme_override_constants/margin_bottom = 160
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 60
 
-[node name="SettingsVBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="SettingsVBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=628856905]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(1500, 0)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 
-[node name="ChunkTypesGridContainer" type="GridContainer" parent="."]
+[node name="ChunkTypesGridContainer" type="GridContainer" parent="." unique_id=2050938362]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 2068.0

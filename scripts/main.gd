@@ -18,6 +18,7 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 @onready var ui: Control = %UI
 
 @onready var chunk_settings: Control = %ChunkSettings
+@onready var erosion_settings: ErosionSettings = %ErosionSettings
 
 @onready var save_heightmap_file_dialog: FileDialog = %SaveHeightmapFileDialog
 @onready var save_render_file_dialog: FileDialog = %SaveRenderFileDialog
@@ -32,6 +33,7 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 @onready var statistics_progress_bar: ProgressBar = %StatisticsProgressBar
 
 @onready var visualisation_texture_rect: TextureRect = %VisualisationTextureRect
+@onready var heightmap_texture_rect: TextureRect = %HeightmapTextureRect
 
 @onready var vertices_label: Label = $MarginContainer/VerticesLabel
 
@@ -89,6 +91,7 @@ func reset_to_one_plane(resolution: int) -> void:
 				ui.add_parameter(ParameterNumber.new("amplitude", amplitude, terrain_generation_method.min_amplitude, terrain_generation_method.max_amplitude, false, false, true), true);
 				#terrain_generation_method_visualiser.set_planes_shader_parameter("amplitude", amplitude);
 				terrain_generation_method_visualiser.max_amplitude = terrain_generation_method.max_amplitude;
+				heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("no_fade", true);
 				#heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("amplitude", 1);
 				
 				ui.set_terrain_generation_method_specific_parameters(terrain_generation_method.parameters);
@@ -112,7 +115,7 @@ func _ready() -> void:
 	
 	await get_tree().process_frame
 	
-	print("OKAY")
+	#print("OKAY")
 	heightmap_terrain_generation_method_visualiser.albedo_type = 1;
 	heightmap_terrain_generation_method_visualiser.render_mode = 1;
 	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(512);
@@ -127,8 +130,10 @@ func generate(generate_button_string: String) -> void:
 		var planes: Array = terrain_generation_method_visualiser.planes.get_children();
 		@warning_ignore("narrowing_conversion")
 		var chunk_grid_resolution: int = sqrt(planes.size());
+		var blank_heightmap: Texture2D = Texture2D.new();
+		heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", Texture2D.new());
 		for plane_index: int in planes.size():
-			print("GENERATING FOR PLANE")
+			#print("GENERATING FOR PLANE")
 			var plane: Chunk = planes[plane_index];
 			var resolution: int = plane.mesh.subdivide_depth + 2;
 			@warning_ignore("integer_division")
@@ -142,6 +147,8 @@ func generate(generate_button_string: String) -> void:
 				heightmap = terrain_generation_method.generate_CPU(rendering_device, resolution, plane.coord);
 			var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
 			plane.mesh.material.set_shader_parameter("heightmap", heightmap_texture);
+			if planes.size() == 1:
+				heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
 	else:
 		var heightmap: Image;
 		if generate_button_string == "generate_GPU":
@@ -199,6 +206,9 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 	elif parameter_name in ["circle", "water_level"]:
 		terrain_generation_method_visualiser.set(parameter_name, parameter_value);
 		return;
+	elif parameter_name == "fog_distance":
+		visualisation_viewport.world_3d.environment.fog_depth_end = parameter_value;
+		return;
 	
 	if is_terrain_generation_method_specific:
 		if terrain_generation_method is TerrainGenerationMethodExplicit and parameter_name != "amplitude":
@@ -209,7 +219,7 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 				return;
 			terrain_generation_method.set(parameter_name, parameter_value);
 		else:
-			print("SETTING: " + parameter_name + " to " + str(parameter_value));
+			#print("SETTING: " + parameter_name + " to " + str(parameter_value));
 			terrain_generation_method_visualiser.set_planes_shader_parameter(parameter_name, parameter_value);
 			heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter(parameter_name, parameter_value);
 	else:
@@ -324,7 +334,7 @@ func generate_statistics() -> void:
 				
 				var erosion_score = TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device) / float(NUMBER_OF_SAMPLES_TO_AVERAGE * HEIGHTMAP_RESOLUTIONS.size());
 				average_erosion_score += erosion_score;
-				print("erosion score: " + str(erosion_score))
+				#print("erosion score: " + str(erosion_score))
 				
 				var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
 				terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
@@ -332,7 +342,7 @@ func generate_statistics() -> void:
 				statistics_progress_bar.value += 1;
 				await get_tree().process_frame;
 			heightmap_generation_times.append(int(average_time));
-		print(heightmap_generation_times);
+		#print(heightmap_generation_times);
 		statistics_progress_center_container.hide();
 		average_erosion_score /= HEIGHTMAP_RESOLUTIONS.size() * NUMBER_OF_SAMPLES_TO_AVERAGE;
 		if terrain_generation_method is TerrainGenerationMethodExplicit:
@@ -367,3 +377,6 @@ func generate_statistics() -> void:
 
 func _on_statistics_samples_h_slider_value_changed(value: float) -> void:
 	statistics_samples_label.text = "Samples to Average Over (" + str(int(value)) + ")";
+
+func _on_erode_heightmap_button_pressed() -> void:
+	erosion_settings.show();

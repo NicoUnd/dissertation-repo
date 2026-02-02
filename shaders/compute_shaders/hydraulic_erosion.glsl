@@ -2,7 +2,7 @@
 #version 450
 
 // Invocations in the (x, y, z) dimension
-layout(local_size_x = 64, local_size_y = 64, local_size_z = 1) in;
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 // A binding to the buffer we create in our script
 layout(set = 0, binding = 0, std430) restrict buffer Parameters {
@@ -84,6 +84,36 @@ void bilinear_deposit(vec2 pos, float amount) {
 	imageStore(heightmap, uv + ivec2(1, 1), vec4(top_right + amount * weight_top_right));
 }
 
+void erode_radius(vec2 pos, float amount) {
+	float erosion_rate = parameter_buffer.erosion_rate;
+	float radius = parameter_buffer.radius;
+	int radius_int = int(ceil(radius));
+	int resolution = imageSize(heightmap).x;
+	
+	float weight_total = 0.0;
+	for (int dy = -radius_int; dy <= radius_int; dy++) {
+		for (int dx = -radius_int; dx <= radius_int; dx++) {
+			ivec2 grid_pos = ivec2(pos + vec2(0.5)) + ivec2(dx, dy);
+			if (grid_pos.x < 0 || grid_pos.x >= resolution || grid_pos.y < 0 || grid_pos.y >= resolution) continue;
+			float dist = length(vec2(grid_pos) - pos);
+			float weight = max(0.0, radius - dist);
+			weight_total += weight;
+		}
+	}
+	for (int dy = -radius_int; dy <= radius_int; dy++) {
+		for (int dx = -radius_int; dx <= radius_int; dx++) {
+			ivec2 grid_pos = ivec2(pos + vec2(0.5)) + ivec2(dx, dy);
+			if (grid_pos.x < 0 || grid_pos.x >= resolution || grid_pos.y < 0 || grid_pos.y >= resolution) continue;
+			float dist = length(vec2(grid_pos) - pos);
+			float weight = max(0.0, radius - dist);
+			if (weight <= 0.0) continue;
+			weight /= weight_total;
+			float height = imageLoad(heightmap, grid_pos).r;
+			imageStore(heightmap, grid_pos, vec4(max(height - weight * amount, 0.0)));
+		}
+	}
+}
+
 // The code we want to execute in each invocation
 void main() {
 	// gl_GlobalInvocationID.x uniquely identifies this invocation across all work groups
@@ -122,23 +152,23 @@ void main() {
 		float height_delta = bilinear_height(pos_new) - bilinear_height(pos);
 		
 		if (height_delta > 0) { // uphill
-			float amount_to_deposit = min(height_diff, sediment);
-			deposit_bilinear(pos_old, amount_to_deposit);
+			float amount_to_deposit = min(height_delta, sediment);
+			bilinear_deposit(pos, amount_to_deposit);
 			sediment -= amount_to_deposit;
 		} else { // downhill
 			float capacity = max(-height_delta, min_slope) * speed * water * base_capacity;
 			if (sediment > capacity) {
 				float amount_to_deposit = (sediment - capacity) * deposition_rate;
-				deposit_bilinear(pos_old, amount_to_deposit);
+				bilinear_deposit(pos, amount_to_deposit);
 				sediment -= amount_to_deposit;
 			} else {
 				float amount_to_erode = min((capacity - sediment) * erosion_rate, -height_delta);
-				erode_or_deposit(pos_old, -amount_to_erode);
+				erode_radius(pos, amount_to_erode);
 				sediment += amount_to_erode;
 			}
 		}
 		
-		speed = sqrt(speed * speed + height_diff * gravity);
+		speed = sqrt(speed * speed + height_delta * gravity);
 		
 		water *= (1.0 - evaporation_rate);
 		
