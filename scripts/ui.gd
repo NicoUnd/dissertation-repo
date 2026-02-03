@@ -70,7 +70,7 @@ func update_chunked_specific_parameters(chunked_specific_parameters: Array[Param
 func _ready() -> void:
 	seed_slider = add_parameter(ParameterNumber.new("seed", 1, 1, 64, false, false, false), false);
 	add_parameter(ParameterBool.new("auto_randomise_seed",false), false);
-	add_parameter(ParameterEnum.new("albedo_type", 0, ["colour_blend", "heightmap", "normal", "grey", "black"]), false);
+	add_parameter(ParameterEnum.new("albedo_type", 0, ["texture_blend", "colour_blend", "heightmap", "normal", "grey", "black"]), false);
 	add_parameter(ParameterEnum.new("render_mode", 0, ["shaded", "unshaded", "wireframe"]), false);
 	add_parameter(ParameterBool.new("circle", true), false);
 	add_parameter(ParameterBool.new("perturbate", false), false);

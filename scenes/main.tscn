@@ -47,6 +47,7 @@ script = ExtResource("1_sugp2")
 unique_name_in_owner = true
 world_3d = SubResource("World3D_85g3d")
 transparent_bg = true
+scaling_3d_scale = 2.0
 size = Vector2i(2675, 1940)
 
 [node name="LightPivot" type="Node3D" parent="VisualisationViewport" unique_id=769769704]
@@ -71,7 +72,7 @@ seed = 42.78947755553328
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport" unique_id=621889884]
 unique_name_in_owner = true
-transform = Transform3D(-0.9525609, 0, 0.3043419, 0, 1, 0, -0.3043419, 0, -0.9525609, 0, 0, 0)
+transform = Transform3D(0.49709344, 0, -0.8676948, 0, 1, 0, 0.8676948, 0, 0.49709344, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot" unique_id=1459652782]
 unique_name_in_owner = true
@@ -95,6 +96,11 @@ transparent_bg = true
 use_debanding = true
 debug_draw = 1
 use_hdr_2d = true
+scaling_3d_mode = 2
+scaling_3d_scale = 2.0
+texture_mipmap_bias = -2.0
+anisotropic_filtering_level = 4
+fsr_sharpness = 0.0
 render_target_update_mode = 1
 
 [node name="HeightmapCamera3D" type="Camera3D" parent="HeightmapViewport" unique_id=1461479670]
@@ -102,13 +108,13 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 1
 environment = SubResource("Environment_0wfyh")
 projection = 1
 current = true
+fov = 37.849285
 size = 64.0
-near = 0.001
 
 [node name="HeightmapTerrainGenerationMethodVisualiser" parent="HeightmapViewport" unique_id=901267162 instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
 render_mode = 1
-albedo_type = 1
+albedo_type = 2
 seed = 41.089
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1295928901]

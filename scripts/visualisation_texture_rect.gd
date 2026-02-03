@@ -57,7 +57,7 @@ func _input(event: InputEvent) -> void:
 	const MAX_ZOOM: float = 0.1;
 	const MIN_SIZE: float = 4;
 	const MAX_CAMERA_SPEED: float = 15;
-	const MIN_CAMERA_SPEED: float = 0.2;
+	const MIN_CAMERA_SPEED: float = 0.05;
 	
 	if not freeroam_camera and Input.get_current_cursor_shape() == Input.CURSOR_HSIZE:
 		if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -83,9 +83,9 @@ func _input(event: InputEvent) -> void:
 	
 	if freeroam_camera:
 		if Input.is_action_just_released("mouse_wheel_up"):
-			camera_speed = min(camera_speed + 0.2, MAX_CAMERA_SPEED);
+			camera_speed = min(camera_speed * 1.1, MAX_CAMERA_SPEED);
 		elif Input.is_action_just_released("mouse_wheel_down"):
-			camera_speed = max(camera_speed - 0.2, MIN_CAMERA_SPEED);
+			camera_speed = max(camera_speed * 0.9, MIN_CAMERA_SPEED);
 		
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and Input.get_current_cursor_shape() == Input.CURSOR_HSIZE and event is InputEventMouseMotion:
 			var mouse_delta: Vector2 = event.relative * 0.001;

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cysg02kiaxppy"
-path.s3tc="res://.godot/imported/rough-dark-stone-texture-with-cracks-and-gold-flecks-dark-back-photo.jpg-ec7874867788e5b838b61e4fe830453f.s3tc.ctex"
+uid="uid://d014i4tqsafgt"
+path.s3tc="res://.godot/imported/360_F_310360177_sMGdmtK0fItpByB2oJZSmzppBjQBSftA.jpg-72bf363cf767ff4b86c98e69012c1bc9.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/textures/rough-dark-stone-texture-with-cracks-and-gold-flecks-dark-back-photo.jpg"
-dest_files=["res://.godot/imported/rough-dark-stone-texture-with-cracks-and-gold-flecks-dark-back-photo.jpg-ec7874867788e5b838b61e4fe830453f.s3tc.ctex"]
+source_file="res://assets/textures/old/360_F_310360177_sMGdmtK0fItpByB2oJZSmzppBjQBSftA.jpg"
+dest_files=["res://.godot/imported/360_F_310360177_sMGdmtK0fItpByB2oJZSmzppBjQBSftA.jpg-72bf363cf767ff4b86c98e69012c1bc9.s3tc.ctex"]
 
 [params]
 

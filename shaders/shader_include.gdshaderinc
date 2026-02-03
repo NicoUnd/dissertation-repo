@@ -9,6 +9,9 @@ uniform bool perturbate;
 
 uniform bool no_fade;
 
+uniform sampler2D grass_texture;
+uniform sampler2D rock_texture;
+
 vec2 random(vec2 uv){
 	uv += vec2(seed * 124.231, seed * 74.512);
     uv = vec2( dot(uv, vec2(127.1 ,311.7) ),
@@ -20,23 +23,25 @@ vec2 random(vec2 uv){
 vec3 get_albedo(vec3 world_pos, vec3 world_normal, float amplitude) {
 	switch(albedo_type) {
 		case 0:
-			//vec2 texture_uv = fract(world_pos.xz);
-			//texture_uv += 2.0 * perlin_2D(texture_uv * 0.25);
 			float steepness = 1.0 - dot(world_normal, vec3(0.0, 1.0, 0.0));
-			//steepness *= steepness;
+			steepness = sqrt(steepness);
+			float highness = smoothstep(0.5, 1.1, world_pos.y * 2.0 / amplitude);
+			vec2 texture_uv = world_pos.xz * 2.0;
+			return ((1.0 - steepness) * (highness * vec4(0.9, 0.9, 0.9, 1.0) + (1.0 - highness) * texture(grass_texture, texture_uv) * 0.5) +
+			steepness * texture(rock_texture, texture_uv) * 0.5).xyz;
+		case 1:
+			float steepness = 1.0 - dot(world_normal, vec3(0.0, 1.0, 0.0));
 			steepness = sqrt(steepness);
 			float highness = smoothstep(0.5, 1.1, world_pos.y * 2.0 / amplitude);
 			return ((1.0 - steepness) * (highness * vec4(0.9, 0.9, 0.9, 1.0) + (1.0 - highness) * vec4(0.15, 0.22, 0.18, 1.0)) +
 			steepness * vec4(0.02, 0.02, 0.02, 1.0)).xyz;
-			//ALBEDO = (steepness * vec4(0.2, 0.25, 0.2, 1.0) +
-			//(1.0 - steepness) * vec4(0.05, 0.05, 0.05, 1.0)).xyz;
-		case 1:
-			return vec3((world_pos.y / amplitude + 1.0) * 0.5);
 		case 2:
-			return world_normal;
+			return vec3((world_pos.y / amplitude + 1.0) * 0.5);
 		case 3:
-			return vec3(0.2);
+			return world_normal;
 		case 4:
+			return vec3(0.2);
+		case 5:
 			return vec3(0.0);
 	}
 }

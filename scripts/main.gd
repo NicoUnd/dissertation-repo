@@ -116,7 +116,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	
 	#print("OKAY")
-	heightmap_terrain_generation_method_visualiser.albedo_type = 1;
+	heightmap_terrain_generation_method_visualiser.albedo_type = 2;
 	heightmap_terrain_generation_method_visualiser.render_mode = 1;
 	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(512);
 	#terrain_generation_method = preload("uid://bunfkxpwyox5q")

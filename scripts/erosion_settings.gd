@@ -121,7 +121,7 @@ func _on_visibility_changed() -> void:
 	
 	settings_v_box_container.add_child(HSeparator.new());
 	
-	var drops_parameter: ParameterNumber = ParameterNumber.new("log_base_2_drops", 28, 20, 36, true, false, false);
+	var drops_parameter: ParameterNumber = ParameterNumber.new("log_base_2_drops", 26, 16, 36, true, false, false);
 	var drops_UI: ParameterSliderUI = UI.parameter_to_parameter_ui(drops_parameter);
 	settings_v_box_container.add_child(drops_UI);
 	drops_UI.setup(drops_parameter, func (new_drops): log_base_2_drops = new_drops);
@@ -173,7 +173,7 @@ func _on_visibility_changed() -> void:
 	
 	settings_v_box_container.add_child(HSeparator.new());
 	
-	var visualisation_speed_parameter: ParameterNumber = ParameterNumber.new("visualisation_speed", 4, 2, 32, true, false, true);
+	var visualisation_speed_parameter: ParameterNumber = ParameterNumber.new("visualisation_speed", 2, 1, 32, true, false, true);
 	var visualisation_speed_UI: ParameterSliderUI = UI.parameter_to_parameter_ui(visualisation_speed_parameter);
 	settings_v_box_container.add_child(visualisation_speed_UI);
 	visualisation_speed_UI.setup(visualisation_speed_parameter, func (new_visualisation_speed): visualisation_speed = new_visualisation_speed);
@@ -198,5 +198,5 @@ func _on_visibility_changed() -> void:
 	gravity = 2;
 	evaporation_rate = 0.1;
 	radius = 2;
-	log_base_2_drops = 28;
-	visualisation_speed = 4;
+	log_base_2_drops = 26;
+	visualisation_speed = 2;

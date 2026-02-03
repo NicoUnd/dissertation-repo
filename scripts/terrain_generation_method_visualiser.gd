@@ -17,6 +17,9 @@ const PLANE_RESOLUTIONS: Array[int] = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 20
 
 @onready var water_mesh_instance_3d: MeshInstance3D = %WaterMeshInstance3D
 
+const GRASS_TEXTURE = preload("uid://bhuujet8ora2q");
+const ROCK_TEXTURE = preload("uid://sjw5cprknt4");
+
 func set_shader(new_shader: Shader, terrain_generation_method_specific_parameters: Array[Parameter]) -> void:
 	if planes:
 		for plane: MeshInstance3D in planes.get_children():
@@ -88,6 +91,9 @@ func apply_shader_options() -> void:
 	set_planes_shader_parameter("albedo_type", albedo_type);
 	set_planes_shader_parameter("circle", circle);
 	set_planes_shader_parameter("perturbate", perturbate);
+	
+	set_planes_shader_parameter("grass_texture", GRASS_TEXTURE);
+	set_planes_shader_parameter("rock_texture", ROCK_TEXTURE);
 
 @export var albedo_type: int = 0:
 	set(new_albedo_type):

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dql2oecs77v8i"
-path.s3tc="res://.godot/imported/6244.jpg-a51e81e6da3023e873d65051a75f8943.s3tc.ctex"
+uid="uid://65osg3g6e1fg"
+path.s3tc="res://.godot/imported/Seamless ground sand texture (4).jpg-b6016a25120d3b90c7b41788919dd13f.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/textures/6244.jpg"
-dest_files=["res://.godot/imported/6244.jpg-a51e81e6da3023e873d65051a75f8943.s3tc.ctex"]
+source_file="res://assets/textures/old/Seamless ground sand texture (4).jpg"
+dest_files=["res://.godot/imported/Seamless ground sand texture (4).jpg-b6016a25120d3b90c7b41788919dd13f.s3tc.ctex"]
 
 [params]
 
