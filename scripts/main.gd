@@ -2,6 +2,8 @@
 extends Control
 
 const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
+const RENDER_FRAMES_AMOUNTS: Array[int] = [1, 5, 20, 50, 100];
+const RENDER_RESOLUTION_MULTIPLIERS: Array[float] = [1, 0.5, 0.25];
 
 @onready var visualisation_viewport: SubViewport = %VisualisationViewport
 @onready var heightmap_viewport: SubViewport = %HeightmapViewport;
@@ -12,8 +14,6 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 
 @onready var terrain_generation_method_visualiser: TerrainGenerationMethodVisualiser = %TerrainGenerationMethodVisualiser
 @onready var heightmap_terrain_generation_method_visualiser: TerrainGenerationMethodVisualiser = %HeightmapTerrainGenerationMethodVisualiser
-
-@onready var timer: Timer = $Timer
 
 @onready var ui: Control = %UI
 
@@ -40,6 +40,12 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 var rendering_device: RenderingDevice;
 
 var last_resolution_of_plane: int = 1024;
+
+var save_render_path: String;
+var save_render_index: int;
+var save_render_amount: int;
+var save_render_resolution_multiplier: float;
+var save_render_file_type_prefix: String;
 
 var filled_UI: bool = false;
 var explicit_chunk_generation: bool = false; # for explicit generation methods, can either generate in chunks or one plane, UI dialog will show this
@@ -122,8 +128,6 @@ func _ready() -> void:
 	#terrain_generation_method = preload("uid://bunfkxpwyox5q")
 	
 	rendering_device = RenderingServer.create_local_rendering_device();
-	
-	timer.start();
 
 func generate(generate_button_string: String) -> void:
 	if explicit_chunk_generation:
@@ -252,9 +256,14 @@ func randomise_seed() -> void:
 	var new_seed = randf_range(1, 64);
 	set_seed(new_seed);
 
-func _on_timer_timeout() -> void:
+func _on_auto_randomise_seed_timer_timeout() -> void:
 	if auto_randomise_seed:
 		randomise_seed();
+
+func _on_capture_render_timer_timeout() -> void:
+	if save_render_index < save_render_amount:
+		save_render(save_render_path + str(save_render_index) + save_render_file_type_prefix);
+		save_render_index += 1;
 
 func _on_save_heightmap_button_pressed() -> void:
 	if explicit_chunk_generation: # explicit generation of chunks produced multiple different-resolution heightmaps, not possible to capture
@@ -264,21 +273,35 @@ func _on_save_heightmap_button_pressed() -> void:
 
 func _on_save_render_button_pressed() -> void:
 	save_render_file_dialog.show();
-	save_render_file_dialog.get_line_edit().text = "Render.jpg";
+	save_render_file_dialog.get_line_edit().text = "Render.png";
 
 func _on_save_render_file_dialog_confirmed() -> void:
+	save_render_resolution_multiplier = RENDER_RESOLUTION_MULTIPLIERS[save_render_file_dialog.get_selected_options()["Resolution "]];
+	save_render_amount = RENDER_FRAMES_AMOUNTS[save_render_file_dialog.get_selected_options()["Number of Frames (4 per second) "]];
+	save_render_index = 0;
+	save_render_path = save_render_file_dialog.current_dir.path_join(save_render_file_dialog.get_line_edit().text);
+	save_render_file_type_prefix = ".png";
+	if save_render_path.ends_with(".png") or save_render_path.ends_with(".jpg"):
+		if save_render_path.ends_with(".jpg"):
+			save_render_file_type_prefix = ".jpg";
+		save_render_path = save_render_path.substr(0, save_render_path.length() - 4);
+
+func save_render(save_path: String) -> void:
 	var render: Image = visualisation_viewport.get_texture().get_image();
-	
-	var save_path = save_render_file_dialog.current_dir.path_join(save_render_file_dialog.get_line_edit().text);
 	if render.is_compressed():
 		render.decompress();
-	if not save_path.ends_with(".jpg"):
-		save_path += ".jpg";
-	render.save_jpg(save_path, 1);
+	var new_render_size: Vector2i = render.get_size() * save_render_resolution_multiplier;
+	render.resize(new_render_size.x, new_render_size.y, Image.INTERPOLATE_BILINEAR);
+	if save_render_file_type_prefix == ".png":
+		render.save_png(save_path);
+	else:
+		render.save_jpg(save_path, 1);
 
 func capture_heightmap(resolution: int) -> Image:
 	if terrain_generation_method is TerrainGenerationMethodExplicit and not explicit_chunk_generation:
-		return heightmap_terrain_generation_method_visualiser.planes.get_child(0).mesh.material.get_shader_parameter("heightmap").get_image();
+		var heightmap: Image = heightmap_terrain_generation_method_visualiser.planes.get_child(0).mesh.material.get_shader_parameter("heightmap").get_image();
+		heightmap.resize(resolution, resolution);
+		return heightmap;
 	heightmap_viewport.size = Vector2(resolution, resolution);
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	RenderingServer.force_draw();
@@ -289,7 +312,7 @@ func capture_heightmap(resolution: int) -> Image:
 	return heightmap;
 
 func _on_save_heightmap_file_dialog_confirmed() -> void:
-	var heightmap_resolution: int = HEIGHTMAP_RESOLUTIONS[save_heightmap_file_dialog.get_selected_options()["Heightmap Resolution"]];
+	var heightmap_resolution: int = HEIGHTMAP_RESOLUTIONS[save_heightmap_file_dialog.get_selected_options()["Heightmap Resolution "]];
 	var heightmap: Image = capture_heightmap(heightmap_resolution);
 	
 	var save_path = save_heightmap_file_dialog.current_dir.path_join(save_heightmap_file_dialog.get_line_edit().text);

@@ -72,7 +72,7 @@ seed = 42.78947755553328
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport" unique_id=621889884]
 unique_name_in_owner = true
-transform = Transform3D(-0.93216336, 0, 0.3620325, 0, 1, 0, -0.3620325, 0, -0.93216336, 0, 0, 0)
+transform = Transform3D(-0.15212604, 0, -0.9883591, 0, 1, 0, 0.9883591, 0, -0.15212604, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot" unique_id=1459652782]
 unique_name_in_owner = true
@@ -297,7 +297,7 @@ size = Vector2i(2018, 1416)
 ok_button_text = "Save Heightmap"
 access = 2
 option_count = 1
-option_0/name = "Heightmap Resolution"
+option_0/name = "Heightmap Resolution "
 option_0/values = PackedStringArray("1024x1024", "2048x2048", "4096x4096")
 
 [node name="SaveRenderFileDialog" type="FileDialog" parent="." unique_id=754815060]
@@ -308,6 +308,11 @@ initial_position = 1
 size = Vector2i(2018, 1416)
 ok_button_text = "Save Render"
 access = 2
+option_count = 2
+option_0/name = "Number of Frames (4 per second) "
+option_0/values = PackedStringArray("1", "5", "20", "50", "100")
+option_1/name = "Resolution "
+option_1/values = PackedStringArray("full", "half", "quarter")
 
 [node name="GenerateStatisticsConfirmDialog" type="ConfirmationDialog" parent="." unique_id=160571538]
 unique_name_in_owner = true
@@ -327,7 +332,11 @@ size = Vector2i(1212, 330)
 dialog_text = "Time taken to generate heightmaps:
 1024x1024: 81ms"
 
-[node name="Timer" type="Timer" parent="." unique_id=1892915584]
+[node name="AutoRandomiseSeedTimer" type="Timer" parent="." unique_id=1892915584]
+autostart = true
+
+[node name="CaptureRenderTimer" type="Timer" parent="." unique_id=1608127237]
+wait_time = 0.25
 autostart = true
 
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/SaveRenderButton" to="." method="_on_save_render_button_pressed"]
@@ -338,4 +347,5 @@ autostart = true
 [connection signal="confirmed" from="SaveHeightmapFileDialog" to="." method="_on_save_heightmap_file_dialog_confirmed"]
 [connection signal="confirmed" from="SaveRenderFileDialog" to="." method="_on_save_render_file_dialog_confirmed"]
 [connection signal="confirmed" from="GenerateStatisticsConfirmDialog" to="." method="generate_statistics"]
-[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="timeout" from="AutoRandomiseSeedTimer" to="." method="_on_auto_randomise_seed_timer_timeout"]
+[connection signal="timeout" from="CaptureRenderTimer" to="." method="_on_capture_render_timer_timeout"]

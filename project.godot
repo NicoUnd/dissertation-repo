@@ -26,6 +26,10 @@ window/size/viewport_height=2160
 window/size/mode=3
 window/stretch/mode="canvas_items"
 
+[editor]
+
+movie_writer/movie_file="E:/Godot/dissertation/dissertation-repo/movie_captures/movie.png"
+
 [file_customization]
 
 folder_colors={
