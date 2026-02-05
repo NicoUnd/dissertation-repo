@@ -257,6 +257,8 @@ func _on_timer_timeout() -> void:
 		randomise_seed();
 
 func _on_save_heightmap_button_pressed() -> void:
+	if explicit_chunk_generation: # explicit generation of chunks produced multiple different-resolution heightmaps, not possible to capture
+		return;
 	save_heightmap_file_dialog.show();
 	save_heightmap_file_dialog.get_line_edit().text = "Heightmap.exr";
 
@@ -275,6 +277,8 @@ func _on_save_render_file_dialog_confirmed() -> void:
 	render.save_jpg(save_path, 1);
 
 func capture_heightmap(resolution: int) -> Image:
+	if terrain_generation_method is TerrainGenerationMethodExplicit and not explicit_chunk_generation:
+		return heightmap_terrain_generation_method_visualiser.planes.get_child(0).mesh.material.get_shader_parameter("heightmap").get_image();
 	heightmap_viewport.size = Vector2(resolution, resolution);
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	RenderingServer.force_draw();

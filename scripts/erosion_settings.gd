@@ -9,8 +9,6 @@ const EROSION_RESOLUTIONS: Array[int] = [256, 512, 1024, 2048, 4096];
 
 @onready var settings_v_box_container: VBoxContainer = %SettingsVBoxContainer
 
-var compute_shader;
-
 var resolution: int;
 
 var time_to_live: int;
@@ -43,6 +41,9 @@ func start_erosion() -> void:
 
 func erode(heightmap: Image) -> void:
 	var rendering_device: RenderingDevice = main.rendering_device;
+	
+	var shader_file := load("res://shaders/compute_shaders/hydraulic_erosion.glsl");
+	var compute_shader = main.rendering_device.shader_create_from_spirv(shader_file.get_spirv());
 	
 	@warning_ignore("narrowing_conversion")
 	var workgroups: int = sqrt(pow(2, log_base_2_drops)) / 8;
@@ -105,11 +106,6 @@ func _on_visibility_changed() -> void:
 		main.heightmap_texture_rect.z_index = 1 if visible else 0;
 	if not visible:
 		return;
-	
-	if compute_shader:
-		main.rendering_device.free_rid(compute_shader);
-	var shader_file := load("res://shaders/compute_shaders/hydraulic_erosion.glsl");
-	compute_shader = main.rendering_device.shader_create_from_spirv(shader_file.get_spirv());
 	
 	var erosion_resolution_strings: Array[String] = [];
 	for erosion_resolution: int in EROSION_RESOLUTIONS:
