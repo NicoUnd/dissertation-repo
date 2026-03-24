@@ -11,6 +11,8 @@ var LOD_preset: LOD_PRESET:
 
 const CHUNK_TYPE_CELL_SCENE = preload("uid://xpucngsf7x4r");
 
+const LOD_KEY_ENTRY_SCENE = preload("uid://pc7hhmpst5ke")
+
 @onready var main: Control = $".."
 
 @onready var settings_v_box_container: VBoxContainer = %SettingsVBoxContainer
@@ -55,6 +57,8 @@ func get_LOD_preset_max_distance(LOD_preset: LOD_PRESET) -> float:
 			return sqrt(chunk_grid_resolution * chunk_grid_resolution * 2) * 0.9;
 		LOD_PRESET.EDGE:
 			return chunk_grid_resolution;
+		LOD_PRESET.CHECKERED:
+			return 0;
 		_:
 			push_error("Couldn't match LOD_PRESET");
 			return 0;
@@ -179,6 +183,13 @@ func _on_visibility_changed() -> void:
 	var cancel_UI: ParameterButtonUI = UI.parameter_to_parameter_ui(cancel_parameter);
 	settings_v_box_container.add_child(cancel_UI);
 	cancel_UI.setup(cancel_parameter, cancel)
+	
+	settings_v_box_container.add_child(HSeparator.new());
+	
+	for LOD_index in LOD_strings.size():
+		var LOD_key_entry: LODKeyEntry = LOD_KEY_ENTRY_SCENE.instantiate();
+		settings_v_box_container.add_child(LOD_key_entry);
+		LOD_key_entry.setup(ChunkTypeCell.LOD_COLOURS[LOD_index], LOD_strings[LOD_index].capitalize());
 	
 	LOD_preset = LOD_PRESET.CENTRE;
 	LOD_preset_sensitivity = 1;

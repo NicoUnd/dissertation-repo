@@ -127,6 +127,8 @@ func _ready() -> void:
 	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(512);
 	#terrain_generation_method = preload("uid://bunfkxpwyox5q")
 	
+	heightmap_viewport.use_hdr_2d
+	
 	rendering_device = RenderingServer.create_local_rendering_device();
 
 func generate(generate_button_string: String) -> void:
@@ -248,7 +250,8 @@ func set_seed(new_seed: float) -> void:
 	heightmap_terrain_generation_method_visualiser.seed = new_seed;
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 	
-	terrain_generation_method.seed = new_seed;
+	if terrain_generation_method:
+		terrain_generation_method.seed = new_seed;
 	
 	ui.seed_slider.h_slider.value = new_seed;
 
@@ -299,7 +302,10 @@ func save_render(save_path: String) -> void:
 
 func capture_heightmap(resolution: int) -> Image:
 	if terrain_generation_method is TerrainGenerationMethodExplicit and not explicit_chunk_generation:
-		var heightmap: Image = heightmap_terrain_generation_method_visualiser.planes.get_child(0).mesh.material.get_shader_parameter("heightmap").get_image();
+		var heightmap_texture = heightmap_terrain_generation_method_visualiser.planes.get_child(0).mesh.material.get_shader_parameter("heightmap");
+		if not heightmap_texture:
+			return Image.new();
+		var heightmap: Image = heightmap_texture.get_image();
 		heightmap.resize(resolution, resolution);
 		return heightmap;
 	heightmap_viewport.size = Vector2(resolution, resolution);
@@ -359,9 +365,9 @@ func generate_statistics() -> void:
 					heightmap = capture_heightmap(heightmap_resolution);
 				average_time += (Time.get_ticks_msec() - start_time) / float(NUMBER_OF_SAMPLES_TO_AVERAGE);
 				
-				var erosion_score = TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device) / float(NUMBER_OF_SAMPLES_TO_AVERAGE * HEIGHTMAP_RESOLUTIONS.size());
+				var erosion_score = TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device);
 				average_erosion_score += erosion_score;
-				#print("erosion score: " + str(erosion_score))
+				print("erosion score: " + str(erosion_score))
 				
 				var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
 				terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
@@ -406,4 +412,5 @@ func _on_statistics_samples_h_slider_value_changed(value: float) -> void:
 	statistics_samples_label.text = "Samples to Average Over (" + str(int(value)) + ")";
 
 func _on_erode_heightmap_button_pressed() -> void:
-	erosion_settings.show();
+	if terrain_generation_method:
+		erosion_settings.show();

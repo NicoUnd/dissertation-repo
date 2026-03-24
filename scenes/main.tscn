@@ -68,11 +68,11 @@ directional_shadow_max_distance = 20536.5
 [node name="TerrainGenerationMethodVisualiser" parent="VisualisationViewport" unique_id=2123795491 instance=ExtResource("1_o5qli")]
 unique_name_in_owner = true
 circle = true
-seed = 42.78947755553328
+seed = 50.56299609086437
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport" unique_id=621889884]
 unique_name_in_owner = true
-transform = Transform3D(-0.15212604, 0, -0.9883591, 0, 1, 0, 0.9883591, 0, -0.15212604, 0, 0, 0)
+transform = Transform3D(-0.9044932, 0, 0.42648312, 0, 1, 0, -0.42648312, 0, -0.9044932, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot" unique_id=1459652782]
 unique_name_in_owner = true
@@ -115,7 +115,7 @@ size = 64.0
 unique_name_in_owner = true
 render_mode = 1
 albedo_type = 2
-seed = 41.089
+seed = 50.56299609086437
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1295928901]
 layout_mode = 1

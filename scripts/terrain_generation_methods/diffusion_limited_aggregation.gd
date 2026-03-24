@@ -16,7 +16,9 @@ var smoothing_growth_factor: float;
 
 var layer_weighting_factor: float;
 
-var start_from: int;
+var seed_origin: int;
+
+var particles_spawn: int;
 
 func setup(rendering_device: RenderingDevice) -> void:
 	var shader_file := load("res://shaders/compute_shaders/diffusion_limited_aggregation_batched.glsl");
@@ -214,7 +216,7 @@ func fill_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, at
 	
 	for i: int in INITIAL_RESOLUTION * 2: # this will be the same for every layer, just larget batches
 		# need to update the seed so that each calling will get different random numbers
-		var shader_parameters: PackedFloat32Array = PackedFloat32Array([hash(layer_resolution + seed + i) % 16, float(layer_resolution), float(walk_hops_to_live)]);
+		var shader_parameters: PackedFloat32Array = PackedFloat32Array([hash(layer_resolution + seed + i) % 16, float(layer_resolution), float(walk_hops_to_live), float(particles_spawn)]);
 		var parameters_bytes: PackedByteArray = shader_parameters.to_byte_array();
 		var parameters_RID := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
 		var parameter_uniform := RDUniform.new();
@@ -396,7 +398,7 @@ func add_crisp_onto_blurry_GPU(rendering_device: RenderingDevice, blurry_bytes: 
 	crisp_uniform.binding = 1 # this needs to match the "binding" in our shader file
 	crisp_uniform.add_id(crisp_RID);
 	
-	var workgroups: int = layer_resolution * layer_resolution;
+	var workgroups: int = layer_resolution * layer_resolution / 1024;
 	
 	var uniform_set := rendering_device.uniform_set_create([blurry_uniform, crisp_uniform], add_compute_shader, 0);
 	
@@ -423,7 +425,7 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	attach_directions.resize(INITIAL_RESOLUTION * INITIAL_RESOLUTION);
 	
 	var start_index: int;
-	match start_from:
+	match seed_origin:
 		0:
 			@warning_ignore("integer_division")
 			start_index = INITIAL_RESOLUTION * INITIAL_RESOLUTION / 2 + INITIAL_RESOLUTION / 2;

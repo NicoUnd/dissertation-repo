@@ -5,20 +5,10 @@
 [ext_resource type="Script" uid="uid://b4xxvbdak0nxt" path="res://scripts/terrain_generation_methods/diffusion_limited_aggregation.gd" id="2_otslh"]
 [ext_resource type="Script" uid="uid://dh4wgjnv8j0ir" path="res://scripts/parameters/parameter_enum.gd" id="3_d0pff"]
 
-[sub_resource type="Resource" id="Resource_y5v37"]
-script = ExtResource("2_d0pff")
-min_value = 256.0
-max_value = 4096.0
-is_int = true
-is_exp = true
-name = "walk_hops_to_live"
-value = 1024
-metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
-
 [sub_resource type="Resource" id="Resource_otslh"]
 script = ExtResource("2_d0pff")
 max_value = 1.0
-name = "smoothing_layer_factor"
+name = "smoothing_growth_factor"
 value = 0.1
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
@@ -33,9 +23,26 @@ metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 [sub_resource type="Resource" id="Resource_gwdbk"]
 script = ExtResource("3_d0pff")
 options = Array[String](["centre", "corner", "edge", "random"])
-name = "start_from"
+name = "seed_origin"
 value = 0
 metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
+
+[sub_resource type="Resource" id="Resource_xqe16"]
+script = ExtResource("3_d0pff")
+options = Array[String](["random", "edge", "corner", "random edge", "random corner"])
+name = "particles_spawn"
+value = 0
+metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
+
+[sub_resource type="Resource" id="Resource_y5v37"]
+script = ExtResource("2_d0pff")
+min_value = 1024.0
+max_value = 16384.0
+is_int = true
+is_exp = true
+name = "walk_hops_to_live"
+value = 4096
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
 [resource]
 script = ExtResource("2_otslh")
@@ -44,5 +51,5 @@ name = "diffusion_limited_aggregation"
 min_amplitude = 1.0
 max_amplitude = 16.0
 default_amplitude = 4.0
-parameters = Array[ExtResource("1_77tkw")]([SubResource("Resource_y5v37"), SubResource("Resource_otslh"), SubResource("Resource_d0pff"), SubResource("Resource_gwdbk")])
+parameters = Array[ExtResource("1_77tkw")]([SubResource("Resource_otslh"), SubResource("Resource_d0pff"), SubResource("Resource_gwdbk"), SubResource("Resource_xqe16"), SubResource("Resource_y5v37")])
 metadata/_custom_type_script = "uid://b4xxvbdak0nxt"

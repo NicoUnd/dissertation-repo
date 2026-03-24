@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://bqb32mcej8un0"]
+
+[ext_resource type="Script" uid="uid://ddnw3wygx3yoq" path="res://scripts/erodibility_mask.gd" id="1_jwqwe"]
+
+[sub_resource type="Gradient" id="Gradient_jwqwe"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_8cqa4"]
+gradient = SubResource("Gradient_jwqwe")
+width = 128
+height = 128
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[node name="ErodibilityMask" type="TextureRect" unique_id=338804239]
+custom_minimum_size = Vector2(512, 512)
+offset_right = 40.0
+offset_bottom = 40.0
+expand_mode = 1
+stretch_mode = 4
+script = ExtResource("1_jwqwe")
+brush_texture = SubResource("GradientTexture2D_8cqa4")

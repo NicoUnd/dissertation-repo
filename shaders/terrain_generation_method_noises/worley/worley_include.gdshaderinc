@@ -4,9 +4,9 @@
 uniform float period: hint_range(1.0, 64.0);
 uniform float amplitude: hint_range(1.0, 64.0);
 
-uniform float c1: hint_range(0.0, 1.0, 0.1);
-uniform float c2: hint_range(0.0, 1.0, 0.1);
-uniform float c3: hint_range(0.0, 1.0, 0.1);
+uniform float c1: hint_range(-1.0, 1.0, 0.1);
+uniform float c2: hint_range(-1.0, 1.0, 0.1);
+uniform float c3: hint_range(-1.0, 1.0, 0.1);
 
 float worley(vec2 uv, float peri, float amp) {
 	vec2 grid_index = floor(uv / peri);

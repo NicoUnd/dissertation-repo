@@ -6,6 +6,9 @@ uniform float amplitude: hint_range(1.0, 64.0);
 
 uniform int octaves: hint_range(1, 16);
 
+uniform float lacunarity;
+uniform float gain;
+
 uniform int value_type;
 
 
@@ -20,8 +23,8 @@ float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float
 		} else {
 			total += val;
 		}
-		peri /= 2.0;
-		amp /= 2.0;
+		peri /= lacunarity;
+		amp *= gain;
 		given_octaves -= 1;
 	}
 	return total;

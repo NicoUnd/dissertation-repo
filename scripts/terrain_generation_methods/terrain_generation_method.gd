@@ -322,7 +322,7 @@ static func max_min_GPU(heightmap: Image, rendering_device: RenderingDevice) -> 
 	var texture_RID = rendering_device.texture_create(texture_format, RDTextureView.new(), [heightmap_bytes]);
 	
 	var sampler_state = RDSamplerState.new();
-	sampler_state.unnormalized_uvw = true;
+	#sampler_state.unnormalized_uvw = true;
 	var sampler = rendering_device.sampler_create(sampler_state);
 	
 	var texture_uniform := RDUniform.new();

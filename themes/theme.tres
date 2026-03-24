@@ -5342,6 +5342,15 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_53ewu"]
+content_margin_left = 0.0
+content_margin_top = 4.0
+content_margin_right = 0.0
+content_margin_bottom = 4.0
+color = Color(0.09803922, 0.09803922, 0.101960786, 0.7294118)
+thickness = 8
+vertical = true
+
 [sub_resource type="DPITexture" id="DPITexture_xeclr"]
 _source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"#fff\" fill-opacity=\".75\" d=\"m1 3 2-2 5 5 5-5 2 2-5 5 5 5-2 2-5-5-5 5-2-2 5-5z\"/></svg>
 "
@@ -5562,6 +5571,8 @@ PopupMenu/styles/labeled_separator_right = SubResource("StyleBoxLine_b82be")
 PopupMenu/styles/panel = SubResource("StyleBoxFlat_xmws8")
 PopupMenu/styles/separator = SubResource("StyleBoxLine_b82be")
 VBoxContainer/constants/separation = 4
+VSeparator/constants/separation = 32
+VSeparator/styles/separator = SubResource("StyleBoxLine_53ewu")
 Window/colors/title_color = Color(0.875, 0.875, 0.875, 1)
 Window/colors/title_outline_modulate = Color(0, 0, 0, 1)
 Window/constants/close_h_offset = 18

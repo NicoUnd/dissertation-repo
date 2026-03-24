@@ -22,6 +22,8 @@ parameter_buffer;
 // A binding to the buffer we create in our script
 layout(set = 0, binding = 1, r32f) uniform image2D heightmap;
 
+layout(set = 0, binding = 2, r8) uniform image2D erodibility_mask;
+
 float rand(ivec2 uv, float seed){ // random 0-1
 	return fract(sin(dot(vec2(uv), vec2(12.9898, 78.233))) * 437.5453 * seed);
 }
@@ -137,8 +139,6 @@ void main() {
 	
 	int time_to_live = int(parameter_buffer.time_to_live);
 	while (time_to_live > 0) {
-		if (pos.x < 0 || pos.x >= float(resolution - 1) || pos.y < 0 || pos.y >= float(resolution - 1)) return;
-		
 		dir = dir * inertia - bilinear_gradient(pos) * (1.0 - inertia);
 		if (length(dir) < 0.0001) {
 			float rand_angle = rand(ivec2(pos + vec2(5.1231, 19.231)) + ivec2(time_to_live), seed) * 6.2831853;
@@ -162,7 +162,7 @@ void main() {
 				bilinear_deposit(pos, amount_to_deposit);
 				sediment -= amount_to_deposit;
 			} else {
-				float amount_to_erode = min((capacity - sediment) * erosion_rate, -height_delta);
+				float amount_to_erode = min((capacity - sediment) * erosion_rate, -height_delta) * imageLoad(erodibility_mask, ivec2(pos)).r;
 				erode_radius(pos, amount_to_erode);
 				sediment += amount_to_erode;
 			}

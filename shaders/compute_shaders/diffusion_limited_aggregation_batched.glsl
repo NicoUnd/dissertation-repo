@@ -8,6 +8,7 @@ layout(set = 0, binding = 0, std430) restrict buffer Parameters {
 	float seed;
 	float resolution;
 	float hops_to_live;
+	float particles_spawn;
 }
 parameter_buffer;
 
@@ -42,6 +43,45 @@ ivec2 next_rand_move(ivec2 uv, float seed){
 	return attach_direction_to_move(attach_direction);
 }
 
+ivec2 get_start_pos(ivec2 uv){
+	float seed = parameter_buffer.seed;
+	int particles_spawn = int(parameter_buffer.particles_spawn);
+	float resolution_float = parameter_buffer.resolution;
+	
+	switch (particles_spawn){
+		case 0:
+			return ivec2(int(next_rand(uv, seed) * (resolution_float)), int(next_rand(uv, seed) * (resolution_float)));
+		case 1:
+			return ivec2(int(next_rand(uv, seed) * (resolution_float)), int(resolution_float) - 1);
+		case 2:
+			return ivec2(int(resolution_float) - 1, int(resolution_float) - 1);
+		case 3:
+			int edge = int(next_rand(uv, seed) * 4.0);
+			switch(edge){
+				case 0:
+					return ivec2(0, int(next_rand(uv, seed) * (resolution_float)));
+				case 1:
+					return ivec2(int(next_rand(uv, seed) * (resolution_float)), 0);
+				case 2:
+					return ivec2(int(resolution_float) - 1, int(next_rand(uv, seed) * (resolution_float)));
+				case 3:
+					return ivec2(int(next_rand(uv, seed) * (resolution_float)), int(resolution_float) - 1);
+			}
+		case 4:
+			int corner = int(next_rand(uv, seed) * 4.0);
+			switch(corner){
+				case 0:
+					return ivec2(0, 0);
+				case 1:
+					return ivec2(int(resolution_float) - 1, 0);
+				case 2:
+					return ivec2(0, int(resolution_float) - 1);
+				case 3:
+					return ivec2(int(resolution_float) - 1, int(resolution_float) - 1);
+			}
+	}
+}
+
 // The code we want to execute in each invocation
 void main() {
 	ivec2 uv = ivec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y);
@@ -49,7 +89,7 @@ void main() {
 	float resolution_float = parameter_buffer.resolution;
 	int resolution = int(resolution_float);
 	
-	ivec2 pos = ivec2(int(next_rand(uv, seed) * (resolution_float)), int(next_rand(uv, seed) * (resolution_float)));
+	ivec2 pos = get_start_pos(uv);
 	int pos_linear = uv_to_linear(pos);
 	if (attach_directions_buffer.data[pos_linear] != 0) return;
 	

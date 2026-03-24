@@ -18,7 +18,7 @@ void main() {
 	// gl_GlobalInvocationID.x uniquely identifies this invocation across all work groups
 	ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
 	
-	int int_value = int(texture(heightmap, uv).r * 255.0);
+	int int_value = int(texelFetch(heightmap, uv, 0).r * 255.0);
 	
 	atomicMax(max_min_buffer.max, int_value);
 	atomicMin(max_min_buffer.min, int_value);

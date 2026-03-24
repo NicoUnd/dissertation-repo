@@ -10,6 +10,8 @@ var start_from: int;
 
 var blur_levels: int;
 
+var walk_weighting: int;
+
 var compute_shader;
 
 func setup(rendering_device: RenderingDevice) -> void:
@@ -75,9 +77,9 @@ func blur_with_detail(heightmap: Image, rendering_device: RenderingDevice) -> Im
 	
 	#var blur_level_multiplier: float = 1;
 	for blur_level: int in blur_levels:
-		var multiplier: float = pow(blur_level + 1, 2);
-		var blurred_heightmap: Image = gaussian_blur(heightmap, multiplier, rendering_device);
-		var blurred_points_bytes: PackedByteArray = PackedFloat32Array([multiplier]).to_byte_array();
+		var blur: float = pow(blur_level + 1, 2);
+		var blurred_heightmap: Image = gaussian_blur(heightmap, blur, rendering_device);
+		var blurred_points_bytes: PackedByteArray = PackedFloat32Array([blur]).to_byte_array();
 		blurred_points_bytes.append_array(blurred_heightmap.get_data());
 		var blurred_points_RID := rendering_device.storage_buffer_create(blurred_points_bytes.size(), blurred_points_bytes);
 		var blurred_points_uniform := RDUniform.new();
@@ -112,6 +114,22 @@ func blur_with_detail(heightmap: Image, rendering_device: RenderingDevice) -> Im
 	combined_heightmap = normalise_heightmap(combined_heightmap, rendering_device);
 	return combined_heightmap;
 
+func generate_walk_weights() -> Array[float]:
+	var walk_weights: Array[float] = [];
+	for walk: int in walks:
+		match walk_weighting:
+			0:
+				walk_weights.append(1);
+			1:
+				walk_weights.append(log2(walk + 2));
+			2:
+				walk_weights.append(walk + 1);
+			3:
+				walk_weights.append(pow(walk + 1, 2));
+			4:
+				walk_weights.append(pow(2, walk));
+	return walk_weights;
+
 func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image:
 	var threads: Array[Thread] = [];
 	threads.resize(walks);
@@ -132,13 +150,27 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	@warning_ignore("integer_division")
 	var workgroups: int = resolution * resolution / 1024;
 	
-	for thread_index: int in threads.size():
+	var walk_weights: Array[float] = generate_walk_weights();
+	#var walk_weights_total: float = 0;
+	#for walk_weight: float in walk_weights:
+	#	walk_weights_total += walk_weight;
+	#var min_blur = 2;
+	#var max_blur = 16;
+	#var blur_difference = max_blur - min_blur;
+	
+	for thread_index: int in walks:
 		var thread: Thread = threads[thread_index];
 		
 		var points: PackedFloat32Array = points_nested_to_linear(thread.wait_to_finish());
+		
 		#var image: Image = Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, points.to_byte_array());
-		#var blurred_image: Image = gaussian_blur(image, thread_index + 1, rendering_device);
-		var points_bytes: PackedByteArray = PackedFloat32Array([1.0]).to_byte_array(); # multiplier is 1
+		#var progress: float = float(thread_index) / walks;
+		#var blur: int = min_blur + float(blur_difference) * progress; #max(64*walk_weights[thread_index]/walk_weights_total, 1)
+		#var blurred_image: Image = gaussian_blur(image, blur, rendering_device);
+		#var blurred_points = blurred_image.get_data();
+		
+		var multiplier: float = walk_weights[thread_index];
+		var points_bytes: PackedByteArray = PackedFloat32Array([multiplier]).to_byte_array(); # multiplier is 1
 		#points_bytes.append_array(blurred_image.get_data());
 		points_bytes.append_array(points.to_byte_array());
 		var points_RID := rendering_device.storage_buffer_create(points_bytes.size(), points_bytes);
@@ -169,6 +201,7 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	rendering_device.free_rid(aggregate_points_RID);
 	
 	var heightmap: Image = points_to_heightmap(points_linear_to_nested(output));
+	#heightmap = normalise_heightmap(heightmap, rendering_device);
 	heightmap = blur_with_detail(heightmap, rendering_device);
 	return heightmap;
 

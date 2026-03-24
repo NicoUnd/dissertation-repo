@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://pc7hhmpst5ke"]
+
+[ext_resource type="Script" uid="uid://oph5t751mpt5" path="res://scripts/chunk_key_entry_h_box_container.gd" id="1_u4mpn"]
+
+[node name="LODKeyEntry" type="HBoxContainer" unique_id=1227139354]
+script = ExtResource("1_u4mpn")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1844156580]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="." unique_id=30118208]
+unique_name_in_owner = true
+layout_mode = 2
