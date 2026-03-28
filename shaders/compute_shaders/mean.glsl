@@ -18,5 +18,10 @@ void main() {
 	// gl_GlobalInvocationID.x uniquely identifies this invocation across all work groups
 	ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
 	
-	atomicAdd(total_buffer.total, texture(heightmap, uv).r);
+	//ivec2 size = textureSize(heightmap, 0);
+	//if (uv.x >= size.x || uv.y >= size.y) return; // guard clause
+	
+	//atomicAdd(total_buffer.total, 1);
+	//atomicAdd(total_buffer.total, int(texelFetch(heightmap, uv, 0).r * 128.0));
+	atomicAdd(total_buffer.total, texelFetch(heightmap, uv, 0).r);
 }

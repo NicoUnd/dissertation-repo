@@ -56,11 +56,9 @@ func start_erosion() -> void:
 		ui.queue_free();
 	
 	var heightmap: Image = main.capture_heightmap(resolution);
-	var amplitude: float = main.terrain_generation_method_visualiser.planes.get_child(0).mesh.material.get_shader_parameter("amplitude");
-	main.terrain_generation_method = HEIGHTMAP_BLENDING_SCENE;
-	main.ui.terrain_generation_method_option_button.option_button.selected = TerrainGenerationMethodVisualiser.TERRAIN_GENERATION_METHODS.find(HEIGHTMAP_BLENDING_SCENE);
-	main.set_parameter("heightmap1", ImageTexture.create_from_image(heightmap));
-	main.set_parameter("amplitude", amplitude);
+	main.transition_to_heightmap_blending(heightmap);
+	
+	#main.ui.turn_off_perturbation();
 	
 	erode(heightmap);
 
@@ -95,6 +93,7 @@ func erode(heightmap: Image) -> void:
 	erodibility_texture_uniform.binding = 2;
 	erodibility_texture_uniform.add_id(erodibility_texture_RID);
 	
+	var erosion_scores: Array[float] = [TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device)];
 	for workgroup in workgroups / pow(visualisation_speed, 2):
 		var parameters: PackedFloat32Array = PackedFloat32Array([randf_range(1, 64), float(time_to_live), inertia, min_slope, base_capacity, deposition_rate, erosion_rate, gravity, evaporation_rate, radius]); # DIFFERENT NEEDS TO BE UPDATED IN SHADER
 		
@@ -140,8 +139,12 @@ func erode(heightmap: Image) -> void:
 		rendering_device.free_rid(pipeline);
 		rendering_device.free_rid(texture_RID);
 		rendering_device.free_rid(parameters_RID);
+		
+		var erosion_score: float = TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device);
+		erosion_scores.append(erosion_score);
 	rendering_device.free_rid(erodibility_texture_RID);
 	rendering_device.free_rid(compute_shader);
+	print(erosion_scores)
 
 func cancel() -> void:
 	hide();

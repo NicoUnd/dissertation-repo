@@ -21,4 +21,5 @@ void main() {
 	uint index = gl_GlobalInvocationID.x;
 
 	points_buffer_1.data[index] += points_buffer_2.data[index] * points_buffer_2.multiplier;
+	//points_buffer_1.data[index] = points_buffer_2.data[index];
 }

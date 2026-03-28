@@ -1,6 +1,6 @@
 #[compute]
 #version 450
-#extension GL_EXT_shader_atomic_float : enable
+#extension GL_EXT_shader_atomic_float : require
 
 // Invocations in the (x, y, z) dimension
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
@@ -19,5 +19,6 @@ void main() {
 	// gl_GlobalInvocationID.x uniquely identifies this invocation across all work groups
 	ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
 	
-	atomicAdd(parameter_buffer.square_diff_total, pow(texture(heightmap, uv).r - parameter_buffer.mean, 2.0));
+	//float mean_float = float(parameter_buffer.mean) / 128.0;
+	atomicAdd(parameter_buffer.square_diff_total, pow(texelFetch(heightmap, uv, 0).r - parameter_buffer.mean, 2.0));
 }

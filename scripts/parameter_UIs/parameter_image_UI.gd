@@ -26,5 +26,12 @@ func _on_file_dialog_file_selected(path: String) -> void:
 	
 	if image.is_compressed():
 		image.decompress();
+	
+	# make sure image is square power of 2
+	var smaller: int = min(image.get_width(), image.get_height());
+	@warning_ignore("narrowing_conversion")
+	smaller = pow(2, floor(TerrainGenerationMethodExplicit.log2(smaller)));
+	image.resize(smaller, smaller);
+	
 	var texture: ImageTexture = ImageTexture.create_from_image(image);
 	emit_signal("image_selected", texture);

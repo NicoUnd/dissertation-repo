@@ -6,6 +6,8 @@ class_name UI;
 @onready var parameters_v_box_container: VBoxContainer = %ParametersVBoxContainer
 
 var seed_slider: ParameterSliderUI;
+var perturbate_checkbox: ParameterCheckBoxUI;
+var amplitude_slider: ParameterSliderUI;
 var terrain_generation_method_option_button: ParameterOptionButtonUI;
 var terrain_generation_method_specific_UIs: Array[Control] = [];
 
@@ -29,6 +31,10 @@ static func parameter_to_parameter_ui(parameter: Parameter) -> Control:
 	push_error("parameter type not recognised");
 	return;
 
+func turn_off_perturbation() -> void:
+	perturbate_checkbox.button_pressed = false;
+	main.set_parameter("perturbate", false, false);
+
 func add_parameter(parameter: Parameter, is_terrain_generation_method_specific: bool) -> Control:
 	var parameter_name: String = parameter.name;
 	var on_change: Callable = func (new_value: Variant=null): main.set_parameter(parameter_name, new_value, is_terrain_generation_method_specific);;
@@ -40,6 +46,9 @@ func add_parameter(parameter: Parameter, is_terrain_generation_method_specific: 
 		terrain_generation_method_specific_UIs.append(new_parameter_UI)
 		if not parameter is ParameterButton:
 			main.set_parameter(parameter_name, parameter.value, true);
+	
+	if parameter_name == "amplitude":
+		amplitude_slider = new_parameter_UI;
 	
 	return new_parameter_UI;
 
@@ -73,7 +82,7 @@ func _ready() -> void:
 	add_parameter(ParameterEnum.new("albedo_type", 0, ["texture_blend", "colour_blend", "heightmap", "normal", "grey", "black"]), false);
 	add_parameter(ParameterEnum.new("render_mode", 0, ["shaded", "unshaded", "wireframe"]), false);
 	add_parameter(ParameterBool.new("circle", true), false);
-	add_parameter(ParameterBool.new("perturbate", false), false);
+	perturbate_checkbox = add_parameter(ParameterBool.new("perturbate", false), false);
 	add_parameter(ParameterNumber.new("water_level", 0, 0, 1, false, false, false), false);
 	add_parameter(ParameterEnum.new("camera_type", 1, ["perspective", "orthographic", "freeroam"]), false);
 	add_parameter(ParameterNumber.new("fog_distance", 150, 1.5, 1500, false, false, true), false);

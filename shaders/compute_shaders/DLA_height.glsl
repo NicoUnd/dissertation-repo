@@ -56,6 +56,7 @@ void main() {
 			
 			// set dla height
 			atomicMax(points_buffer.data[pos_linear], step);
+			//points_buffer.data[pos_linear] = 1;
 		}
 	}
 }

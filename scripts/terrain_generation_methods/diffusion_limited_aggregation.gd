@@ -10,7 +10,9 @@ var dla_height_compute_shader;
 var smooth_falloff_compute_shader;
 var add_compute_shader;
 
-var walk_hops_to_live: int;
+var num_of_particles_factor: float;
+
+var particle_hops_to_live: int;
 
 var smoothing_growth_factor: float;
 
@@ -203,7 +205,7 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 
 func fill_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, attach_directions_uniform: RDUniform, add) -> void:
 	@warning_ignore("integer_division")
-	var workgroups = layer_resolution / INITIAL_RESOLUTION;
+	var workgroups = num_of_particles_factor * layer_resolution / INITIAL_RESOLUTION;
 	
 	var output_bytes := rendering_device.buffer_get_data(add);
 	#@warning_ignore("integer_division")
@@ -216,7 +218,7 @@ func fill_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, at
 	
 	for i: int in INITIAL_RESOLUTION * 2: # this will be the same for every layer, just larget batches
 		# need to update the seed so that each calling will get different random numbers
-		var shader_parameters: PackedFloat32Array = PackedFloat32Array([hash(layer_resolution + seed + i) % 16, float(layer_resolution), float(walk_hops_to_live), float(particles_spawn)]);
+		var shader_parameters: PackedFloat32Array = PackedFloat32Array([hash(layer_resolution + seed + i) % 16, float(layer_resolution), float(particle_hops_to_live), float(particles_spawn)]);
 		var parameters_bytes: PackedByteArray = shader_parameters.to_byte_array();
 		var parameters_RID := rendering_device.storage_buffer_create(parameters_bytes.size(), parameters_bytes);
 		var parameter_uniform := RDUniform.new();

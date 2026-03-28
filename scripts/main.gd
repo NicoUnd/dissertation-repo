@@ -5,6 +5,8 @@ const HEIGHTMAP_RESOLUTIONS: Array[int] = [1024, 2048, 4096];
 const RENDER_FRAMES_AMOUNTS: Array[int] = [1, 5, 20, 50, 100];
 const RENDER_RESOLUTION_MULTIPLIERS: Array[float] = [1, 0.5, 0.25];
 
+const HEIGHTMAP_BLENDING_SCENE: TerrainGenerationMethodNoise = preload("uid://uir8vm75yx0o");
+
 @onready var visualisation_viewport: SubViewport = %VisualisationViewport
 @onready var heightmap_viewport: SubViewport = %HeightmapViewport;
 
@@ -32,10 +34,14 @@ const RENDER_RESOLUTION_MULTIPLIERS: Array[float] = [1, 0.5, 0.25];
 @onready var statistics_progress_center_container: CenterContainer = %StatisticsProgressCenterContainer
 @onready var statistics_progress_bar: ProgressBar = %StatisticsProgressBar
 
+@onready var capture_heightmap_resolution_menu: PopupMenu = %CaptureHeightmapResolutionMenu
+@onready var normalise_heightmap_resolution_menu: PopupMenu = %NormaliseHeightmapResolutionMenu
+
 @onready var visualisation_texture_rect: TextureRect = %VisualisationTextureRect
 @onready var heightmap_texture_rect: TextureRect = %HeightmapTextureRect
 
-@onready var vertices_label: Label = $MarginContainer/VerticesLabel
+@onready var vertices_label: Label = %VerticesLabel
+@onready var erosion_score_label: Label = %ErosionScoreLabel
 
 var rendering_device: RenderingDevice;
 
@@ -113,6 +119,7 @@ func reset_to_one_plane(resolution: int) -> void:
 				terrain_generation_method.setup(rendering_device);
 		if heightmap_viewport:
 			heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
+		ui.turn_off_perturbation();
 
 var auto_randomise_seed: bool = false;
 
@@ -126,8 +133,6 @@ func _ready() -> void:
 	heightmap_terrain_generation_method_visualiser.render_mode = 1;
 	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(512);
 	#terrain_generation_method = preload("uid://bunfkxpwyox5q")
-	
-	heightmap_viewport.use_hdr_2d
 	
 	rendering_device = RenderingServer.create_local_rendering_device();
 
@@ -301,13 +306,14 @@ func save_render(save_path: String) -> void:
 		render.save_jpg(save_path, 1);
 
 func capture_heightmap(resolution: int) -> Image:
-	if terrain_generation_method is TerrainGenerationMethodExplicit and not explicit_chunk_generation:
-		var heightmap_texture = heightmap_terrain_generation_method_visualiser.planes.get_child(0).mesh.material.get_shader_parameter("heightmap");
-		if not heightmap_texture:
-			return Image.new();
-		var heightmap: Image = heightmap_texture.get_image();
-		heightmap.resize(resolution, resolution);
-		return heightmap;
+	#if terrain_generation_method is TerrainGenerationMethodExplicit and not explicit_chunk_generation:
+		#var heightmap_texture = heightmap_terrain_generation_method_visualiser.planes.get_child(0).mesh.material.get_shader_parameter("heightmap");
+		#if not heightmap_texture:
+		#	return Image.new();
+		#var heightmap: Image = heightmap_texture.get_image();
+		#heightmap.resize(resolution, resolution);
+		#return heightmap;
+		# CANT DO THIS AS DOESNT WORK WITH PERTURBATION
 	heightmap_viewport.size = Vector2(resolution, resolution);
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	RenderingServer.force_draw();
@@ -335,6 +341,7 @@ func generate_statistics() -> void:
 	var NUMBER_OF_SAMPLES_TO_AVERAGE: int = int(statistics_samples_h_slider.value);
 	
 	reset_to_one_plane(last_resolution_of_plane);
+	print("RESET TO ONE PLANE")
 	
 	if terrain_generation_method:
 		var heightmap_generation_times: Array[int] = [];
@@ -342,7 +349,10 @@ func generate_statistics() -> void:
 		statistics_progress_center_container.show();
 		statistics_progress_bar.value = 0;
 		statistics_progress_bar.max_value = NUMBER_OF_SAMPLES_TO_AVERAGE * HEIGHTMAP_RESOLUTIONS.size();
+		print("AAA")
 		await get_tree().process_frame;
+		
+		print("BBB")
 		
 		var original_resolution: int;
 		if terrain_generation_method is TerrainGenerationMethodExplicit:
@@ -350,8 +360,10 @@ func generate_statistics() -> void:
 		var average_erosion_score: float = 0;
 		for heightmap_resolution: int in HEIGHTMAP_RESOLUTIONS:
 			var average_time: float = 0;
+			print(heightmap_resolution)
 			for i: int in NUMBER_OF_SAMPLES_TO_AVERAGE:
 				randomise_seed();
+				print("STARTING SAMPLE TO AVERAGE " + str(i))
 				
 				var heightmap: Image;
 				var start_time = Time.get_ticks_msec();
@@ -364,6 +376,8 @@ func generate_statistics() -> void:
 				else:
 					heightmap = capture_heightmap(heightmap_resolution);
 				average_time += (Time.get_ticks_msec() - start_time) / float(NUMBER_OF_SAMPLES_TO_AVERAGE);
+				
+				print("GOT THE HEIGHTMAP")
 				
 				var erosion_score = TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device);
 				average_erosion_score += erosion_score;
@@ -414,3 +428,31 @@ func _on_statistics_samples_h_slider_value_changed(value: float) -> void:
 func _on_erode_heightmap_button_pressed() -> void:
 	if terrain_generation_method:
 		erosion_settings.show();
+
+func transition_to_heightmap_blending(heightmap: Image) -> void:
+	var amplitude: float = terrain_generation_method_visualiser.planes.get_child(0).mesh.material.get_shader_parameter("amplitude");
+	terrain_generation_method = HEIGHTMAP_BLENDING_SCENE;
+	ui.terrain_generation_method_option_button.option_button.selected = TerrainGenerationMethodVisualiser.TERRAIN_GENERATION_METHODS.find(HEIGHTMAP_BLENDING_SCENE);
+	set_parameter("heightmap1", ImageTexture.create_from_image(heightmap));
+	set_parameter("amplitude", amplitude);
+	if ui.amplitude_slider:
+		ui.amplitude_slider.h_slider.value = amplitude;
+
+func _on_capture_heightmap_button_pressed() -> void:
+	capture_heightmap_resolution_menu.show();
+
+func _on_normalise_heightmap_button_pressed() -> void:
+	normalise_heightmap_resolution_menu.show();
+
+func _on_capture_heightmap_resolution_menu_id_pressed(id: int) -> void:
+	if id == 5: # title of window, not real option
+		return;
+	var heightmap: Image = capture_heightmap(ErosionSettings.EROSION_RESOLUTIONS[id]);
+	transition_to_heightmap_blending(heightmap);
+
+func _on_normalise_heightmap_resolution_menu_id_pressed(id: int) -> void:
+	if id == 5: # title of window, not real option
+		return;
+	var heightmap: Image = capture_heightmap(ErosionSettings.EROSION_RESOLUTIONS[id]);
+	heightmap = TerrainGenerationMethod.normalise_heightmap(heightmap, rendering_device);
+	transition_to_heightmap_blending(heightmap);

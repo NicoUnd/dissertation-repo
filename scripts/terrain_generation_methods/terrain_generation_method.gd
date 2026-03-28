@@ -99,12 +99,12 @@ static func get_slopemap_data_GPU(heightmap: Image, rendering_device: RenderingD
 	var texture_format := RDTextureFormat.new();
 	texture_format.width = resolution;
 	texture_format.height = resolution;
-	texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT;
+	texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT;
 	texture_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
 	var texture_RID = rendering_device.texture_create(texture_format, RDTextureView.new(), [heightmap_bytes]);
 	
 	var sampler_state = RDSamplerState.new();
-	sampler_state.unnormalized_uvw = true;
+	#sampler_state.unnormalized_uvw = true;
 	var sampler = rendering_device.sampler_create(sampler_state);
 	
 	var texture_uniform := RDUniform.new();
@@ -160,6 +160,24 @@ static func get_slopemap_data_GPU(heightmap: Image, rendering_device: RenderingD
 	
 	return output_bytes;
 
+static func mean_CPU(heightmap: Image) -> float:
+	var resolution: int = heightmap.get_width();
+	var total: float = 0.0;
+	for y: int in resolution:
+		for x: int in resolution:
+			total += heightmap.get_pixel(x, y).r;
+	return total / (resolution * resolution);
+
+
+static func std_dev_CPU(heightmap: Image, mean: float) -> float:
+	var resolution: int = heightmap.get_width()
+	var variance: float = 0.0;
+	for y: int in resolution:
+		for x: int in resolution:
+			variance += pow(heightmap.get_pixel(x, y).r - mean, 2);
+	variance /= (resolution * resolution);
+	return sqrt(variance);
+
 static func mean_GPU(resolution: int, rendering_device: RenderingDevice, texture_uniform: RDUniform) -> float:
 	var shader_file := load("res://shaders/compute_shaders/mean.glsl");
 	var compute_shader := rendering_device.shader_create_from_spirv(shader_file.get_spirv());
@@ -186,6 +204,7 @@ static func mean_GPU(resolution: int, rendering_device: RenderingDevice, texture
 	rendering_device.sync();
 	
 	var output_bytes: PackedByteArray = rendering_device.buffer_get_data(total_buffer_RID);
+	print("Mi bumbo: " + str(output_bytes.to_float32_array()[0]))
 	var mean: float = output_bytes.to_float32_array()[0] / (resolution * resolution);
 	
 	rendering_device.free_rid(uniform_set);
@@ -221,7 +240,7 @@ static func std_dev_GPU(resolution: int, rendering_device: RenderingDevice, text
 	rendering_device.sync();
 	
 	var output_bytes: PackedByteArray = rendering_device.buffer_get_data(parameter_buffer_RID);
-	var std_dev: float = sqrt(output_bytes.to_float32_array()[1] / (resolution * resolution));
+	var std_dev: float = sqrt(output_bytes.to_float32_array()[1]) / resolution;
 	
 	rendering_device.free_rid(uniform_set);
 	rendering_device.free_rid(pipeline);
@@ -231,29 +250,11 @@ static func std_dev_GPU(resolution: int, rendering_device: RenderingDevice, text
 	return std_dev;
 
 static func get_erosion_score(heightmap: Image, rendering_device: RenderingDevice) -> float:
-	#var points: Array[PackedFloat32Array] = heightmap_to_points(heightmap);
-	#var slopemap_points: Array[PackedFloat32Array] = points_to_slopemap_points(points);
-	#print(slopemap_points[0].slice(0, 10));
-	#
-	#var total: float = 0;
-	#for row: PackedFloat32Array in slopemap_points:
-		#for point: float in row:
-			#total += point;
-	#var resolution: int = points.size();
-	#@warning_ignore("narrowing_conversion")
-	#var resolution_squared: int = pow(resolution, 2);
-	#var mean: float = total / resolution_squared;
-	#
-	#total = 0;
-	#for row: PackedFloat32Array in slopemap_points:
-		#for point: float in row:
-			#total += pow(mean - point, 2);
-	#var std_dev: float = sqrt(total / resolution_squared);
-	#
-	#assert(mean != 0);
-	#return std_dev / mean;
+	heightmap = normalise_heightmap(heightmap, rendering_device);
 	
 	var slopemap_bytes: PackedByteArray = get_slopemap_data_GPU(heightmap, rendering_device);
+	var slopemap: Image = points_to_heightmap(points_linear_to_nested(slopemap_bytes.to_float32_array()));
+	#print(slopemap_bytes.to_float32_array())
 	
 	#print(heightmap.get_data().to_float32_array().slice(0, 100));
 	#print(slopemap_bytes.to_float32_array().slice(0, 100));
@@ -263,21 +264,6 @@ static func get_erosion_score(heightmap: Image, rendering_device: RenderingDevic
 	
 	var resolution: int = heightmap.get_width();
 	
-	#var total_CPU: float = 0;
-	#for row: PackedFloat32Array in slopemap_points:
-		#for point: float in row:
-			#total_CPU += point;
-	#@warning_ignore("narrowing_conversion")
-	#var mean_CPU: float = total_CPU / (resolution * resolution);
-	#print("total_CPU", str(total_CPU));
-	#print("mean_CPU", str(mean_CPU));
-	#total_CPU = 0;
-	#for row: PackedFloat32Array in slopemap_points:
-		#for point: float in row:
-			#total_CPU += pow(mean_CPU - point, 2);
-	#var std_dev_CPU: float = sqrt(total_CPU / (resolution * resolution));
-	#print("std_dev_CPU", str(std_dev_CPU));
-	
 	var texture_format := RDTextureFormat.new();
 	texture_format.width = resolution;
 	texture_format.height = resolution;
@@ -286,7 +272,7 @@ static func get_erosion_score(heightmap: Image, rendering_device: RenderingDevic
 	var texture_RID = rendering_device.texture_create(texture_format, RDTextureView.new(), [slopemap_bytes]);
 	
 	var sampler_state = RDSamplerState.new();
-	sampler_state.unnormalized_uvw = true;
+	#sampler_state.unnormalized_uvw = true;
 	var sampler = rendering_device.sampler_create(sampler_state);
 	
 	var texture_uniform := RDUniform.new();
@@ -295,16 +281,23 @@ static func get_erosion_score(heightmap: Image, rendering_device: RenderingDevic
 	texture_uniform.add_id(sampler);
 	texture_uniform.add_id(texture_RID);
 	
+	#breakpoint
+	
 	var mean: float = mean_GPU(resolution, rendering_device, texture_uniform);
+	#var mean_CPU: float = mean_CPU(slopemap);
 	if mean == 0:
 		return 0;
+	print("mean GPU: " + str(mean))
+	#print("mean CPU: " + str(mean_CPU))
 	var std_dev: float = std_dev_GPU(resolution, rendering_device, texture_uniform, mean);
-	#print("mean" + str(mean));
-	#print("std_dev" + str(std_dev));
-	
+	print("std_dev_GPU: " + str(std_dev));
+	#var std_dev_CPU: float = std_dev_CPU(slopemap, mean_CPU);
+	#print("std_dev_CPU: " + str(std_dev_CPU));
 	rendering_device.free_rid(sampler);
 	rendering_device.free_rid(texture_RID);
 	
+	#print("erosion_score_GPU: " + str(std_dev / mean))
+	#print("erosion_score_CPU: " + str(std_dev_CPU / mean_CPU))
 	return std_dev / mean;
 
 static func max_min_GPU(heightmap: Image, rendering_device: RenderingDevice) -> RID:

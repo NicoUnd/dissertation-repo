@@ -73,7 +73,7 @@ seed = 50.56299609086437
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport" unique_id=621889884]
 unique_name_in_owner = true
-transform = Transform3D(0.7606015, 0, -0.64921576, 0, 1, 0, 0.64921576, 0, 0.7606015, 0, 0, 0)
+transform = Transform3D(0.39082745, 0, -0.9204617, 0, 1, 0, 0.9204617, 0, 0.39082745, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot" unique_id=1459652782]
 unique_name_in_owner = true
@@ -294,7 +294,7 @@ theme = ExtResource("7_o6xl0")
 [node name="StatisticsSamplesLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer" unique_id=1642101829]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Samples to Average Over (3)"
+text = "Samples to Average Over (5)"
 
 [node name="StatisticsSamplesHSlider" type="HSlider" parent="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer" unique_id=954938804]
 unique_name_in_owner = true
@@ -302,8 +302,8 @@ custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 min_value = 1.0
-max_value = 20.0
-value = 3.0
+max_value = 50.0
+value = 5.0
 
 [node name="HSeparator2" type="HSeparator" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=2026022644]
 modulate = Color(1, 1, 1, 0)
@@ -389,48 +389,6 @@ size = Vector2i(1212, 330)
 dialog_text = "Time taken to generate heightmaps:
 1024x1024: 81ms"
 
-[node name="CaptureHeightmapResolutionMenu" type="PopupMenu" parent="." unique_id=539159102]
-unique_name_in_owner = true
-oversampling_override = 1.0
-title = "Resolution to capture heightmap"
-initial_position = 1
-size = Vector2i(725, 371)
-item_count = 6
-item_0/text = "Resolution to capture heightmap"
-item_0/icon = ExtResource("10_choun")
-item_0/id = 5
-item_1/text = "256x256"
-item_1/id = 0
-item_2/text = "512x512"
-item_2/id = 1
-item_3/text = "1024x1024"
-item_3/id = 2
-item_4/text = "2048x2048"
-item_4/id = 3
-item_5/text = "4096x4096"
-item_5/id = 4
-
-[node name="NormaliseHeightmapResolutionMenu" type="PopupMenu" parent="." unique_id=1438256900]
-unique_name_in_owner = true
-oversampling_override = 1.0
-title = "Resolution to capture heightmap"
-initial_position = 1
-size = Vector2i(725, 371)
-item_count = 6
-item_0/text = "Resolution to capture heightmap"
-item_0/icon = ExtResource("10_choun")
-item_0/id = 5
-item_1/text = "256x256"
-item_1/id = 0
-item_2/text = "512x512"
-item_2/id = 1
-item_3/text = "1024x1024"
-item_3/id = 2
-item_4/text = "2048x2048"
-item_4/id = 3
-item_5/text = "4096x4096"
-item_5/id = 4
-
 [node name="AutoRandomiseSeedTimer" type="Timer" parent="." unique_id=1892915584]
 autostart = true
 
@@ -438,17 +396,40 @@ autostart = true
 wait_time = 0.25
 autostart = true
 
+[node name="PopupMenu" type="PopupMenu" parent="." unique_id=539159102]
+oversampling_override = 1.0
+title = "Resolution to capture heightmap"
+initial_position = 1
+size = Vector2i(725, 371)
+visible = true
+item_count = 6
+item_0/text = "Resolution to capture heightmap"
+item_0/icon = ExtResource("10_choun")
+item_0/id = 5
+item_1/text = "256x256"
+item_1/id = 0
+item_1/separator = true
+item_2/text = "512x512"
+item_2/id = 1
+item_2/separator = true
+item_3/text = "1024x1024"
+item_3/id = 2
+item_3/separator = true
+item_4/text = "2048x2048"
+item_4/id = 3
+item_4/separator = true
+item_5/text = "4096x4096"
+item_5/id = 4
+item_5/separator = true
+
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer/SaveHeightmapButton" to="." method="_on_save_heightmap_button_pressed"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer/SaveRenderButton" to="." method="_on_save_render_button_pressed"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/CaptureHeightmapButton" to="." method="_on_capture_heightmap_button_pressed"]
-[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/NormaliseHeightmapButton" to="." method="_on_normalise_heightmap_button_pressed"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/ErodeHeightmapButton" to="." method="_on_erode_heightmap_button_pressed"]
 [connection signal="value_changed" from="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer/StatisticsSamplesHSlider" to="." method="_on_statistics_samples_h_slider_value_changed"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/GenerateStatisticsButton" to="." method="_on_generate_statistics_button_pressed"]
 [connection signal="confirmed" from="SaveHeightmapFileDialog" to="." method="_on_save_heightmap_file_dialog_confirmed"]
 [connection signal="confirmed" from="SaveRenderFileDialog" to="." method="_on_save_render_file_dialog_confirmed"]
 [connection signal="confirmed" from="GenerateStatisticsConfirmDialog" to="." method="generate_statistics"]
-[connection signal="id_pressed" from="CaptureHeightmapResolutionMenu" to="." method="_on_capture_heightmap_resolution_menu_id_pressed"]
-[connection signal="id_pressed" from="NormaliseHeightmapResolutionMenu" to="." method="_on_normalise_heightmap_resolution_menu_id_pressed"]
 [connection signal="timeout" from="AutoRandomiseSeedTimer" to="." method="_on_auto_randomise_seed_timer_timeout"]
 [connection signal="timeout" from="CaptureRenderTimer" to="." method="_on_capture_render_timer_timeout"]
