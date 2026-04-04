@@ -31,7 +31,7 @@ float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float
 }
 
 vec3 get_normal(vec2 uv, int given_octaves, float base_period, float base_amp) {
-	const float delta = 8.0 / 1024.0;
+	const float delta = 16.0 / 1024.0;
 
 	//float h = fract_brownian_motion(uv, given_octaves, base_period, base_amp);
 	float hL = fract_brownian_motion(vec2(uv.x - delta, uv.y), given_octaves, base_period, base_amp);
@@ -46,22 +46,6 @@ vec3 get_normal(vec2 uv, int given_octaves, float base_period, float base_amp) {
 	return normal;
 }
 
-float get_fract_brownian_motion_max_height(int given_octaves, float base_amp) {
-	float max_height = 0.0;
-	int octave = 0;
-	float amp = base_amp;
-	while (octave < given_octaves) {
-		max_height += amp;
-		amp /= 2.0;
-		octave += 1;
-	}
-	//max_height *= 0.5;
-	if (value_type != 0) {
-		max_height *= 0.5;
-	}
-	return max_height;
-}
-
 void vertex() {
 	vec2 uv = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz;
 	if (perturbate) {
@@ -71,11 +55,11 @@ void vertex() {
 	if (value_type == 0 || value_type == 1) {
 		VERTEX.y += fract_brownian_motion(uv, octaves, period, amplitude);
 		if (value_type == 1) {
-			VERTEX.y -= get_fract_brownian_motion_max_height(octaves, amplitude) * 0.25;
+			VERTEX.y -= amplitude * 0.5;
 		}
 	} else { // value_type == 2
 		VERTEX.y -= fract_brownian_motion(uv, octaves, period, amplitude);
-		VERTEX.y += get_fract_brownian_motion_max_height(octaves, amplitude) * 0.25;
+		VERTEX.y += amplitude * 0.5;
 	}
 	NORMAL = get_normal(uv, octaves, period, amplitude);
 }
@@ -90,5 +74,5 @@ void fragment() {
 	//float max_height = get_fract_brownian_motion_max_height(octaves, amplitude);
 
 	ALBEDO = get_albedo(world_pos, world_normal, amplitude);
-	ALPHA = get_alpha(world_pos);
+	ALPHA = get_alpha(world_pos, amplitude);
 }

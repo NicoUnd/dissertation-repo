@@ -20,6 +20,22 @@ vec2 random(vec2 uv){
     //return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123 * (seed - TIME * 0.000001));
 }
 
+// Encode float into RGBA8 value
+//vec4 encode_float(float v) {
+//	v = clamp(v, 0.0, 1.0);
+//	vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
+//	enc = fract(enc);
+//	//enc -= enc.gbaa * vec4(1.0/255.0, 1.0/255.0, 1.0/255.0, 0.0);
+//	return enc;
+//}
+
+vec2 encode_float(float v) {
+	v = clamp(v, 0.0, 1.0);
+	float r = v;
+	float g = fract(v * 65536.0);
+	return vec2(r, g);
+}
+
 vec3 get_albedo(vec3 world_pos, vec3 world_normal, float amplitude) {
 	switch(albedo_type) {
 		case 0:
@@ -43,20 +59,31 @@ vec3 get_albedo(vec3 world_pos, vec3 world_normal, float amplitude) {
 			return vec3(0.2);
 		case 5:
 			return vec3(0.0);
+		case 6:
+			vec2 encoded_float = encode_float((world_pos.y / amplitude + 1.0) * 0.5);
+			//vec2 encoded_float = encode_float(0.3000152590218967);
+			//float decoded = encoded_float.r + encoded_float.g / 255.0 + encoded_float.b / 65025.0 + encoded_float.a / 16581375.0;
+			//return vec3(decoded);
+			return vec3(encoded_float.r, encoded_float.g, 0.0);
 	}
 }
 
-float get_alpha(vec3 world_pos) {
+float get_alpha(vec3 world_pos, float amplitude) {
+	//if (albedo_type == 2){
+		//vec4 encoded_float = encode_float((world_pos.y / amplitude + 1.0) * 0.5);
+		//float decoded = encoded_float.r + encoded_float.g / 255.0 + encoded_float.b / 65025.0 + encoded_float.a / 16581375.0;
+		//return decoded.a;
+		//return encoded_float.a;
+	//}
 	if (no_fade) return 1.0;
 	if (circle) {
 		return 1.0 - smoothstep(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5, 32.0, sqrt(world_pos.x * world_pos.x + world_pos.z * world_pos.z));
-	} else {
-		return 1.0 -
-			max(smoothstep(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5, 32.0, world_pos.x),
-			max(smoothstep(-(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5), -32.0, world_pos.x),
-			max(smoothstep(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5, 32.0, world_pos.z),
-			smoothstep(-(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5), -32.0, world_pos.z))));
 	}
+	return 1.0 -
+		max(smoothstep(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5, 32.0, world_pos.x),
+		max(smoothstep(-(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5), -32.0, world_pos.x),
+		max(smoothstep(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5, 32.0, world_pos.z),
+		smoothstep(-(16.0 + 8.0 + 4.0 + 2.0 + 1.0 + 0.5), -32.0, world_pos.z))));
 }
 
 float perlin_2D(vec2 uv) {

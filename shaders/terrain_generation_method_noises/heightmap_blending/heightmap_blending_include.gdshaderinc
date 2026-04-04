@@ -71,5 +71,5 @@ void fragment() {
 	vec3 world_normal = get_normal(uv, amplitude, heightmap1, heightmap2, heightmap3, heightmap4, c1_normalised, c2_normalised, c3_normalised, c4_normalised);
 
 	ALBEDO = get_albedo(world_pos, world_normal, amplitude);
-	ALPHA = get_alpha(world_pos);
+	ALPHA = get_alpha(world_pos, amplitude);
 }

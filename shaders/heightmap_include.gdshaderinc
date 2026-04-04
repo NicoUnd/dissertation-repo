@@ -29,9 +29,9 @@ vec3 get_normal(vec2 uv, float amp, sampler2D h) {
 void vertex() {
 	vec2 uv = UV;
 	if (perturbate) {
-		uv *= 32.0;
+		uv *= 64.0;
 		uv += 2.0 * perlin_2D(uv * 0.25);
-		uv /= 32.0;
+		uv /= 64.0;
 	}
 	VERTEX.y += sample_heightmap(uv, amplitude, heightmap);
 	//VERTEX.y -= amplitude;
@@ -42,12 +42,12 @@ void fragment() {
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec2 uv = UV;
 	if (perturbate) {
-		uv *= 32.0;
+		uv *= 64.0;
 		uv += 2.0 * perlin_2D(uv * 0.25);
-		uv /= 32.0;
+		uv /= 64.0;
 	}
 	vec3 world_normal = get_normal(uv, amplitude, heightmap);
 
 	ALBEDO = get_albedo(world_pos, world_normal, amplitude);
-	ALPHA = get_alpha(world_pos);
+	ALPHA = get_alpha(world_pos, amplitude);
 }

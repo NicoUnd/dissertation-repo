@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://de0eqtkic42jj" path="res://assets/blueprint.jpg" id="6_o6xl0"]
 [ext_resource type="PackedScene" uid="uid://vsifhaplg8ve" path="res://scenes/ui.tscn" id="6_tefeu"]
 [ext_resource type="Theme" uid="uid://cs2nnup0f3ppn" path="res://themes/panel_container_clear.tres" id="7_o6xl0"]
+[ext_resource type="Shader" uid="uid://d04wjg48gv5b7" path="res://scenes/view_heightmap.gdshader" id="7_ya4ey"]
 [ext_resource type="PackedScene" uid="uid://ccif6rael18m6" path="res://scenes/chunk_settings.tscn" id="8_tipki"]
 [ext_resource type="PackedScene" uid="uid://ca3hvhuf6apkv" path="res://scenes/erosion_settings.tscn" id="9_85g3d"]
 [ext_resource type="Texture2D" uid="uid://dwfvjjub8da6a" path="res://assets/UI/FileDialog/Paint Layer 16.png" id="10_choun"]
@@ -33,7 +34,10 @@ background_color = Color(0, 0, 0, 0)
 [sub_resource type="ViewportTexture" id="ViewportTexture_tbgi4"]
 viewport_path = NodePath("VisualisationViewport")
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_eb6dy"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_eb6dy"]
+shader = ExtResource("7_ya4ey")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_ya4ey"]
 viewport_path = NodePath("HeightmapViewport")
 
 [node name="Main" type="Control" unique_id=233669081]
@@ -73,7 +77,7 @@ seed = 50.56299609086437
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport" unique_id=621889884]
 unique_name_in_owner = true
-transform = Transform3D(0.7606015, 0, -0.64921576, 0, 1, 0, 0.64921576, 0, 0.7606015, 0, 0, 0)
+transform = Transform3D(-0.85040677, 0, 0.5261217, 0, 1, 0, -0.5261217, 0, -0.85040677, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot" unique_id=1459652782]
 unique_name_in_owner = true
@@ -210,11 +214,12 @@ size_flags_vertical = 8
 
 [node name="HeightmapTextureRect" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=699647725]
 unique_name_in_owner = true
+material = SubResource("ShaderMaterial_eb6dy")
 custom_minimum_size = Vector2(400, 400)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 8
-texture = SubResource("ViewportTexture_eb6dy")
+texture = SubResource("ViewportTexture_ya4ey")
 expand_mode = 1
 
 [node name="VSeparator" type="VSeparator" parent="MarginContainer/HBoxContainer" unique_id=1507364705]

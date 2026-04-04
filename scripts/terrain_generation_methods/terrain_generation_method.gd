@@ -473,3 +473,79 @@ static func gaussian_blur(heightmap: Image, blur_size: int, rendering_device: Re
 	rendering_device.free_rid(compute_shader);
 	
 	return Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, output_bytes);
+
+static func rg16_to_r32(heightmap: Image) -> Image:
+	var resolution: int = heightmap.get_width();
+	
+	var buffer: PackedByteArray = PackedByteArray();
+	buffer.resize(resolution * resolution * 4);
+	
+	for y: int in resolution:
+		for x: int in resolution:
+			var pixel: Color = heightmap.get_pixel(x, y);
+			var decoded: float = pixel.r + pixel.g / 65535;
+			
+			var offset: int = (y * resolution + x) * 4;
+			buffer.encode_float(offset, decoded);
+			if x == 0 and y == 0:
+				print("HI")
+				print(pixel.r);
+				print(pixel.g)
+				print(decoded)
+	
+	var r32_img: Image = Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, buffer);
+	return r32_img;
+
+static func rg16_to_r32_GPU(rendering_device: RenderingDevice, compute_shader: RID, heightmap_rg16: Image) -> Image:
+	var resolution: int = heightmap_rg16.get_width();
+	
+	var rg16_bytes: PackedByteArray = heightmap_rg16.get_data();
+	var rg16_texture_data := RDTextureFormat.new();
+	rg16_texture_data.width = resolution;
+	rg16_texture_data.height = resolution;
+	rg16_texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT;
+	rg16_texture_data.format = RenderingDevice.DATA_FORMAT_R16G16B16A16_SFLOAT;
+	var rg16_texture_RID = rendering_device.texture_create(rg16_texture_data, RDTextureView.new(), [rg16_bytes]);
+	
+	var rg16_texture_uniform := RDUniform.new();
+	rg16_texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
+	rg16_texture_uniform.binding = 0;
+	rg16_texture_uniform.add_id(rg16_texture_RID);
+	
+	var r32_bytes: PackedByteArray = PackedByteArray();
+	r32_bytes.resize(resolution * resolution * 4);
+	var r32_texture_data := RDTextureFormat.new();
+	r32_texture_data.width = resolution;
+	r32_texture_data.height = resolution;
+	r32_texture_data.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT;
+	r32_texture_data.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var r32_texture_RID = rendering_device.texture_create(r32_texture_data, RDTextureView.new(), [r32_bytes]);
+	
+	var r32_texture_uniform := RDUniform.new();
+	r32_texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
+	r32_texture_uniform.binding = 1;
+	r32_texture_uniform.add_id(r32_texture_RID);
+	
+	var uniform_set := rendering_device.uniform_set_create([rg16_texture_uniform, r32_texture_uniform], compute_shader, 0);
+	
+	var pipeline := rendering_device.compute_pipeline_create(compute_shader);
+	var compute_list := rendering_device.compute_list_begin();
+	rendering_device.compute_list_bind_compute_pipeline(compute_list, pipeline);
+	rendering_device.compute_list_bind_uniform_set(compute_list, uniform_set, 0);
+	@warning_ignore("integer_division")
+	var workgroups: int = resolution / 32;
+	rendering_device.compute_list_dispatch(compute_list, workgroups, workgroups, 1);
+	rendering_device.compute_list_end();
+	
+	rendering_device.submit();
+	rendering_device.sync();
+	
+	var bytes: PackedByteArray = rendering_device.texture_get_data(r32_texture_RID, 0);
+	
+	rendering_device.free_rid(uniform_set);
+	rendering_device.free_rid(pipeline);
+	#rendering_device.free_rid(compute_shader);
+	rendering_device.free_rid(rg16_texture_RID);
+	rendering_device.free_rid(r32_texture_RID);
+	
+	return Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, bytes);

@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://bqatjxqb0i1io"
+path="res://.godot/imported/rg16_to_r32.glsl-e8968d529cfecbfb2e56850bd966eb4c.res"
+
+[deps]
+
+source_file="res://shaders/compute_shaders/rg16_to_r32.glsl"
+dest_files=["res://.godot/imported/rg16_to_r32.glsl-e8968d529cfecbfb2e56850bd966eb4c.res"]
+
+[params]
+

@@ -42,7 +42,7 @@ float worley(vec2 uv, float peri, float amp) {
 }
 
 vec3 get_normal(vec2 uv, float peri, float amp) {
-	const float delta = 4.0 / 1024.0;
+	const float delta = 16.0 / 1024.0;
 
     float hL = worley(vec2(uv.x - delta, uv.y), peri, amp);
     float hR = worley(vec2(uv.x + delta, uv.y), peri, amp);
@@ -74,5 +74,5 @@ void fragment() {
 	vec3 world_normal = get_normal(uv, period, amplitude);
 
 	ALBEDO = get_albedo(world_pos, world_normal, amplitude);
-	ALPHA = get_alpha(world_pos);
+	ALPHA = get_alpha(world_pos, amplitude);
 }

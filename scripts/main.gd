@@ -53,6 +53,8 @@ var save_render_amount: int;
 var save_render_resolution_multiplier: float;
 var save_render_file_type_prefix: String;
 
+var rg16_to_r32_compute_shader: RID;
+
 var filled_UI: bool = false;
 var explicit_chunk_generation: bool = false; # for explicit generation methods, can either generate in chunks or one plane, UI dialog will show this
 func set_explicit_chunk_generation_and_update_UI_and_planes(new_explicit_chunk_generation: bool) -> void:
@@ -129,12 +131,19 @@ func _ready() -> void:
 	await get_tree().process_frame
 	
 	#print("OKAY")
-	heightmap_terrain_generation_method_visualiser.albedo_type = 2;
+	heightmap_terrain_generation_method_visualiser.albedo_type = 2; # heightmap
 	heightmap_terrain_generation_method_visualiser.render_mode = 1;
 	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(512);
 	#terrain_generation_method = preload("uid://bunfkxpwyox5q")
 	
 	rendering_device = RenderingServer.create_local_rendering_device();
+	
+	var shader_file := preload("res://shaders/compute_shaders/rg16_to_r32.glsl");
+	rg16_to_r32_compute_shader = rendering_device.shader_create_from_spirv(shader_file.get_spirv());
+
+func update_heightmap() -> void:
+	var heightmap: Image = capture_heightmap(256);
+	heightmap_texture_rect.texture = ImageTexture.create_from_image(heightmap);
 
 func generate(generate_button_string: String) -> void:
 	if explicit_chunk_generation:
@@ -315,11 +324,19 @@ func capture_heightmap(resolution: int) -> Image:
 		#return heightmap;
 		# CANT DO THIS AS DOESNT WORK WITH PERTURBATION
 	heightmap_viewport.size = Vector2(resolution, resolution);
-	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
+	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(resolution);
+	heightmap_terrain_generation_method_visualiser.albedo_type = 6; # heightmap encoded
+	heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("no_fade", true);
 	RenderingServer.force_draw();
 	var heightmap: Image = heightmap_viewport.get_texture().get_image();
+	#print(heightmap.get_format());
+	heightmap = TerrainGenerationMethod.rg16_to_r32_GPU(rendering_device, rg16_to_r32_compute_shader, heightmap);
+	#print(heightmap.get_format());
 	heightmap.convert(Image.FORMAT_RF);
 	heightmap_viewport.size = Vector2(512, 512);
+	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(512);
+	heightmap_terrain_generation_method_visualiser.albedo_type = 2; # heightmap
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 	return heightmap;
 

@@ -6,10 +6,17 @@
 [ext_resource type="Script" uid="uid://dh4wgjnv8j0ir" path="res://scripts/parameters/parameter_enum.gd" id="3_dvls0"]
 [ext_resource type="Script" uid="uid://ppfcadcfq54h" path="res://scripts/parameters/parameter_bool.gd" id="4_gxwsg"]
 
+[sub_resource type="Resource" id="Resource_yiacb"]
+script = ExtResource("2_dvls0")
+max_value = 2.0
+name = "smoothness"
+value = 1.0
+metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
 [sub_resource type="Resource" id="Resource_ikv75"]
 script = ExtResource("3_dvls0")
-options = Array[String](["wrap_around", "ignore_outside", "chunk_compatible"])
-name = "diamond_average_type"
+options = Array[String](["accurate_chunk_sampling", "ignore_inside_and_outside"])
+name = "border_diamond_average_type"
 value = 2
 metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
@@ -42,9 +49,9 @@ metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
 [sub_resource type="Resource" id="Resource_q4gjg"]
 script = ExtResource("3_dvls0")
-options = Array[String](["wrap_around", "ignore_outside", "chunk_compatible"])
-name = "diamond_average_type"
-value = 1
+options = Array[String](["wrap_around", "ignore_outside", "ignore_inside_and_outside"])
+name = "border_diamond_average_type"
+value = 0
 metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
 [sub_resource type="Resource" id="Resource_krgyn"]
@@ -63,5 +70,5 @@ max_amplitude = 32.0
 default_amplitude = 16.0
 parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_gxwsg"), SubResource("Resource_2on8b"), SubResource("Resource_q4gjg"), SubResource("Resource_krgyn")])
 can_generate_in_chunks = true
-chunked_specific_parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_ikv75"), SubResource("Resource_mgpmt"), SubResource("Resource_22u67")])
+chunked_specific_parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_yiacb"), SubResource("Resource_ikv75"), SubResource("Resource_mgpmt"), SubResource("Resource_22u67")])
 metadata/_custom_type_script = "uid://ddkes5jhoum04"

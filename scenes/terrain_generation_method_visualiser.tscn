@@ -4,10 +4,10 @@
 [ext_resource type="Texture2D" uid="uid://d1gpbux8tchrn" path="res://assets/water_normal_map.png" id="3_i4yfv"]
 [ext_resource type="Script" uid="uid://c38b2dst17kuq" path="res://scripts/terrain_generation_method_visualiser.gd" id="3_md2q8"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_i4yfv"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8sw0d"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_rec0i"]
-material = SubResource("ShaderMaterial_i4yfv")
+[sub_resource type="PlaneMesh" id="PlaneMesh_xfu5g"]
+material = SubResource("ShaderMaterial_8sw0d")
 size = Vector2(64, 64)
 subdivide_width = 1022
 subdivide_depth = 1022
@@ -116,9 +116,9 @@ script = ExtResource("3_md2q8")
 [node name="Planes" type="Node" parent="." unique_id=1654431943]
 unique_name_in_owner = true
 
-[node name="@MeshInstance3D@18967" type="MeshInstance3D" parent="Planes" unique_id=1911879682]
+[node name="@MeshInstance3D@18979" type="MeshInstance3D" parent="Planes" unique_id=545511487]
 extra_cull_margin = inf
-mesh = SubResource("PlaneMesh_rec0i")
+mesh = SubResource("PlaneMesh_xfu5g")
 script = ExtResource("2_i4yfv")
 
 [node name="WaterMeshInstance3D" type="MeshInstance3D" parent="." unique_id=1990605936]
