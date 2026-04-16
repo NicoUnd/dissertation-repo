@@ -95,27 +95,30 @@ func reset_to_one_plane(resolution: int) -> void:
 				ui.clear_terrain_generation_method_specific_parameters();
 				filled_UI = false;
 				
-				if terrain_generation_method is TerrainGenerationMethodExplicit:
-					var resolution_strings: Array[String] = [];
-					for resoluton: int in TerrainGenerationMethodExplicit.RESOLUTIONS:
-						resolution_strings.append(str(resoluton) + "x" + str(resoluton));
-					ui.add_parameter(ParameterEnum.new("resolution", 5, resolution_strings), true);
-				
-				var amplitude: float = terrain_generation_method.default_amplitude;
-				ui.add_parameter(ParameterNumber.new("amplitude", amplitude, terrain_generation_method.min_amplitude, terrain_generation_method.max_amplitude, false, false, true), true);
-				#terrain_generation_method_visualiser.set_planes_shader_parameter("amplitude", amplitude);
+				#if terrain_generation_method is TerrainGenerationMethodExplicit:
+				#	if terrain_generation_method.can_generate_in_chunks:
+				#		ui.add_parameter(ParameterBool.new("generating_in_chunks", false), true);
+				#	
+				#	var resolution_strings: Array[String] = [];
+				#	for resoluton: int in TerrainGenerationMethodExplicit.RESOLUTIONS:
+				#		resolution_strings.append(str(resoluton) + "x" + str(resoluton));
+				#	ui.add_parameter(ParameterEnum.new("resolution", 5, resolution_strings), true);
+				#
+				#var amplitude: float = terrain_generation_method.default_amplitude;
+				#ui.add_parameter(ParameterNumber.new("amplitude", amplitude, terrain_generation_method.min_amplitude, terrain_generation_method.max_amplitude, false, false, true), true);
+				terrain_generation_method_visualiser.set_planes_shader_parameter("amplitude", terrain_generation_method.default_amplitude);
 				terrain_generation_method_visualiser.max_amplitude = terrain_generation_method.max_amplitude;
 				heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("no_fade", true);
-				#heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("amplitude", 1);
+				heightmap_terrain_generation_method_visualiser.set_planes_shader_parameter("amplitude", 1);
 				
-				ui.set_terrain_generation_method_specific_parameters(terrain_generation_method.parameters);
-				if terrain_generation_method.can_generate_in_chunks:
-					ui.add_parameter(ParameterButton.new("chunk_settings"), true);
-				if terrain_generation_method is TerrainGenerationMethodExplicit:
-					if terrain_generation_method.can_generate_CPU:
-						ui.add_parameter(ParameterButton.new("generate_CPU"), true);
-					if terrain_generation_method.can_generate_GPU:
-						ui.add_parameter(ParameterButton.new("generate_GPU"), true);
+				ui.set_terrain_generation_method_specific_parameters(terrain_generation_method.get_parameters());
+				#if terrain_generation_method.can_generate_in_chunks:
+				#	ui.add_parameter(ParameterButton.new("chunk_settings"), true);
+				#if terrain_generation_method is TerrainGenerationMethodExplicit:
+				#	if terrain_generation_method.can_generate_CPU:
+				#		ui.add_parameter(ParameterButton.new("generate_CPU"), true);
+				#	if terrain_generation_method.can_generate_GPU:
+				#		ui.add_parameter(ParameterButton.new("generate_GPU"), true);
 				filled_UI = true;
 			if terrain_generation_method is TerrainGenerationMethodExplicit:
 				terrain_generation_method.setup(rendering_device);
@@ -219,7 +222,11 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 		assert(terrain_generation_method is TerrainGenerationMethodExplicit);
 		generate(parameter_name);
 		return;
-	elif parameter_name == "chunk_settings":
+	elif parameter_name == "enable_chunks":
+		assert(terrain_generation_method.can_generate_in_chunks);
+		chunk_settings.show();
+		return;
+	elif parameter_name == "disable_chunks":
 		assert(terrain_generation_method.can_generate_in_chunks);
 		chunk_settings.show();
 		return;
@@ -249,8 +256,8 @@ func set_parameter(parameter_name: String, parameter_value: Variant=null, is_ter
 		terrain_generation_method_visualiser.set(parameter_name, parameter_value);
 		heightmap_terrain_generation_method_visualiser.set(parameter_name, parameter_value);
 
-func update_chunked_specific_parameters() -> void:
-	ui.update_chunked_specific_parameters(terrain_generation_method.chunked_specific_parameters);
+func update_chunked_parameters() -> void:
+	ui.update_chunked_parameters(terrain_generation_method.chunked_parameters);
 
 #func save_heightmap() -> void:
 	#const heightmap_save_path = "res://heightmap.png";

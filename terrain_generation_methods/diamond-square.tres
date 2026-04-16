@@ -20,12 +20,6 @@ name = "border_diamond_average_type"
 value = 2
 metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
-[sub_resource type="Resource" id="Resource_mgpmt"]
-script = ExtResource("4_gxwsg")
-name = "normalise"
-value = false
-metadata/_custom_type_script = "uid://ppfcadcfq54h"
-
 [sub_resource type="Resource" id="Resource_22u67"]
 script = ExtResource("3_dvls0")
 options = Array[String](["uniform", "guassian"])
@@ -70,5 +64,5 @@ max_amplitude = 32.0
 default_amplitude = 16.0
 parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_gxwsg"), SubResource("Resource_2on8b"), SubResource("Resource_q4gjg"), SubResource("Resource_krgyn")])
 can_generate_in_chunks = true
-chunked_specific_parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_yiacb"), SubResource("Resource_ikv75"), SubResource("Resource_mgpmt"), SubResource("Resource_22u67")])
+chunked_specific_parameters = Array[ExtResource("1_1rd5d")]([SubResource("Resource_yiacb"), SubResource("Resource_ikv75"), SubResource("Resource_22u67")])
 metadata/_custom_type_script = "uid://ddkes5jhoum04"

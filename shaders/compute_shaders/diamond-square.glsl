@@ -97,7 +97,7 @@ float get_square_average() {
 	return square_total / 4.0;
 }
 
-float accurate_sample_border_diamond_corner(ivec2 corner_uv, ivec2 uv) {
+float chunk_sample_border_diamond_corner(ivec2 corner_uv, ivec2 uv) {
 	int resolution = int(parameter_buffer.resolution);
 	int step_size = int(parameter_buffer.step_size);
 	int half_step_size = step_size / 2;

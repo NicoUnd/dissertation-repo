@@ -25,6 +25,33 @@ func get_shader(shader_type: SHADER_TYPE) -> Shader:
 	push_error("COULDNT FIND SHADER TYPE")
 	return null;
 
+func get_parameters() -> Array[Parameter]:
+	var to_return: Array[Parameter] = [ParameterNumber.new("ampltiude", default_amplitude, min_amplitude, max_amplitude, false, false, false)];
+	if not generating_in_chunks:
+		#to_return.append(ParameterBool.new("generating_in_chunks", false));
+		var resolution_strings: Array[String] = [];
+		for resoluton: int in RESOLUTIONS:
+			resolution_strings.append(str(resoluton) + "x" + str(resoluton));
+		to_return.append(ParameterEnum.new("resolution", 5, resolution_strings));
+	
+	if can_generate_in_chunks and generating_in_chunks:
+		if chunked_parameters.size() > 0:
+			to_return.append_array(chunked_parameters);
+		else:
+			to_return.append_array(parameters);
+		to_return.append(ParameterButton.new("disable_chunks"));
+	else:
+		to_return.append_array(parameters);
+		if can_generate_in_chunks:
+			to_return.append(ParameterButton.new("enable_chunks"));
+	
+	if can_generate_CPU:
+		to_return.append(ParameterButton.new("generate_CPU"));
+	if can_generate_GPU:
+		to_return.append(ParameterButton.new("generate_GPU"));
+	
+	return to_return;
+
 @abstract func setup(rendering_device: RenderingDevice) -> void;
 
 @abstract func setdown(rendering_device: RenderingDevice) -> void;

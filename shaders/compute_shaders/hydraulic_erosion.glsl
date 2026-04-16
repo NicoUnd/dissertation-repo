@@ -95,9 +95,7 @@ void erode_radius(vec2 pos, float amount) {
 	float weight_total = 0.0;
 	for (int dy = -radius_int; dy <= radius_int; dy++) {
 		for (int dx = -radius_int; dx <= radius_int; dx++) {
-			ivec2 grid_pos = ivec2(pos + vec2(0.5)) + ivec2(dx, dy);
-			if (grid_pos.x < 0 || grid_pos.x >= resolution || grid_pos.y < 0 || grid_pos.y >= resolution) continue;
-			float dist = length(vec2(grid_pos) - pos);
+			float dist = length(vec2(dx, dy));
 			float weight = max(0.0, radius - dist);
 			weight_total += weight;
 		}

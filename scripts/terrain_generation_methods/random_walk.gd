@@ -12,6 +12,8 @@ var blur_levels: int;
 
 var walk_weighting: int;
 
+var smoothness: float;
+
 var compute_shader;
 
 func setup(rendering_device: RenderingDevice) -> void:
@@ -79,7 +81,7 @@ func blur_with_detail(heightmap: Image, rendering_device: RenderingDevice) -> Im
 	for blur_level: int in blur_levels:
 		var blur: float = pow(blur_level + 1, 2);
 		var blurred_heightmap: Image = gaussian_blur(heightmap, blur, rendering_device);
-		var blurred_points_bytes: PackedByteArray = PackedFloat32Array([blur]).to_byte_array();
+		var blurred_points_bytes: PackedByteArray = PackedFloat32Array([blur*smoothness]).to_byte_array();
 		blurred_points_bytes.append_array(blurred_heightmap.get_data());
 		var blurred_points_RID := rendering_device.storage_buffer_create(blurred_points_bytes.size(), blurred_points_bytes);
 		var blurred_points_uniform := RDUniform.new();

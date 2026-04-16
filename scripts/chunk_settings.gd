@@ -122,7 +122,7 @@ func finish() -> void:
 		for resolution: int in row:
 			total_verticies += resolution * resolution;
 	main.update_verticies(total_verticies);
-	main.update_chunked_specific_parameters();
+	main.update_chunked_parameters();
 
 func _on_visibility_changed() -> void:
 	if not visible:

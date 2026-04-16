@@ -54,5 +54,5 @@ void main() {
 	float dx = frac.x;
 	float dy = frac.y;
 	
-	upscaled_points.data[upscaled_uv] = mix(mix(v0, v1, dx), mix(v2, v3, dx), dy);
+	upscaled_points_buffer.data[upscaled_uv_to_linear(upscaled_uv)] = mix(mix(v0, v1, dx), mix(v2, v3, dx), dy);
 }

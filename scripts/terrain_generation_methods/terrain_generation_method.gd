@@ -12,13 +12,29 @@ class_name TerrainGenerationMethod;
 @export var parameters: Array[Parameter] = [];
 
 @export var can_generate_in_chunks: bool;
-@export var chunked_specific_parameters: Array[Parameter] = [];
+@export var chunked_parameters: Array[Parameter] = [];
 
 var seed: float;
 
 enum SHADER_TYPE {NORMAL, UNSHADED, WIREFRAME}
 
+var generating_in_chunks: bool = false;
+
 @abstract func get_shader(shader_type: SHADER_TYPE) -> Shader;
+
+func get_parameters() -> Array[Parameter]:
+	var to_return: Array[Parameter] = [ParameterNumber.new("ampltiude", default_amplitude, min_amplitude, max_amplitude, false, false, false)];
+	if can_generate_in_chunks and generating_in_chunks:
+		if chunked_parameters.size() > 0:
+			to_return.append_array(chunked_parameters);
+		else:
+			to_return.append_array(parameters);
+		to_return.append(ParameterButton.new("disable_chunks"));
+	else:
+		to_return.append_array(parameters);
+		if can_generate_in_chunks:
+			to_return.append(ParameterButton.new("enable_chunks"));
+	return to_return;
 
 static func points_to_heightmap(points: Array[PackedFloat32Array]) -> Image:
 	var resolution: int = points.size();

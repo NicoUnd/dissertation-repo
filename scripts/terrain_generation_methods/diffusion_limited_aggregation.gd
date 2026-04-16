@@ -216,7 +216,7 @@ func fill_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, at
 		#	total += x;
 		#print("TOTAL: " + str(total));
 	
-	for i: int in INITIAL_RESOLUTION * 2: # this will be the same for every layer, just larget batches
+	for i: int in INITIAL_RESOLUTION * 2: # this will be the same for every layer, just larger batches
 		# need to update the seed so that each calling will get different random numbers
 		var shader_parameters: PackedFloat32Array = PackedFloat32Array([hash(layer_resolution + seed + i) % 16, float(layer_resolution), float(particle_hops_to_live), float(particles_spawn)]);
 		var parameters_bytes: PackedByteArray = shader_parameters.to_byte_array();
@@ -476,10 +476,10 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 		var blurry_bytes: PackedByteArray = get_blurry_upscale_bytes_GPU(layer_bytes, rendering_device);
 		
 		@warning_ignore("integer_division")
-		if layer_resolution == resolution / 2:
-			layer_bytes = blurry_bytes;
-		else:
-			layer_bytes = add_crisp_onto_blurry_GPU(rendering_device, blurry_bytes, attach_directions_uniform);
+		#if layer_resolution == resolution / 2:
+		#	layer_bytes = blurry_bytes;
+		#else:
+		layer_bytes = add_crisp_onto_blurry_GPU(rendering_device, blurry_bytes, attach_directions_uniform);
 		
 		#var heightmap: Image = Image.create_from_data(layer_resolution * 2, layer_resolution * 2, false, Image.FORMAT_RF, layer_bytes);
 		#heightmap = normalise_heightmap(heightmap, rendering_device);
