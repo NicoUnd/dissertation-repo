@@ -10,7 +10,7 @@ layout(set = 0, binding = 0, std430) restrict buffer Parameters {
 	float resolution;
 	float step_size;
 	float random_scale;
-	float border_diamond_average_type;
+	float border_diamond_average_type; // 0: wrap_around, 1: ignore_inside, 2: ignore_outside, 3: chunked
 	float distribution;
 	float diamond_step;
 	float chunk_coord_x;
@@ -236,7 +236,7 @@ float chunk_sample_border_diamond_corner(ivec2 corner_uv, ivec2 uv) {
 			if (buffer_Sb.data[b_index] == -1){ // unassigned
 				// buffer a & corner buffer
 				if (uv.x - half_step_size == 0){ // SW corner
-					corner_buffer.data[4] = clamp(
+					corner_buffer.data[7] = clamp(
 							(corner_buffer.data[3]
 							+ buffer_Sa.data[0]
 							+ buffer_Wa.data[step_resolution/4]
@@ -353,6 +353,11 @@ float chunk_sample_border_diamond_corner(ivec2 corner_uv, ivec2 uv) {
 float get_diamond_corner(ivec2 corner_uv, ivec2 uv) { // returns -1 if the corner is not used
 	int border_diamond_average_type = int(parameter_buffer.border_diamond_average_type);
 	int resolution = int(parameter_buffer.resolution);
+	
+	if (border_diamond_average_type == 3 && (corner_uv.y < 0 || corner_uv.y > resolution || corner_uv.x < 0 || corner_uv.x > resolution)) { // chunked and on border
+		return chunk_sample_border_diamond_corner(corner_uv, uv);
+	}
+	
 	if ((border_diamond_average_type == 2 && corner_uv.y != uv.y && (uv.y == 0 || uv.y == resolution)) || (border_diamond_average_type == 1 && (corner_uv.y > resolution || corner_uv.y < 0))) {
 		return -1.0;
 	}

@@ -70,5 +70,6 @@ name = "heightmap_blending"
 min_amplitude = 1.0
 max_amplitude = 64.0
 default_amplitude = 16.0
-parameters = Array[ExtResource("3_ygccv")]([SubResource("Resource_33twg"), SubResource("Resource_5mavw"), SubResource("Resource_hq3wy"), SubResource("Resource_ch6t7"), SubResource("Resource_auc3n"), SubResource("Resource_7w5ie"), SubResource("Resource_1rdl3"), SubResource("Resource_i1px2")])
+_parameters = Array[ExtResource("3_ygccv")]([SubResource("Resource_33twg"), SubResource("Resource_5mavw"), SubResource("Resource_hq3wy"), SubResource("Resource_ch6t7"), SubResource("Resource_auc3n"), SubResource("Resource_7w5ie"), SubResource("Resource_1rdl3"), SubResource("Resource_i1px2")])
+_chunked_parameters = Array[ExtResource("3_ygccv")]([SubResource("Resource_33twg"), SubResource("Resource_5mavw"), SubResource("Resource_hq3wy"), SubResource("Resource_ch6t7"), SubResource("Resource_auc3n"), SubResource("Resource_7w5ie"), SubResource("Resource_1rdl3"), SubResource("Resource_i1px2")])
 metadata/_custom_type_script = "uid://b7uir5a8rvikp"

@@ -115,14 +115,13 @@ func finish() -> void:
 	hide();
 	for ui: Control in settings_v_box_container.get_children():
 		ui.queue_free();
-	main.set_explicit_chunk_generation_and_update_UI_and_planes(true);
+	main.set_generating_in_chunks(true);
 	
 	var total_verticies: int = 0;
 	for row: Array in resolutions:
 		for resolution: int in row:
 			total_verticies += resolution * resolution;
 	main.update_verticies(total_verticies);
-	main.update_chunked_parameters();
 
 func _on_visibility_changed() -> void:
 	if not visible:

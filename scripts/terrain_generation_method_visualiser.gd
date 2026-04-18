@@ -13,6 +13,8 @@ const TERRAIN_GENERATION_METHODS: Array[TerrainGenerationMethod] = [
 
 const PLANE_RESOLUTIONS: Array[int] = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
 
+@onready var main: Control = $"../.."
+
 @onready var planes: Node = %Planes
 
 @onready var water_mesh_instance_3d: MeshInstance3D = %WaterMeshInstance3D
@@ -43,11 +45,11 @@ func remove_planes() -> void:
 			for plane: MeshInstance3D in planes.get_children():
 				plane.mesh.material = ShaderMaterial.new();
 		else:
-			set_shader(terrain_generation_method.get_shader(render_mode), terrain_generation_method.parameters);
+			set_shader(terrain_generation_method.get_shader(render_mode), terrain_generation_method.get_parameters(main.generating_in_chunks));
 		set_planes_shader_parameter("heightmap", null);
 
-func get_specific_parameters() -> Array[Array]: # Arrar[Array[String], Array[Variant]]
-	var specific_parameters = terrain_generation_method.parameters;
+func get_specific_parameters(chunked: bool) -> Array[Array]: # Arrar[Array[String], Array[Variant]]
+	var specific_parameters = terrain_generation_method.get_parameters(chunked);
 	var plane: MeshInstance3D = planes.get_child(0);
 	if not plane:
 		return [[], []];
@@ -80,9 +82,10 @@ func set_heightmaps(heightmaps: Array[ImageTexture]) -> void:
 	set(new_render_mode):
 		render_mode = new_render_mode;
 		if terrain_generation_method:
-			var prev_specific_parameters: Array[Array] = get_specific_parameters();
+			var generating_in_chunks: bool = main.generating_in_chunks;
+			var prev_specific_parameters: Array[Array] = get_specific_parameters(generating_in_chunks);
 			var prev_heightmaps: Array[ImageTexture] = get_heightmaps();
-			set_shader(terrain_generation_method.get_shader(render_mode), terrain_generation_method.parameters);
+			set_shader(terrain_generation_method.get_shader(render_mode), terrain_generation_method.get_parameters(generating_in_chunks));
 			set_specific_parameters(prev_specific_parameters[0], prev_specific_parameters[1]);
 			set_heightmaps(prev_heightmaps);
 
@@ -136,7 +139,7 @@ func set_planes(grid_resolution: int, resolutions: Array[Array]) -> void: # Arra
 	var prev_specific_parameters: Array[Array];
 	var retain_prev_specific_parameters: bool = planes.get_child_count() > 0 and terrain_generation_method;
 	if retain_prev_specific_parameters:
-		prev_specific_parameters = get_specific_parameters();
+		prev_specific_parameters = get_specific_parameters(main.generating_in_chunks);
 	remove_planes();
 	@warning_ignore("integer_division")
 	var half_grid_resolution: int = grid_resolution / 2;

@@ -5,14 +5,14 @@
 [ext_resource type="Script" uid="uid://bnn5t8hur4pxq" path="res://scripts/parameters/parameter_number.gd" id="2_gustg"]
 [ext_resource type="Script" uid="uid://dh4wgjnv8j0ir" path="res://scripts/parameters/parameter_enum.gd" id="3_gustg"]
 
-[sub_resource type="Resource" id="Resource_hw3dn"]
+[sub_resource type="Resource" id="Resource_moksy"]
 script = ExtResource("2_gustg")
 max_value = 1.0
 name = "walk_percent_of_resolution"
 value = 0.5
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
-[sub_resource type="Resource" id="Resource_vd25m"]
+[sub_resource type="Resource" id="Resource_gustg"]
 script = ExtResource("2_gustg")
 min_value = 1.0
 max_value = 16.0
@@ -21,21 +21,14 @@ name = "walks"
 value = 8
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
 
-[sub_resource type="Resource" id="Resource_878xy"]
+[sub_resource type="Resource" id="Resource_hw3dn"]
 script = ExtResource("3_gustg")
 options = Array[String](["centre", "near_centre", "corner", "random_corner", "random"])
 name = "start_from"
 value = 1
 metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
-[sub_resource type="Resource" id="Resource_ra3kq"]
-script = ExtResource("3_gustg")
-options = Array[String](["uniform", "logarithmic", "linear", "quadratic", "exponential"])
-name = "walk_weighting"
-value = 1
-metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
-
-[sub_resource type="Resource" id="Resource_gustg"]
+[sub_resource type="Resource" id="Resource_878xy"]
 script = ExtResource("2_gustg")
 min_value = 1.0
 max_value = 16.0
@@ -43,6 +36,13 @@ is_int = true
 name = "blur_levels"
 value = 8
 metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
+
+[sub_resource type="Resource" id="Resource_ra3kq"]
+script = ExtResource("3_gustg")
+options = Array[String](["constant", "logarithmic", "linear", "quadratic", "exponential"])
+name = "walk_weighting"
+value = 1
+metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
 [sub_resource type="Resource" id="Resource_vw2q8"]
 script = ExtResource("2_gustg")
@@ -59,5 +59,5 @@ name = "random_walk"
 min_amplitude = 1.0
 max_amplitude = 16.0
 default_amplitude = 4.0
-parameters = Array[ExtResource("1_vd25m")]([SubResource("Resource_hw3dn"), SubResource("Resource_vd25m"), SubResource("Resource_878xy"), SubResource("Resource_ra3kq"), SubResource("Resource_gustg"), SubResource("Resource_vw2q8")])
+_parameters = Array[ExtResource("1_vd25m")]([SubResource("Resource_moksy"), SubResource("Resource_gustg"), SubResource("Resource_hw3dn"), SubResource("Resource_878xy"), SubResource("Resource_ra3kq"), SubResource("Resource_vw2q8")])
 metadata/_custom_type_script = "uid://b3m1lspbw6sua"

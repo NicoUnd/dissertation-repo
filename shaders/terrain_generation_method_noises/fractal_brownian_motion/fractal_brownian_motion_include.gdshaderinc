@@ -11,18 +11,35 @@ uniform float gain;
 
 uniform int value_type;
 
+uniform float influence_multiplier;
+
 
 float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float base_amp) {
+	const float delta = 16.0 / 1024.0;
+	
 	float total = 0.0;
 	float peri = base_period;
 	float amp = base_amp;
+	//vec2 grad_total = vec2(0.0);
 	while (given_octaves > 0) {
 		float val = perlin_2D(uv / peri) * amp;
 		if (value_type != 0) {
-			total += abs(val);
-		} else {
-			total += val;
+			val = abs(val);
 		}
+		//float dx_val = perlin_2D(vec2(uv.x + delta, uv.y) / peri) * amp;
+		//if (value_type != 0) {
+		//	dx_val = abs(dx_val);
+		//}
+		//grad_total.x += dx_val - val;
+		//float dy_val = perlin_2D(vec2(uv.x, uv.y + delta) / peri) * amp;
+		//if (value_type != 0) {
+		//	dy_val = abs(dy_val);
+		//}
+		//grad_total.y += dy_val - val;
+		
+		//float influence = 1.0 / (1.0 + length(grad_total) * influence_multiplier);
+		total += val; // * influence;
+		
 		peri /= lacunarity;
 		amp *= gain;
 		given_octaves -= 1;

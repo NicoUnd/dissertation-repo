@@ -57,29 +57,10 @@ func clear_terrain_generation_method_specific_parameters() -> void:
 		terrain_generation_method_specific_UI.queue_free();
 	terrain_generation_method_specific_UIs = [];
 
-func pop_terrain_generation_method_specific_parameter() -> void:
-	terrain_generation_method_specific_UIs.pop_back().queue_free();
-
-#func set_terrain_generation_method_specific_parameters(terrain_generation_method_specific_parameters: Array[Parameter]) -> void:
-#	for terrain_generation_method_specific_parameter: Parameter in terrain_generation_method_specific_parameters:
-#		add_parameter(terrain_generation_method_specific_parameter, true);
-
 func set_terrain_generation_method_specific_parameters(terrain_generation_method_specific_parameters: Array[Parameter]) -> void:
 	clear_terrain_generation_method_specific_parameters();
 	for terrain_generation_method_specific_parameter: Parameter in terrain_generation_method_specific_parameters:
 		add_parameter(terrain_generation_method_specific_parameter, true);
-
-func update_chunked_parameters(chunked_parameters: Array[Parameter]) -> void:
-	for chunked_parameter: Parameter in chunked_parameters:
-		var chunked_parameter_name: String = chunked_parameter.name;
-		var on_change: Callable = func (new_value: Variant=null):
-			main.set_parameter(chunked_parameter_name, new_value, true);
-			if main.explicit_chunk_generation:
-				main.set_explicit_chunk_generation_and_update_UI_and_planes(false);; # if these parameters are changed, no longer generating in chunks
-		for terrain_generation_method_specific_UI: Control in terrain_generation_method_specific_UIs:
-			if terrain_generation_method_specific_UI.parameter_name == chunked_parameter.name:
-				terrain_generation_method_specific_UI.setup(chunked_parameter, on_change);
-				main.set_parameter(chunked_parameter_name, chunked_parameter.value, true);
 
 func _ready() -> void:
 	seed_slider = add_parameter(ParameterNumber.new("seed", 1, 1, 64, false, false, false), false);
