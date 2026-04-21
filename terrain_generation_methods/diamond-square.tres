@@ -31,7 +31,7 @@ metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 script = ExtResource("3_dvls0")
 options = Array[String](["wrap_around", "ignore_outside", "ignore_inside_and_outside"])
 name = "border_diamond_average_type"
-value = 0
+value = 1
 metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
 [sub_resource type="Resource" id="Resource_yiacb"]

@@ -203,7 +203,7 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	rendering_device.free_rid(aggregate_points_RID);
 	
 	var heightmap: Image = points_to_heightmap(points_linear_to_nested(output));
-	#heightmap = normalise_heightmap(heightmap, rendering_device);
+	heightmap = normalise_heightmap(heightmap, rendering_device);
 	heightmap = blur_with_detail(heightmap, rendering_device);
 	return heightmap;
 

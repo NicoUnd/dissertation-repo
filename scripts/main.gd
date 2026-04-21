@@ -299,6 +299,7 @@ func capture_heightmap(resolution: int) -> Image:
 		#return heightmap;
 		# CANT DO THIS AS DOESNT WORK WITH PERTURBATION
 	heightmap_viewport.size = Vector2(resolution, resolution);
+	visualisation_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED;
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
 	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(resolution);
 	heightmap_terrain_generation_method_visualiser.albedo_type = 6; # heightmap encoded
@@ -313,6 +314,7 @@ func capture_heightmap(resolution: int) -> Image:
 	heightmap_terrain_generation_method_visualiser.reset_to_one_plane(512);
 	heightmap_terrain_generation_method_visualiser.albedo_type = 2; # heightmap
 	heightmap_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE;
+	visualisation_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS;
 	return heightmap;
 
 func _on_save_heightmap_file_dialog_confirmed() -> void:
@@ -334,6 +336,27 @@ func generate_statistics() -> void:
 	
 	reset_to_one_plane(last_resolution_of_plane);
 	print("RESET TO ONE PLANE")
+	
+	#var erosion_scores: Array[float] = [];
+	#for i: int in 20:
+	#	randomise_seed();
+	#	
+	#	var heightmap: Image;
+	#	if terrain_generation_method is TerrainGenerationMethodExplicit:
+	#		terrain_generation_method.resolution = 1024;
+	#		if terrain_generation_method.can_generate_GPU:
+	#			heightmap = terrain_generation_method.generate_GPU(rendering_device, terrain_generation_method.resolution);
+	#		else:
+	#			heightmap = terrain_generation_method.generate_CPU(rendering_device, terrain_generation_method.resolution);
+	#	else:
+	#		heightmap = capture_heightmap(1024);
+	#	
+	#	await get_tree().process_frame;
+	#	
+	#	var erosion_score = TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device);
+	#	erosion_scores.append(erosion_score);
+	#print("erosion scores: " + str(erosion_scores))
+	#return;
 	
 	if terrain_generation_method:
 		var heightmap_generation_times: Array[int] = [];

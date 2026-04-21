@@ -15,8 +15,7 @@ uniform float influence_multiplier;
 
 
 float fract_brownian_motion(vec2 uv, int given_octaves, float base_period, float base_amp) {
-	const float delta = 16.0 / 1024.0;
-	
+	//const float delta = 16.0 / 1024.0;
 	float total = 0.0;
 	float peri = base_period;
 	float amp = base_amp;

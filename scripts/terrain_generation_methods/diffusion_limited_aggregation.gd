@@ -205,7 +205,7 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 
 func fill_layer_GPU(layer_resolution: int, rendering_device: RenderingDevice, attach_directions_uniform: RDUniform, add) -> void:
 	@warning_ignore("integer_division")
-	var workgroups = num_of_particles_factor * layer_resolution / INITIAL_RESOLUTION;
+	var workgroups = max(1, num_of_particles_factor * layer_resolution / INITIAL_RESOLUTION);
 	
 	var output_bytes := rendering_device.buffer_get_data(add);
 	#@warning_ignore("integer_division")

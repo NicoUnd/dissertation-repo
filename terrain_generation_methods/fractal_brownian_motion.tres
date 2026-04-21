@@ -51,13 +51,6 @@ name = "value_type"
 value = 0
 metadata/_custom_type_script = "uid://dh4wgjnv8j0ir"
 
-[sub_resource type="Resource" id="Resource_mykcp"]
-script = ExtResource("4_ur1vb")
-max_value = 10.0
-name = "influence_multiplier"
-value = 1.0
-metadata/_custom_type_script = "uid://bnn5t8hur4pxq"
-
 [resource]
 script = ExtResource("1_40yf8")
 _shader = ExtResource("2_ur1vb")
@@ -67,7 +60,6 @@ name = "fractal_brownian_motion"
 min_amplitude = 1.0
 max_amplitude = 32.0
 default_amplitude = 16.0
-_parameters = Array[ExtResource("3_25fsa")]([SubResource("Resource_wried"), SubResource("Resource_25fsa"), SubResource("Resource_4kv0k"), SubResource("Resource_dgyx1"), SubResource("Resource_qj0ci"), SubResource("Resource_mykcp")])
+_parameters = Array[ExtResource("3_25fsa")]([SubResource("Resource_wried"), SubResource("Resource_25fsa"), SubResource("Resource_4kv0k"), SubResource("Resource_dgyx1"), SubResource("Resource_qj0ci")])
 can_generate_in_chunks = true
-_chunked_parameters = Array[ExtResource("3_25fsa")]([SubResource("Resource_wried"), SubResource("Resource_25fsa"), SubResource("Resource_4kv0k"), SubResource("Resource_dgyx1"), SubResource("Resource_qj0ci"), SubResource("Resource_mykcp")])
 metadata/_custom_type_script = "uid://b7uir5a8rvikp"

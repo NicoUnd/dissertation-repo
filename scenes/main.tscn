@@ -77,7 +77,7 @@ seed = 50.56299609086437
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport" unique_id=621889884]
 unique_name_in_owner = true
-transform = Transform3D(-0.9952079, 0, 0.09775874, 0, 1, 0, -0.09775874, 0, -0.9952079, 0, 0, 0)
+transform = Transform3D(-0.8133837, 0, 0.58172363, 0, 1, 0, -0.58172363, 0, -0.8133837, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot" unique_id=1459652782]
 unique_name_in_owner = true
