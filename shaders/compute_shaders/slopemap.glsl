@@ -21,10 +21,19 @@ void main() {
 	
 	int resolution = resolution_buffer.resolution;
 	float value = texelFetch(heightmap, uv, 0).r;
-	imageStore(slopemap, uv, vec4(
-		max(abs(value - texelFetch(heightmap, ivec2(uv.x, (uv.y + 1) % resolution), 0).r),
-		max(abs(value - texelFetch(heightmap, ivec2(uv.x, (uv.y - 1) % resolution), 0).r),
-		max(abs(value - texelFetch(heightmap, ivec2((uv.x + 1) % resolution, uv.y), 0).r),
-		abs(value - texelFetch(heightmap, ivec2((uv.x - 1) % resolution, uv.y), 0).r)))),
-	0.0, 0.0, 0.0));
+	
+	
+	//imageStore(slopemap, uv, vec4(
+	//	max(abs(value - texelFetch(heightmap, ivec2(uv.x, (uv.y + 1) % resolution), 0).r),
+	//	max(abs(value - texelFetch(heightmap, ivec2(uv.x, (uv.y - 1) % resolution), 0).r),
+	//	max(abs(value - texelFetch(heightmap, ivec2((uv.x + 1) % resolution, uv.y), 0).r),
+	//	abs(value - texelFetch(heightmap, ivec2((uv.x - 1) % resolution, uv.y), 0).r)))),
+	//0.0, 0.0, 0.0));
+	
+	float down = (uv.y + 1 < resolution) ? abs(value - texelFetch(heightmap, ivec2(uv.x, uv.y + 1), 0).r) : 0.0;
+	float up = (uv.y - 1 >= 0) ? abs(value - texelFetch(heightmap, ivec2(uv.x, uv.y - 1), 0).r) : 0.0;
+	float right = (uv.x + 1 < resolution) ? abs(value - texelFetch(heightmap, ivec2(uv.x + 1, uv.y), 0).r) : 0.0;
+	float left = (uv.x - 1 >= 0) ? abs(value - texelFetch(heightmap, ivec2(uv.x - 1, uv.y), 0).r) : 0.0;
+
+	imageStore(slopemap, uv, vec4(max(up, max(down, max(left, right))), 0.0, 0.0, 0.0));
 }

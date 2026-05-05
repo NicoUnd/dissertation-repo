@@ -220,7 +220,7 @@ static func mean_GPU(resolution: int, rendering_device: RenderingDevice, texture
 	rendering_device.sync();
 	
 	var output_bytes: PackedByteArray = rendering_device.buffer_get_data(total_buffer_RID);
-	print("Mi bumbo: " + str(output_bytes.to_float32_array()[0]))
+	#print("Mi bumbo: " + str(output_bytes.to_float32_array()[0]))
 	var mean: float = output_bytes.to_float32_array()[0] / (resolution * resolution);
 	
 	rendering_device.free_rid(uniform_set);
@@ -229,6 +229,126 @@ static func mean_GPU(resolution: int, rendering_device: RenderingDevice, texture
 	rendering_device.free_rid(total_buffer_RID);
 	
 	return mean;
+
+static func get_hisogram_GPU(heightmap: Image, rendering_device: RenderingDevice) -> PackedFloat32Array:
+	var shader_file := load("res://shaders/compute_shaders/histogram.glsl");
+	var compute_shader := rendering_device.shader_create_from_spirv(shader_file.get_spirv());
+	
+	heightmap = normalise_heightmap(heightmap, rendering_device);
+	
+	var resolution: int = heightmap.get_width();
+	
+	var heightmap_bytes: PackedByteArray = heightmap.get_data();
+	var texture_format := RDTextureFormat.new();
+	texture_format.width = resolution;
+	texture_format.height = resolution;
+	texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT;
+	texture_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var texture_RID = rendering_device.texture_create(texture_format, RDTextureView.new(), [heightmap_bytes]);
+	
+	var sampler_state = RDSamplerState.new();
+	#sampler_state.unnormalized_uvw = true;
+	var sampler = rendering_device.sampler_create(sampler_state);
+	
+	var texture_uniform := RDUniform.new();
+	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE;
+	texture_uniform.binding = 0;
+	texture_uniform.add_id(sampler);
+	texture_uniform.add_id(texture_RID);
+	
+	var histogram_buffer: PackedFloat32Array = PackedFloat32Array();
+	histogram_buffer.resize(64);
+	histogram_buffer.fill(0);
+	var bytes: PackedByteArray = histogram_buffer.to_byte_array();
+	var histogram_buffer_RID := rendering_device.storage_buffer_create(bytes.size(), bytes);
+	var histogram_buffer_uniform := RDUniform.new();
+	histogram_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+	histogram_buffer_uniform.binding = 1 # this needs to match the "binding" in our shader file
+	histogram_buffer_uniform.add_id(histogram_buffer_RID);
+	
+	var uniform_set := rendering_device.uniform_set_create([texture_uniform, histogram_buffer_uniform], compute_shader, 0);
+	
+	var pipeline := rendering_device.compute_pipeline_create(compute_shader);
+	var compute_list := rendering_device.compute_list_begin();
+	rendering_device.compute_list_bind_compute_pipeline(compute_list, pipeline);
+	rendering_device.compute_list_bind_uniform_set(compute_list, uniform_set, 0);
+	@warning_ignore("integer_division")
+	var workgroups: int = resolution / 32;
+	rendering_device.compute_list_dispatch(compute_list, workgroups, workgroups, 1);
+	rendering_device.compute_list_end();
+	
+	rendering_device.submit();
+	rendering_device.sync();
+	
+	histogram_buffer = rendering_device.buffer_get_data(histogram_buffer_RID, 0, bytes.size()).to_float32_array();
+	
+	rendering_device.free_rid(uniform_set);
+	rendering_device.free_rid(pipeline);
+	rendering_device.free_rid(compute_shader);
+	rendering_device.free_rid(texture_RID);
+	rendering_device.free_rid(sampler);
+	
+	return(histogram_buffer);
+
+static func get_slopemap_hisogram_GPU(heightmap: Image, rendering_device: RenderingDevice) -> PackedFloat32Array:
+	var shader_file := load("res://shaders/compute_shaders/slopemap_histogram.glsl");
+	var compute_shader := rendering_device.shader_create_from_spirv(shader_file.get_spirv());
+	
+	heightmap = normalise_heightmap(heightmap, rendering_device);
+	var slopemap_bytes: PackedByteArray = get_slopemap_data_GPU(heightmap, rendering_device);
+	
+	var resolution: int = heightmap.get_width();
+	
+	var texture_format := RDTextureFormat.new();
+	texture_format.width = resolution;
+	texture_format.height = resolution;
+	texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT;
+	texture_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT;
+	var texture_RID = rendering_device.texture_create(texture_format, RDTextureView.new(), [slopemap_bytes]);
+	
+	var sampler_state = RDSamplerState.new();
+	#sampler_state.unnormalized_uvw = true;
+	var sampler = rendering_device.sampler_create(sampler_state);
+	
+	var texture_uniform := RDUniform.new();
+	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE;
+	texture_uniform.binding = 0;
+	texture_uniform.add_id(sampler);
+	texture_uniform.add_id(texture_RID);
+	
+	var histogram_buffer: PackedFloat32Array = PackedFloat32Array();
+	histogram_buffer.resize(64);
+	histogram_buffer.fill(0);
+	var bytes: PackedByteArray = histogram_buffer.to_byte_array();
+	var histogram_buffer_RID := rendering_device.storage_buffer_create(bytes.size(), bytes);
+	var histogram_buffer_uniform := RDUniform.new();
+	histogram_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
+	histogram_buffer_uniform.binding = 1 # this needs to match the "binding" in our shader file
+	histogram_buffer_uniform.add_id(histogram_buffer_RID);
+	
+	var uniform_set := rendering_device.uniform_set_create([texture_uniform, histogram_buffer_uniform], compute_shader, 0);
+	
+	var pipeline := rendering_device.compute_pipeline_create(compute_shader);
+	var compute_list := rendering_device.compute_list_begin();
+	rendering_device.compute_list_bind_compute_pipeline(compute_list, pipeline);
+	rendering_device.compute_list_bind_uniform_set(compute_list, uniform_set, 0);
+	@warning_ignore("integer_division")
+	var workgroups: int = resolution / 32;
+	rendering_device.compute_list_dispatch(compute_list, workgroups, workgroups, 1);
+	rendering_device.compute_list_end();
+	
+	rendering_device.submit();
+	rendering_device.sync();
+	
+	histogram_buffer = rendering_device.buffer_get_data(histogram_buffer_RID, 0, bytes.size()).to_float32_array();
+	
+	rendering_device.free_rid(uniform_set);
+	rendering_device.free_rid(pipeline);
+	rendering_device.free_rid(compute_shader);
+	rendering_device.free_rid(texture_RID);
+	rendering_device.free_rid(sampler);
+	
+	return(histogram_buffer);
 
 static func std_dev_GPU(resolution: int, rendering_device: RenderingDevice, texture_uniform: RDUniform, mean: float) -> float:
 	var shader_file := load("res://shaders/compute_shaders/std_dev.glsl");
@@ -303,10 +423,10 @@ static func get_erosion_score(heightmap: Image, rendering_device: RenderingDevic
 	#var mean_CPU: float = mean_CPU(slopemap);
 	if mean == 0:
 		return 0;
-	print("mean GPU: " + str(mean))
+	#print("mean GPU: " + str(mean))
 	#print("mean CPU: " + str(mean_CPU))
 	var std_dev: float = std_dev_GPU(resolution, rendering_device, texture_uniform, mean);
-	print("std_dev_GPU: " + str(std_dev));
+	#print("std_dev_GPU: " + str(std_dev));
 	#var std_dev_CPU: float = std_dev_CPU(slopemap, mean_CPU);
 	#print("std_dev_CPU: " + str(std_dev_CPU));
 	rendering_device.free_rid(sampler);
@@ -503,11 +623,11 @@ static func rg16_to_r32(heightmap: Image) -> Image:
 			
 			var offset: int = (y * resolution + x) * 4;
 			buffer.encode_float(offset, decoded);
-			if x == 0 and y == 0:
-				print("HI")
-				print(pixel.r);
-				print(pixel.g)
-				print(decoded)
+			#if x == 0 and y == 0:
+			#	print("HI")
+			#	print(pixel.r);
+			#	print(pixel.g)
+			#	print(decoded)
 	
 	var r32_img: Image = Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, buffer);
 	return r32_img;

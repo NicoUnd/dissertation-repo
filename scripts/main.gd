@@ -335,7 +335,43 @@ func generate_statistics() -> void:
 	var NUMBER_OF_SAMPLES_TO_AVERAGE: int = int(statistics_samples_h_slider.value);
 	
 	reset_to_one_plane(last_resolution_of_plane);
-	print("RESET TO ONE PLANE")
+	#print("RESET TO ONE PLANE")
+	
+	#var histogram_total: Array[float] = [];
+	#histogram_total.resize(64)
+	#histogram_total.fill(0);
+	#var slopemap_histogram_total: Array[float] = [];
+	#slopemap_histogram_total.resize(64)
+	#slopemap_histogram_total.fill(0);
+	#for i: int in 20:
+	#	randomise_seed();
+	#	
+	#	var heightmap: Image;
+	#	if terrain_generation_method is TerrainGenerationMethodExplicit:
+	#		terrain_generation_method.resolution = 1024;
+	#		if terrain_generation_method.can_generate_GPU:
+	#			heightmap = terrain_generation_method.generate_GPU(rendering_device, terrain_generation_method.resolution);
+	#		else:
+	#			heightmap = terrain_generation_method.generate_CPU(rendering_device, terrain_generation_method.resolution);
+	#	else:
+	#		heightmap = capture_heightmap(1024);
+	#	
+	#	await get_tree().process_frame;
+	#	
+	#	var histogram: PackedFloat32Array = TerrainGenerationMethod.get_hisogram_GPU(heightmap, rendering_device);
+	#	for j: int in 64:
+	#		histogram_total[j] += histogram[j];
+	#	var slopemap_histogram: PackedFloat32Array = TerrainGenerationMethod.get_slopemap_hisogram_GPU(heightmap, rendering_device);
+	#	for j: int in 64:
+	#		slopemap_histogram_total[j] += slopemap_histogram[j];
+	#
+	#for j: int in 64:
+	#	histogram_total[j] /= 20;
+	#for j: int in 64:
+	#	slopemap_histogram_total[j] /= 20;
+	#print("histogram: " + str(histogram_total))
+	#print("slopemap_histogram: " + str(slopemap_histogram_total))
+	#return;
 	
 	#var erosion_scores: Array[float] = [];
 	#for i: int in 20:
@@ -353,9 +389,9 @@ func generate_statistics() -> void:
 	#	
 	#	await get_tree().process_frame;
 	#	
-	#	var erosion_score = TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device);
-	#	erosion_scores.append(erosion_score);
-	#print("erosion scores: " + str(erosion_scores))
+	#	erosion_scores.append(TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device));
+	#
+	#print("erosion_scores: " + str(erosion_scores))
 	#return;
 	
 	if terrain_generation_method:
@@ -364,10 +400,10 @@ func generate_statistics() -> void:
 		statistics_progress_center_container.show();
 		statistics_progress_bar.value = 0;
 		statistics_progress_bar.max_value = NUMBER_OF_SAMPLES_TO_AVERAGE * HEIGHTMAP_RESOLUTIONS.size();
-		print("AAA")
+		#print("AAA")
 		await get_tree().process_frame;
 		
-		print("BBB")
+		#print("BBB")
 		
 		var original_resolution: int;
 		if terrain_generation_method is TerrainGenerationMethodExplicit:
@@ -375,10 +411,10 @@ func generate_statistics() -> void:
 		var average_erosion_score: float = 0;
 		for heightmap_resolution: int in HEIGHTMAP_RESOLUTIONS:
 			var average_time: float = 0;
-			print(heightmap_resolution)
+			#print(heightmap_resolution)
 			for i: int in NUMBER_OF_SAMPLES_TO_AVERAGE:
 				randomise_seed();
-				print("STARTING SAMPLE TO AVERAGE " + str(i))
+				#print("STARTING SAMPLE TO AVERAGE " + str(i))
 				
 				var heightmap: Image;
 				var start_time = Time.get_ticks_msec();
@@ -392,11 +428,11 @@ func generate_statistics() -> void:
 					heightmap = capture_heightmap(heightmap_resolution);
 				average_time += (Time.get_ticks_msec() - start_time) / float(NUMBER_OF_SAMPLES_TO_AVERAGE);
 				
-				print("GOT THE HEIGHTMAP")
+				#print("GOT THE HEIGHTMAP")
 				
 				var erosion_score = TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device);
 				average_erosion_score += erosion_score;
-				print("erosion score: " + str(erosion_score))
+				#print("erosion score: " + str(erosion_score))
 				
 				var heightmap_texture: ImageTexture = ImageTexture.create_from_image(heightmap);
 				terrain_generation_method_visualiser.set_planes_shader_parameter("heightmap", heightmap_texture);
@@ -470,4 +506,7 @@ func _on_normalise_heightmap_resolution_menu_id_pressed(id: int) -> void:
 		return;
 	var heightmap: Image = capture_heightmap(ErosionSettings.EROSION_RESOLUTIONS[id]);
 	heightmap = TerrainGenerationMethod.normalise_heightmap(heightmap, rendering_device);
+	print(TerrainGenerationMethod.get_hisogram_GPU(heightmap, rendering_device));
+	print(TerrainGenerationMethod.get_slopemap_hisogram_GPU(heightmap, rendering_device));
+	#print("erosion score: " + str(TerrainGenerationMethod.get_erosion_score(heightmap, rendering_device)));
 	transition_to_heightmap_blending(heightmap);

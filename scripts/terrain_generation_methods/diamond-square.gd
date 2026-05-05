@@ -204,7 +204,7 @@ func generate_CPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	
 	var heightmap: Image = points_to_heightmap(points);
 	if normalise:
-		print("HELLOO JAKE")
+		#print("HELLOO JAKE")
 		heightmap = normalise_heightmap(heightmap, rendering_device);
 	return heightmap;
 
@@ -280,9 +280,9 @@ func pad_c_buffer_to_become_b_buffer(c_buffer: PackedFloat32Array) -> PackedFloa
 	return b_buffer;
 
 func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coord: Vector2i=Vector2i.ZERO) -> Image:
-	print("CHUNKED: " + str(chunked));
-	print("chunked_border_diamond_average_type: " + str(chunked_border_diamond_average_type))
-	print("BORDER diamond type: " + str(get_border_diamond_average_type_for_GPU()))
+	#print("CHUNKED: " + str(chunked));
+	#print("chunked_border_diamond_average_type: " + str(chunked_border_diamond_average_type))
+	#print("BORDER diamond type: " + str(get_border_diamond_average_type_for_GPU()))
 	var a = get_border_diamond_average_type_for_GPU()
 	#breakpoint
 	
@@ -296,12 +296,12 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	
 	points = fill_layer_1(rendering_device, points, resolution, chunk_coord);
 	
-	if chunk_coord == Vector2i.ZERO:
-		print("chunk_coord (0, 0)")
-		print(points[uv_to_linear(Vector2i(resolution/2, resolution), resolution)])
-	if chunk_coord == Vector2i.DOWN:
-		print("chunk_coord (0, 1)")
-		print(points[uv_to_linear(Vector2i(resolution/2, 0), resolution)])
+	#if chunk_coord == Vector2i.ZERO:
+	#	print("chunk_coord (0, 0)")
+	#	print(points[uv_to_linear(Vector2i(resolution/2, resolution), resolution)])
+	#if chunk_coord == Vector2i.DOWN:
+	#	print("chunk_coord (0, 1)")
+	#	print(points[uv_to_linear(Vector2i(resolution/2, 0), resolution)])
 	
 	var points_bytes: PackedByteArray = points.to_byte_array();
 	#print(points_bytes.size());
@@ -326,7 +326,7 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 	var buffer_Ea: PackedFloat32Array = initialise_a_buffer([2*resolution], [0, resolution], resolution, chunk_coord);
 	var buffer_Sa: PackedFloat32Array = initialise_a_buffer([0, resolution], [2*resolution], resolution, chunk_coord);
 	var buffer_Wa: PackedFloat32Array = initialise_a_buffer([-resolution], [0, resolution], resolution, chunk_coord);
-	print("buffer_Na initial: " + str(buffer_Na));
+	#print("buffer_Na initial: " + str(buffer_Na));
 	
 	var buffer_Nb: PackedFloat32Array = PackedFloat32Array();
 	buffer_Nb.resize(3);
@@ -360,7 +360,7 @@ func generate_GPU(rendering_device: RenderingDevice, resolution: int, chunk_coor
 		world_pos_randf(seed, uv_to_world_pos(resolution, chunk_coord, Vector2i(-resolution, resolution))) + 
 		points[0] + points[(resolution + 1) * resolution]) / 4 + \
 		world_pos_random_offset(uv_to_world_pos(resolution, chunk_coord, Vector2i(-resolution/2, resolution/2)), 1), 0, 1);
-	print("buffer_Nb initial: " + str(buffer_Nb));
+	#print("buffer_Nb initial: " + str(buffer_Nb));
 	
 	# var step_size: int = resolution; 
 	# var random_scale: float = 1;

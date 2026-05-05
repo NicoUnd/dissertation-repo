@@ -77,7 +77,7 @@ seed = 50.56299609086437
 
 [node name="VisualisationCameraPivot" type="Node3D" parent="VisualisationViewport" unique_id=621889884]
 unique_name_in_owner = true
-transform = Transform3D(-0.8133837, 0, 0.58172363, 0, 1, 0, -0.58172363, 0, -0.8133837, 0, 0, 0)
+transform = Transform3D(-0.5513787, 0, -0.8342521, 0, 1, 0, 0.8342521, 0, -0.5513787, 0, 0, 0)
 
 [node name="VisualisationPerspectiveCamera3D" type="Camera3D" parent="VisualisationViewport/VisualisationCameraPivot" unique_id=1459652782]
 unique_name_in_owner = true
@@ -283,7 +283,10 @@ modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ErodeHeightmapButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=2145673335]
+[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=323729482]
+layout_mode = 2
+
+[node name="ErodeHeightmapButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer4" unique_id=2145673335]
 layout_mode = 2
 size_flags_horizontal = 0
 text = "Erode Heightmap"
@@ -315,14 +318,14 @@ modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="GenerateStatisticsButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=291734935]
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=1604178495]
+layout_mode = 2
+
+[node name="GenerateStatisticsButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer3" unique_id=291734935]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 8
 text = "Generate Statistics"
-
-[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=1604178495]
-layout_mode = 2
 
 [node name="StatisticsProgressCenterContainer" type="CenterContainer" parent="." unique_id=1140472962]
 unique_name_in_owner = true
@@ -447,9 +450,9 @@ autostart = true
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer/SaveRenderButton" to="." method="_on_save_render_button_pressed"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/CaptureHeightmapButton" to="." method="_on_capture_heightmap_button_pressed"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/NormaliseHeightmapButton" to="." method="_on_normalise_heightmap_button_pressed"]
-[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/ErodeHeightmapButton" to="." method="_on_erode_heightmap_button_pressed"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer4/ErodeHeightmapButton" to="." method="_on_erode_heightmap_button_pressed"]
 [connection signal="value_changed" from="MarginContainer/HBoxContainer/VBoxContainer/PanelContainer/StatisticsSamplesHSlider" to="." method="_on_statistics_samples_h_slider_value_changed"]
-[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/GenerateStatisticsButton" to="." method="_on_generate_statistics_button_pressed"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer3/GenerateStatisticsButton" to="." method="_on_generate_statistics_button_pressed"]
 [connection signal="confirmed" from="SaveHeightmapFileDialog" to="." method="_on_save_heightmap_file_dialog_confirmed"]
 [connection signal="confirmed" from="SaveRenderFileDialog" to="." method="_on_save_render_file_dialog_confirmed"]
 [connection signal="confirmed" from="GenerateStatisticsConfirmDialog" to="." method="generate_statistics"]

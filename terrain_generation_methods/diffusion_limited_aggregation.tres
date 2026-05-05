@@ -61,5 +61,4 @@ min_amplitude = 1.0
 max_amplitude = 16.0
 default_amplitude = 4.0
 _parameters = Array[ExtResource("1_77tkw")]([SubResource("Resource_otslh"), SubResource("Resource_d0pff"), SubResource("Resource_gwdbk"), SubResource("Resource_xqe16"), SubResource("Resource_5gu2q"), SubResource("Resource_y5v37")])
-_chunked_parameters = Array[ExtResource("1_77tkw")]([SubResource("Resource_otslh"), SubResource("Resource_d0pff"), SubResource("Resource_gwdbk"), SubResource("Resource_xqe16"), SubResource("Resource_5gu2q"), SubResource("Resource_y5v37")])
 metadata/_custom_type_script = "uid://b4xxvbdak0nxt"
